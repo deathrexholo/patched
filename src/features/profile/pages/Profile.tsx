@@ -1,0 +1,1843 @@
+import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Edit3 } from 'lucide-react';
+import { useAuth } from '../../../contexts/AuthContext';
+import NavigationBar from '../../../components/layout/NavigationBar';
+import FooterNav from '../../../components/layout/FooterNav';
+import { db } from '../../../lib/firebase';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  deleteDoc,
+  doc,
+  serverTimestamp
+} from 'firebase/firestore';
+import RoleSelector from '../components/RoleSelector';
+import RoleSpecificSections from '../components/RoleSpecificSections';
+import ProfilePictureManager from '../components/ProfilePictureManager';
+import CoverPhotoManager from '../components/CoverPhotoManager';
+import SportBanner from '../components/SportBanner';
+// Performance monitoring disabled - causing warnings
+// import { usePerformanceMonitoring, useMemoryMonitoring } from '../hooks/usePerformanceMonitoring';
+import {
+  UserRole,
+  PersonalDetails,
+  PhysicalAttributes,
+  TrackBest,
+  Achievement,
+  Certificate,
+  Post,
+  roleConfigurations
+} from '../types/ProfileTypes';
+import { TalentVideo } from '../types/TalentVideoTypes';
+import PhysicalAttributesSection from '../components/PhysicalAttributesSection';
+import TrackBestSection from '../components/TrackBestSection';
+import AchievementsCertificatesSection from '../components/AchievementsCertificatesSection';
+import MessageButton from '../components/MessageButton';
+import { organizationConnectionService } from '../../../services/api/organizationConnectionService';
+import friendsService from '../../../services/api/friendsService';
+import { useRealtimeFriendRequests } from '../../../hooks/useRealtimeFriendRequests';
+import { userService } from '../../../services/api/userService';
+import { COLLECTIONS } from '../../../constants/firebase';
+import '../styles/Profile.css';
+
+// Lazy load heavy components for better performance
+const TalentVideosSection = lazy(() => import('../components/TalentVideosSection'));
+const PostsSection = lazy(() => import('../components/PostsSection'));
+const EditProfileModal = lazy(() => import('../components/EditProfileModal'));
+const PersonalDetailsModal = lazy(() => import('../components/PersonalDetailsModal'));
+const PhysicalAttributesModal = lazy(() => import('../components/PhysicalAttributesModal'));
+const TrackBestModal = lazy(() => import('../components/TrackBestModal'));
+const AchievementsSectionModal = lazy(() => import('../components/AchievementsSectionModal'));
+const CertificatesSectionModal = lazy(() => import('../components/CertificatesSectionModal'));
+
+// Helper function to map role to Firestore collection
+const getCollectionForRole = (role: UserRole): string => {
+  switch (role) {
+    case 'parent':
+      return COLLECTIONS.PARENTS;
+    case 'coach':
+      return COLLECTIONS.COACHES;
+    case 'organization':
+      return COLLECTIONS.ORGANIZATIONS;
+    case 'athlete':
+      return COLLECTIONS.ATHLETES;
+    default:
+      return COLLECTIONS.ATHLETES; // Default to athletes
+  }
+};
+
+const Profile: React.FC = React.memo(() => {
+  const navigate = useNavigate();
+  const { userId } = useParams<{ userId?: string }>();
+  const { currentUser: firebaseUser, isGuest } = useAuth();
+  const [currentRole, setCurrentRole] = useState<UserRole>('athlete');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Performance monitoring - Disabled to prevent warnings
+  // const { measureRender, logRenderTime } = usePerformanceMonitoring('Profile');
+  // useMemoryMonitoring();
+
+  // Measure render performance
+  // measureRender();
+
+  // Determine if this is the current user's profile or another user's profile
+  const isOwner = !userId || userId === firebaseUser?.uid;
+
+  // Helper function to safely extract name from object or return string value
+  const getDisplayValue = (value: any): string | undefined => {
+    if (!value) return undefined;
+    if (typeof value === 'string') return value;
+    if (typeof value === 'object' && value !== null && 'name' in value) {
+      return value.name as string;
+    }
+    return undefined;
+  };
+
+  // Format date to dd-mm-yyyy
+  const formatDateOfBirth = (dateString: string | undefined): string => {
+    if (!dateString) return 'Not specified';
+
+    try {
+      // Check if date is in YYYY-MM-DD format
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (dateRegex.test(dateString)) {
+        const [year, month, day] = dateString.split('-');
+        return `${day}-${month}-${year}`;
+      }
+
+      // If it's already in dd-mm-yyyy or another format, return as is
+      return dateString;
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return dateString;
+    }
+  };
+
+  const [personalDetails, setPersonalDetails] = useState<PersonalDetails>({
+    name: 'Loading...'
+  });
+
+  const [physicalAttributes, setPhysicalAttributes] = useState<PhysicalAttributes>({
+    height: undefined,
+    weight: undefined,
+    dominantSide: undefined,
+    personalBest: undefined,
+    seasonBest: undefined,
+    coachName: undefined,
+    coachContact: undefined,
+    trainingAcademy: undefined,
+    schoolName: undefined,
+    clubName: undefined
+  });
+
+  const [trackBest, setTrackBest] = useState<TrackBest>({
+    runs: undefined,
+    overs: undefined,
+    strikeRate: undefined,
+    goals: undefined,
+    minutes: undefined,
+    assists: undefined,
+    points: undefined,
+    rebounds: undefined,
+    gameTime: undefined,
+    aces: undefined,
+    winners: undefined,
+    matchDuration: undefined,
+    field1: undefined,
+    field2: undefined,
+    field3: undefined,
+    sport: undefined,
+    matchDate: undefined,
+    opponent: undefined,
+    venue: undefined
+  });
+
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [talentVideos, setTalentVideos] = useState<TalentVideo[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
+  const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
+  const [uploadingCoverPhoto, setUploadingCoverPhoto] = useState(false);
+  const [athleteSports, setAthleteSports] = useState<Array<{ id: string; name: string }>>([]);
+
+
+
+  // Function to load user posts from posts collection
+  const loadUserPosts = async (targetUserId: string) => {
+    try {
+      const { collection, query, where, orderBy, getDocs } = await import('firebase/firestore');
+      const { db } = await import('../../../lib/firebase');
+
+      // Query posts collection for posts by this user
+      const postsQuery = query(
+        collection(db, 'posts'),
+        where('userId', '==', targetUserId),
+        orderBy('timestamp', 'desc')
+      );
+
+      const postsSnapshot = await getDocs(postsQuery);
+      const userPosts: Post[] = [];
+
+      postsSnapshot.forEach((doc) => {
+        const postData = doc.data();
+
+        // Build mediaUrls array from the different media fields
+        const mediaUrls: string[] = [];
+        if (postData.imageUrl) mediaUrls.push(postData.imageUrl);
+        if (postData.videoUrl) mediaUrls.push(postData.videoUrl);
+        if (postData.mediaUrl) mediaUrls.push(postData.mediaUrl);
+
+        // Determine post type based on media
+        let postType: 'photo' | 'video' | 'text' | 'mixed' = 'text';
+        if (postData.mediaType === 'image' || postData.imageUrl) {
+          postType = 'photo';
+        } else if (postData.mediaType === 'video' || postData.videoUrl) {
+          postType = 'video';
+        } else if (mediaUrls.length > 1) {
+          postType = 'mixed';
+        }
+
+        userPosts.push({
+          id: doc.id,
+          type: postType,
+          title: postData.title || '',
+          content: postData.caption || postData.content || '',
+          mediaUrls: mediaUrls,
+          thumbnailUrl: postData.thumbnailUrl || postData.imageUrl || null,
+          createdDate: postData.timestamp?.toDate() || postData.createdAt?.toDate() || new Date(),
+          likes: Array.isArray(postData.likes) ? postData.likes.length : (postData.likes || 0),
+          comments: Array.isArray(postData.comments) ? postData.comments.length : (postData.comments || 0),
+          isPublic: postData.isPublic !== undefined ? postData.isPublic : true
+        });
+      });
+
+      setPosts(userPosts);
+    } catch (error) {
+      console.error('Error loading user posts:', error);
+      // Fallback to empty array if posts collection doesn't exist or has issues
+      setPosts([]);
+
+
+    }
+  };
+
+  useEffect(() => {
+    // Load profile data based on whether it's current user or another user
+    const loadProfileData = async () => {
+      try {
+        setIsLoading(true);
+
+        const { doc, getDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        const targetUserId = userId || firebaseUser?.uid;
+
+        if (!targetUserId) {
+          setError('No user ID available');
+          setIsLoading(false);
+          return;
+        }
+
+        try {
+          // Fetch user profile using userService (automatically checks all role-specific collections)
+          const userData = await userService.getUserProfile(targetUserId);
+
+          if (userData) {
+            // Set role from the fetched user data
+            if (isOwner && userData.role) {
+              setCurrentRole(userData.role as UserRole);
+            }
+
+            // Set personal details from Firestore data
+            // Handle sport data: use sportDetails (array of objects) or fall back to sport field
+            const sportData = userData.sportDetails && userData.sportDetails.length > 0
+              ? userData.sportDetails[0].name // Use first sport's name
+              : userData.sport;
+
+            // Handle position data: use positionName or fall back to position field
+            const positionData = userData.positionName || userData.position;
+
+            setPersonalDetails({
+              name: userData.displayName || userData.name || firebaseUser?.displayName || 'User',
+              dateOfBirth: userData.dateOfBirth,
+              gender: userData.gender,
+              mobile: userData.mobile,
+              email: userData.email,
+              city: userData.city,
+              district: userData.district,
+              state: userData.state,
+              country: userData.country,
+              playerType: userData.playerType,
+              sport: sportData,
+              position: positionData,
+              // Organization fields
+              organizationName: userData.organizationName,
+              organizationType: userData.organizationType,
+              location: userData.location,
+              contactEmail: userData.contactEmail,
+              website: userData.website,
+              // Parent fields
+              relationship: userData.relationship,
+              connectedAthletes: userData.connectedAthletes || [],
+              // Coach fields
+              specializations: userData.specializations || [],
+              yearsExperience: userData.yearsExperience,
+              coachingLevel: userData.coachingLevel
+            });
+
+            // Set physical attributes
+            setPhysicalAttributes({
+              height: userData.height,
+              weight: userData.weight,
+              dominantSide: userData.dominantSide,
+              personalBest: userData.personalBest,
+              seasonBest: userData.seasonBest,
+              coachName: userData.coachName,
+              coachContact: userData.coachContact,
+              trainingAcademy: userData.trainingAcademy,
+              schoolName: userData.schoolName,
+              clubName: userData.clubName
+            });
+
+            // Load other profile data
+            setAchievements(userData.achievements || []);
+            setCertificates(userData.certificates || []);
+            // Load talent videos from separate talentVideos collection (not from user document)
+            const { collection, query, where, getDocs, Timestamp } = await import('firebase/firestore');
+            const talentVideosRef = collection(db, 'talentVideos');
+            const talentVideoQuery = query(talentVideosRef, where('userId', '==', targetUserId));
+            const talentVideoSnapshot = await getDocs(talentVideoQuery);
+            const talentVideosList: TalentVideo[] = [];
+            talentVideoSnapshot.forEach((doc) => {
+              const data = doc.data();
+              talentVideosList.push({
+                ...data,
+                id: doc.id,
+                uploadDate: data.uploadDate?.toDate ? data.uploadDate.toDate() : data.uploadDate,
+                verificationDeadline: data.verificationDeadline?.toDate ? data.verificationDeadline.toDate() : undefined
+              } as TalentVideo);
+            });
+            setTalentVideos(talentVideosList);
+            setTrackBest(userData.trackBest || {});
+            setProfilePicture(userData.profilePicture || userData.photoURL || null);
+            setCoverPhoto(userData.coverPhoto || null);
+            setAthleteSports(userData.sportDetails || []);
+
+            // Load posts from separate posts collection
+            await loadUserPosts(targetUserId);
+
+          } else if (isOwner) {
+            // If it's the current user but no document exists, create a basic profile
+            const defaultProfile = {
+              name: firebaseUser?.displayName || 'User'
+            };
+            setPersonalDetails(defaultProfile);
+
+            // Create the user document in Firestore
+            const { setDoc } = await import('firebase/firestore');
+            
+            // Filter out undefined values to prevent Firestore errors
+            const cleanProfileData = Object.fromEntries(
+              Object.entries(defaultProfile).filter(([_, value]) => value !== undefined)
+            );
+            
+            const userDocData = {
+              displayName: firebaseUser?.displayName || 'User',
+              email: firebaseUser?.email,
+              photoURL: firebaseUser?.photoURL,
+              createdAt: new Date(),
+              ...cleanProfileData
+            };
+            
+            // Remove any remaining undefined values
+            const cleanUserDocData = Object.fromEntries(
+              Object.entries(userDocData).filter(([_, value]) => value !== undefined)
+            );// Create in role-specific collection (default: athletes for backward compatibility)
+            const defaultRole: UserRole = 'athlete';
+            const collection = getCollectionForRole(defaultRole);
+            setCurrentRole(defaultRole);
+            await setDoc(doc(db, collection, targetUserId), { ...cleanUserDocData, role: defaultRole });
+
+            // Load posts for the new user (will be empty initially)
+            await loadUserPosts(targetUserId);
+          } else {
+            setError('User not found');
+            setIsLoading(false);
+            return;
+          }
+        } catch (fetchError) {
+          console.error('Error fetching user profile:', fetchError);
+          setError('Failed to load user profile');
+          setIsLoading(false);
+          return;
+        }
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Error in loadProfileData:', err);
+        setError('Failed to load profile data');
+        setIsLoading(false);
+      }
+    };
+
+    if (firebaseUser || userId) {
+      loadProfileData();
+    }
+  }, [userId, isOwner, firebaseUser]);
+
+  // Handle online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  const handleGoBack = () => {
+    navigate(-1); // Go back to previous page
+  };
+
+  const handleTitleClick = () => {
+    navigate('/home');
+  };
+
+  const [editModalInitialTab, setEditModalInitialTab] = useState<string>('personal');
+  const [isPersonalDetailsModalOpen, setIsPersonalDetailsModalOpen] = useState(false);
+  const [isPhysicalAttributesModalOpen, setIsPhysicalAttributesModalOpen] = useState(false);
+  const [isTrackBestModalOpen, setIsTrackBestModalOpen] = useState(false);
+  const [isAchievementsSectionModalOpen, setIsAchievementsSectionModalOpen] = useState(false);
+  const [isCertificatesSectionModalOpen, setIsCertificatesSectionModalOpen] = useState(false);
+
+  const handleEditProfile = useCallback(() => {
+    setIsEditModalOpen(true);
+  }, []);
+
+  const handleEditPersonalDetails = useCallback(() => {
+    setIsPersonalDetailsModalOpen(true);
+  }, []);
+
+  const handleEditPhysicalAttributes = useCallback(() => {
+    setIsPhysicalAttributesModalOpen(true);
+  }, []);
+
+  const handleEditAchievements = useCallback(() => {
+    setIsAchievementsSectionModalOpen(true);
+  }, []);
+
+  const handleEditTrackBest = useCallback(() => {
+    setIsTrackBestModalOpen(true);
+  }, []);
+
+  const handleEditCertificates = useCallback(() => {
+    setIsCertificatesSectionModalOpen(true);
+  }, []);
+
+  const handleEditProfileWithTab = useCallback((initialTab: string) => {
+    // Route to specific section modals instead of the big modal
+    switch (initialTab) {
+      case 'personal':
+        setIsPersonalDetailsModalOpen(true);
+        break;
+      case 'physicalAttributes':
+        setIsPhysicalAttributesModalOpen(true);
+        break;
+      case 'trackBest':
+        setIsTrackBestModalOpen(true);
+        break;
+      case 'achievements':
+        setIsAchievementsSectionModalOpen(true);
+        break;
+      case 'certificates':
+        setIsCertificatesSectionModalOpen(true);
+        break;
+      default:
+        setEditModalInitialTab(initialTab);
+        setIsEditModalOpen(true);
+        break;
+    }
+  }, []);
+
+  const handleOpenEditModal = useCallback((initialTab: string) => {
+    // Route to specific section modals instead of the big modal
+    switch (initialTab) {
+      case 'personal':
+        setIsPersonalDetailsModalOpen(true);
+        break;
+      case 'physicalAttributes':
+        setIsPhysicalAttributesModalOpen(true);
+        break;
+      case 'trackBest':
+        setIsTrackBestModalOpen(true);
+        break;
+      case 'achievements':
+        setIsAchievementsSectionModalOpen(true);
+        break;
+      case 'certificates':
+        setIsCertificatesSectionModalOpen(true);
+        break;
+      default:
+        setEditModalInitialTab(initialTab);
+        setIsEditModalOpen(true);
+        break;
+    }
+  }, []);
+
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Escape' && isEditModalOpen) {
+      setIsEditModalOpen(false);
+    }
+  }, [isEditModalOpen]);
+
+  // Announce content changes to screen readers
+  const announceToScreenReader = useCallback((message: string) => {
+    const liveRegion = document.getElementById('live-region');
+    if (liveRegion) {
+      liveRegion.textContent = message;
+      // Clear after announcement
+      setTimeout(() => {
+        liveRegion.textContent = '';
+      }, 1000);
+    }
+  }, []);
+
+  // Handle role change with Firestore persistence
+  const handleRoleChange = useCallback(async (newRole: UserRole) => {
+    setCurrentRole(newRole);
+
+    // Persist role selection to Firestore
+    if (firebaseUser?.uid) {
+      try {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+        await updateDoc(userRef, {
+          role: newRole,
+          updatedAt: new Date()
+        });
+
+        // Clear sport-related localStorage for organizations and coaches
+        // to prevent showing athlete-specific data
+        if (newRole === 'organization' || newRole === 'coaches') {
+          localStorage.removeItem('userSport');
+          localStorage.removeItem('userPosition');
+          localStorage.removeItem('userPlayerType');
+        }
+        if (newRole === 'organization') {
+          localStorage.removeItem('userSpecializations');
+        }
+
+        // Update role in localStorage
+        localStorage.setItem('userRole', newRole);
+
+        // Dispatch custom event to notify other components about role change
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: { role: newRole }
+        }));announceToScreenReader(`Role changed to ${roleConfigurations[newRole].displayName}`);
+      } catch (error) {
+        console.error('Error saving role:', error);
+        announceToScreenReader('Failed to save role change');
+      }
+    }
+  }, [firebaseUser, announceToScreenReader]);
+
+  // Performance optimization: Memoize expensive computations
+  const profileStats = useMemo(() => ({
+    posts: posts.length,
+    followers: 1, // Mock data
+    following: 0  // Mock data
+  }), [posts.length]);
+
+  // Memoize expensive computations
+  const currentRoleConfig = useMemo(() => roleConfigurations[currentRole], [currentRole]);
+  const sections = useMemo(() => currentRoleConfig.sections, [currentRoleConfig]);
+
+  // Memoize handlers to prevent unnecessary re-renders
+  const achievementHandlers = useMemo(() => ({
+    onAddAchievement: () => {
+      // Handle add achievement - would open add modalannounceToScreenReader('Opening add achievement form');
+    },
+    onEditAchievement: (achievement: Achievement) => {
+      // Handle edit achievement - would open edit modalannounceToScreenReader(`Editing achievement: ${achievement.title}`);
+    },
+    onDeleteAchievement: async (id: string) => {
+      try {
+        const achievement = achievements.find(a => a.id === id);
+        const updatedAchievements = achievements.filter(a => a.id !== id);
+
+        // Update local state
+        setAchievements(updatedAchievements);
+
+        // Save to Firebase
+        if (firebaseUser?.uid) {
+          const { doc, updateDoc } = await import('firebase/firestore');
+          const { db } = await import('../../../lib/firebase');
+
+          const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+          await updateDoc(userRef, {
+            achievements: updatedAchievements,
+            updatedAt: new Date()
+          });
+        }
+
+        announceToScreenReader(`Achievement ${achievement?.title || ''} deleted`);
+      } catch (error) {
+        console.error('Error deleting achievement:', error);
+        announceToScreenReader('Failed to delete achievement');
+      }
+    }
+  }), [announceToScreenReader, achievements, firebaseUser]);
+
+  const certificateHandlers = useMemo(() => ({
+    onAddCertificate: () => {
+      // Handle add certificate - would open add modalannounceToScreenReader('Opening add certificate form');
+    },
+    onEditCertificate: (certificate: Certificate) => {
+      // Handle edit certificate - would open edit modalannounceToScreenReader(`Editing certificate: ${certificate.name}`);
+    },
+    onDeleteCertificate: async (id: string) => {
+      try {
+        const certificate = certificates.find(c => c.id === id);
+        const updatedCertificates = certificates.filter(c => c.id !== id);
+
+        // Update local state
+        setCertificates(updatedCertificates);
+
+        // Save to Firebase
+        if (firebaseUser?.uid) {
+          const { doc, updateDoc } = await import('firebase/firestore');
+          const { db } = await import('../../../lib/firebase');
+
+          const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+          await updateDoc(userRef, {
+            certificates: updatedCertificates,
+            updatedAt: new Date()
+          });
+        }
+
+        announceToScreenReader(`Certificate ${certificate?.name || ''} deleted`);
+      } catch (error) {
+        console.error('Error deleting certificate:', error);
+        announceToScreenReader('Failed to delete certificate');
+      }
+    }
+  }), [announceToScreenReader, certificates, firebaseUser]);
+
+  // Function to reload talent videos from Firestore talentVideos collection
+  const reloadTalentVideos = useCallback(async () => {
+    try {
+      if (!firebaseUser?.uid) return;
+
+      const { collection, query, where, getDocs } = await import('firebase/firestore');
+      const { db } = await import('../../../lib/firebase');
+
+      const talentVideosRef = collection(db, 'talentVideos');
+      const q = query(talentVideosRef, where('userId', '==', firebaseUser.uid));
+      const snapshot = await getDocs(q);
+
+      const videos: TalentVideo[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        videos.push({
+          ...data,
+          id: doc.id,
+          uploadDate: data.uploadDate?.toDate ? data.uploadDate.toDate() : data.uploadDate,
+          verificationDeadline: data.verificationDeadline?.toDate ? data.verificationDeadline.toDate() : undefined
+        } as TalentVideo);
+      });
+
+      setTalentVideos(videos);
+    } catch (error) {
+      console.error('Error reloading talent videos:', error);
+    }
+  }, [firebaseUser]);
+
+  const videoHandlers = useMemo(() => ({
+    onAddVideo: () => {
+      // Handle add video - reload videos after upload
+      // The TalentVideosSection handles the actual uploadannounceToScreenReader('Opening add video form');
+    },
+    onEditVideo: async (video: TalentVideo) => {
+      try {
+        // Update local state
+        const updatedVideos = talentVideos.map(v => v.id === video.id ? video : v);
+        setTalentVideos(updatedVideos);
+
+        // Save to Firebase
+        if (firebaseUser?.uid) {
+          const { doc, updateDoc } = await import('firebase/firestore');
+          const { db } = await import('../../../lib/firebase');
+
+          const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+          await updateDoc(userRef, {
+            talentVideos: updatedVideos,
+            updatedAt: new Date()
+          });
+        }
+
+        announceToScreenReader(`Video ${video.title} updated`);
+      } catch (error) {
+        console.error('Error updating video:', error);
+        announceToScreenReader('Failed to update video');
+      }
+    },
+    onDeleteVideo: async (id: string) => {
+      try {
+        const video = talentVideos.find(v => v.id === id);
+        const updatedVideos = talentVideos.filter(v => v.id !== id);
+
+        // Update local state
+        setTalentVideos(updatedVideos);
+
+        // Save to Firebase
+        if (firebaseUser?.uid) {
+          const { doc, updateDoc } = await import('firebase/firestore');
+          const { db } = await import('../../../lib/firebase');
+
+          const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+          await updateDoc(userRef, {
+            talentVideos: updatedVideos,
+            updatedAt: new Date()
+          });
+
+          // Also try to delete video and thumbnail from storage
+          try {
+            const { ref, deleteObject } = await import('firebase/storage');
+            const { storage } = await import('../../../lib/firebase');
+
+            // Extract filename from video URL
+            if (video?.videoUrl) {
+              const videoPath = new URL(video.videoUrl).pathname;
+              const videoFileName = videoPath.split('/').pop();
+              if (videoFileName) {
+                const videoRef = ref(storage, `talent-videos/${firebaseUser.uid}/${decodeURIComponent(videoFileName)}`);
+                await deleteObject(videoRef).catch(() => {});
+              }
+            }
+
+            // Delete thumbnail
+            if (video?.thumbnailUrl) {
+              const thumbnailPath = new URL(video.thumbnailUrl).pathname;
+              const thumbnailFileName = thumbnailPath.split('/').pop();
+              if (thumbnailFileName) {
+                const thumbnailRef = ref(storage, `thumbnails/${firebaseUser.uid}/${decodeURIComponent(thumbnailFileName)}`);
+                await deleteObject(thumbnailRef).catch(() => {});
+              }
+            }
+          } catch (storageError) {
+            console.warn('Error deleting video files from storage:', storageError);
+          }
+        }
+
+        announceToScreenReader(`Video ${video?.title || ''} deleted`);
+      } catch (error) {
+        console.error('Error deleting video:', error);
+        announceToScreenReader('Failed to delete video');
+      }
+    },
+    onVideoClick: (video: TalentVideo) => {
+      // Handle video click - would open video player modalannounceToScreenReader(`Playing video: ${video.title}`);
+    }
+  }), [announceToScreenReader, talentVideos, firebaseUser]);
+
+  // Auto-play video from share link
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoId = urlParams.get('video');
+
+    if (videoId && talentVideos.length > 0 && !isLoading) {
+      // Find the video with matching ID
+      const video = talentVideos.find(v => v.id === videoId);
+
+      if (video) {
+        // Scroll to talent videos section and open video player
+        setTimeout(() => {
+          const videoSection = document.getElementById('talent-videos-section');
+          if (videoSection) {
+            videoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+
+          // Trigger video click to open player
+          videoHandlers.onVideoClick(video);
+        }, 500); // Small delay to ensure page is fully rendered
+      }
+    }
+  }, [talentVideos, isLoading, videoHandlers]);
+
+  const postHandlers = useMemo(() => ({
+    onPostClick: (post: Post) => {
+      // Handle post click - would navigate to post detailannounceToScreenReader(`Opening post: ${post.title || 'Untitled post'}`);
+    },
+    onEditPost: async (id: string, postData: Omit<Post, 'id' | 'createdDate' | 'likes' | 'comments'>) => {
+      try {
+        if (!firebaseUser?.uid) {
+          throw new Error('User not authenticated');
+        }
+
+        // Update post document in posts collection
+        const { doc, updateDoc, serverTimestamp } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        const postRef = doc(db, 'posts', id);
+        await updateDoc(postRef, {
+          ...postData,
+          updatedAt: serverTimestamp()
+        });
+
+        // Update local state
+        const updatedPosts = posts.map(p => p.id === id ? { ...p, ...postData } : p);
+        setPosts(updatedPosts);
+
+        announceToScreenReader('Post updated successfully');
+      } catch (error) {
+        console.error('Error updating post:', error);
+        announceToScreenReader('Failed to update post');
+      }
+    },
+    onDeletePost: async (id: string) => {
+      try {
+        if (!firebaseUser?.uid) {
+          throw new Error('User not authenticated');
+        }
+
+        const post = posts.find(p => p.id === id);
+
+        // Delete post document from posts collection
+        const { doc, deleteDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        const postRef = doc(db, 'posts', id);
+        await deleteDoc(postRef);
+
+        // Update local state
+        const updatedPosts = posts.filter(p => p.id !== id);
+        setPosts(updatedPosts);
+
+        announceToScreenReader(`Post ${post?.title || ''} deleted`);
+      } catch (error) {
+        console.error('Error deleting post:', error);
+        announceToScreenReader('Failed to delete post');
+      }
+    }
+  }), [announceToScreenReader, posts, firebaseUser]);
+
+  // Handler for personal details modal
+  const handleSavePersonalDetails = useCallback(async (updatedPersonalDetails: PersonalDetails) => {
+    try {
+      // Update local state immediately for better UX
+      setPersonalDetails(updatedPersonalDetails);
+
+      // Save to Firebase
+      if (firebaseUser?.uid) {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        // Prepare update data, filtering out undefined values
+        const updateData = {
+          displayName: updatedPersonalDetails.name,
+          name: updatedPersonalDetails.name,
+          dateOfBirth: updatedPersonalDetails.dateOfBirth,
+          gender: updatedPersonalDetails.gender,
+          mobile: updatedPersonalDetails.mobile,
+          email: updatedPersonalDetails.email,
+          city: updatedPersonalDetails.city,
+          district: updatedPersonalDetails.district,
+          state: updatedPersonalDetails.state,
+          country: updatedPersonalDetails.country,
+          playerType: updatedPersonalDetails.playerType,
+          sport: updatedPersonalDetails.sport,
+          position: updatedPersonalDetails.position,
+          organizationName: updatedPersonalDetails.organizationName,
+          organizationType: updatedPersonalDetails.organizationType,
+          location: updatedPersonalDetails.location,
+          contactEmail: updatedPersonalDetails.contactEmail,
+          website: updatedPersonalDetails.website,
+          relationship: updatedPersonalDetails.relationship,
+          connectedAthletes: updatedPersonalDetails.connectedAthletes,
+          specializations: updatedPersonalDetails.specializations,
+          yearsExperience: updatedPersonalDetails.yearsExperience,
+          coachingLevel: updatedPersonalDetails.coachingLevel,
+          updatedAt: new Date()
+        };
+
+        // Filter out undefined values
+        const cleanedUpdateData = Object.fromEntries(
+          Object.entries(updateData).filter(([_, value]) => value !== undefined)
+        );
+
+        const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+        await updateDoc(userRef, cleanedUpdateData);// Dispatch custom event to notify other components about profile update
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: { personalDetails: updatedPersonalDetails }
+        }));
+      }
+
+      setIsPersonalDetailsModalOpen(false);
+      announceToScreenReader('Personal details updated successfully');
+    } catch (error) {
+      console.error('Error saving personal details:', error);
+      announceToScreenReader('Failed to save personal details');
+      alert('Failed to save personal details. Please try again.');
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Handler for physical attributes modal
+  const handleSavePhysicalAttributes = useCallback(async (updatedPhysicalAttributes: PhysicalAttributes) => {
+    try {
+      // Update local state immediately for better UX
+      setPhysicalAttributes(updatedPhysicalAttributes);
+
+      // Save to Firebase
+      if (firebaseUser?.uid) {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        const updateData = {
+          height: updatedPhysicalAttributes.height,
+          weight: updatedPhysicalAttributes.weight,
+          dominantSide: updatedPhysicalAttributes.dominantSide,
+          personalBest: updatedPhysicalAttributes.personalBest,
+          seasonBest: updatedPhysicalAttributes.seasonBest,
+          coachName: updatedPhysicalAttributes.coachName,
+          coachContact: updatedPhysicalAttributes.coachContact,
+          trainingAcademy: updatedPhysicalAttributes.trainingAcademy,
+          schoolName: updatedPhysicalAttributes.schoolName,
+          clubName: updatedPhysicalAttributes.clubName,
+          updatedAt: new Date()
+        };
+
+        // Filter out undefined values
+        const cleanedUpdateData = Object.fromEntries(
+          Object.entries(updateData).filter(([_, value]) => value !== undefined)
+        );
+
+        const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+        await updateDoc(userRef, cleanedUpdateData);}
+
+      setIsPhysicalAttributesModalOpen(false);
+      announceToScreenReader('Physical attributes updated successfully');
+    } catch (error) {
+      console.error('Error saving physical attributes:', error);
+      announceToScreenReader('Failed to save physical attributes');
+      alert('Failed to save physical attributes. Please try again.');
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Handler for organization info modal
+  const handleSaveOrganizationInfo = useCallback(async (updatedPersonalDetails: PersonalDetails) => {
+    try {
+      // Update local state immediately for better UX
+      setPersonalDetails(updatedPersonalDetails);
+
+      // Save to Firebase
+      if (firebaseUser?.uid) {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        const updateData = {
+          organizationName: updatedPersonalDetails.organizationName,
+          organizationType: updatedPersonalDetails.organizationType,
+          location: updatedPersonalDetails.location,
+          contactEmail: updatedPersonalDetails.contactEmail,
+          website: updatedPersonalDetails.website,
+          updatedAt: new Date()
+        };
+
+        // Filter out undefined values
+        const cleanedUpdateData = Object.fromEntries(
+          Object.entries(updateData).filter(([_, value]) => value !== undefined)
+        );
+
+        const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+        await updateDoc(userRef, cleanedUpdateData);// Dispatch custom event to notify other components about profile update
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: { personalDetails: updatedPersonalDetails }
+        }));
+      }
+
+      announceToScreenReader('Organization information updated successfully');
+    } catch (error) {
+      console.error('Error saving organization info:', error);
+      announceToScreenReader('Failed to save organization information');
+      alert('Failed to save organization information. Please try again.');
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Handler for track best modal
+  const handleSaveTrackBest = useCallback(async (updatedTrackBest: TrackBest) => {
+    try {
+      // Update local state immediately for better UX
+      setTrackBest(updatedTrackBest);
+
+      // Save to Firebase
+      if (firebaseUser?.uid) {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+        await updateDoc(userRef, {
+          trackBest: updatedTrackBest,
+          updatedAt: new Date()
+        });}
+
+      setIsTrackBestModalOpen(false);
+      announceToScreenReader('Track best updated successfully');
+    } catch (error) {
+      console.error('Error saving track best:', error);
+      announceToScreenReader('Failed to save track best');
+      alert('Failed to save track best. Please try again.');
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Handler for achievements section modal
+  const handleSaveAchievements = useCallback(async (updatedAchievements: Achievement[]) => {
+    try {
+      // Update local state immediately for better UX
+      setAchievements(updatedAchievements);
+
+      // Save to Firebase
+      if (firebaseUser?.uid) {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+        await updateDoc(userRef, {
+          achievements: updatedAchievements,
+          updatedAt: new Date()
+        });}
+
+      setIsAchievementsSectionModalOpen(false);
+      announceToScreenReader('Achievements updated successfully');
+    } catch (error) {
+      console.error('Error saving achievements:', error);
+      announceToScreenReader('Failed to save achievements');
+      alert('Failed to save achievements. Please try again.');
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Handler for certificates section modal
+  const handleSaveCertificates = useCallback(async (updatedCertificates: Certificate[]) => {
+    try {
+      // Update local state immediately for better UX
+      setCertificates(updatedCertificates);
+
+      // Save to Firebase
+      if (firebaseUser?.uid) {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+        await updateDoc(userRef, {
+          certificates: updatedCertificates,
+          updatedAt: new Date()
+        });}
+
+      setIsCertificatesSectionModalOpen(false);
+      announceToScreenReader('Certificates updated successfully');
+    } catch (error) {
+      console.error('Error saving certificates:', error);
+      announceToScreenReader('Failed to save certificates');
+      alert('Failed to save certificates. Please try again.');
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  const editModalHandler = useCallback(async (data: any) => {
+    try {
+      // Update local state immediately for better UX
+      setPersonalDetails(data.personalDetails);
+      setPhysicalAttributes(data.physicalAttributes);
+      setAchievements(data.achievements);
+      setCertificates(data.certificates);
+      // Note: Talent videos are managed separately via talentVideos collection, not updated here
+      setPosts(data.posts);
+
+      // Save to Firebase
+      if (firebaseUser?.uid) {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+
+        // Prepare update data, filtering out undefined values to prevent Firebase errors
+        const updateData = {
+          // Personal details
+          displayName: data.personalDetails.name,
+          name: data.personalDetails.name,
+          dateOfBirth: data.personalDetails.dateOfBirth,
+          gender: data.personalDetails.gender,
+          mobile: data.personalDetails.mobile,
+          email: data.personalDetails.email,
+          city: data.personalDetails.city,
+          district: data.personalDetails.district,
+          state: data.personalDetails.state,
+          playerType: data.personalDetails.playerType,
+          sport: data.personalDetails.sport,
+          position: data.personalDetails.position,
+          // Physical attributes
+          height: data.physicalAttributes.height,
+          weight: data.physicalAttributes.weight,
+          dominantSide: data.physicalAttributes.dominantSide,
+          personalBest: data.physicalAttributes.personalBest,
+          seasonBest: data.physicalAttributes.seasonBest,
+          coachName: data.physicalAttributes.coachName,
+          coachContact: data.physicalAttributes.coachContact,
+          trainingAcademy: data.physicalAttributes.trainingAcademy,
+          schoolName: data.physicalAttributes.schoolName,
+          clubName: data.physicalAttributes.clubName,
+          // Organization fields
+          organizationName: data.personalDetails.organizationName,
+          organizationType: data.personalDetails.organizationType,
+          location: data.personalDetails.location,
+          contactEmail: data.personalDetails.contactEmail,
+          website: data.personalDetails.website,
+          // Parent fields
+          relationship: data.personalDetails.relationship,
+          connectedAthletes: data.personalDetails.connectedAthletes,
+          // Coach fields
+          specializations: data.personalDetails.specializations,
+          yearsExperience: data.personalDetails.yearsExperience,
+          coachingLevel: data.personalDetails.coachingLevel,
+          // Other profile data
+          achievements: data.achievements,
+          certificates: data.certificates,
+          talentVideos: data.talentVideos,
+          // Note: posts are now stored in separate posts collection, not in user document
+          updatedAt: new Date()
+        };
+
+        // Filter out undefined values to prevent Firestore errors
+        const cleanedUpdateData = Object.fromEntries(
+          Object.entries(updateData).filter(([_, value]) => value !== undefined)
+        );
+
+        const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+        await updateDoc(userRef, cleanedUpdateData);}
+
+      setIsEditModalOpen(false);
+
+      // Announce successful save to screen readers
+      announceToScreenReader('Profile updated successfully');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      announceToScreenReader('Failed to save profile changes');
+      alert('Failed to save profile changes. Please try again.');
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Profile picture upload handler
+  const handleProfilePictureUpload = useCallback(async (file: Blob) => {
+    setUploadingProfilePicture(true);
+    try {
+      if (!firebaseUser?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      // Upload to Firebase Storage
+      const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+      const { storage } = await import('../../../lib/firebase');
+
+      const storageRef = ref(storage, `users/${firebaseUser.uid}/profile-picture.jpg`);
+      const uploadResult = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+
+      // Update profile picture in local state
+      setProfilePicture(downloadURL);
+
+      // Update Firestore with the new URL
+      const { doc, updateDoc } = await import('firebase/firestore');
+      const { db } = await import('../../../lib/firebase');
+
+      const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+      await updateDoc(userRef, {
+        profilePicture: downloadURL,
+        photoURL: downloadURL,
+        updatedAt: new Date()
+      });
+
+      announceToScreenReader('Profile picture updated successfully');
+    } catch (error) {
+      console.error('Error uploading profile picture:', error);
+      alert('Failed to upload profile picture. Please try again.');
+      // Revert to previous state on error
+      if (firebaseUser?.uid) {
+        const { doc, getDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+        const collection = getCollectionForRole(currentRole);
+        const userDoc = await getDoc(doc(db, collection, firebaseUser.uid));
+        if (userDoc.exists()) {
+          setProfilePicture(userDoc.data().profilePicture || null);
+        }
+      }
+    } finally {
+      setUploadingProfilePicture(false);
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Profile picture delete handler
+  const handleProfilePictureDelete = useCallback(async () => {
+    try {
+      if (!firebaseUser?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      // Delete from Firebase Storage
+      try {
+        const { ref, deleteObject } = await import('firebase/storage');
+        const { storage } = await import('../../../lib/firebase');
+        const storageRef = ref(storage, `users/${firebaseUser.uid}/profile-picture.jpg`);
+        await deleteObject(storageRef);
+      } catch (storageError: any) {
+        // Ignore if file doesn't exist
+        if (storageError?.code !== 'storage/object-not-found') {
+          throw storageError;
+        }
+      }
+
+      // Update local state
+      setProfilePicture(null);
+
+      // Update Firestore
+      const { doc, updateDoc } = await import('firebase/firestore');
+      const { db } = await import('../../../lib/firebase');
+
+      const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+      await updateDoc(userRef, {
+        profilePicture: null,
+        photoURL: null,
+        updatedAt: new Date()
+      });
+
+      announceToScreenReader('Profile picture removed');
+    } catch (error) {
+      console.error('Error removing profile picture:', error);
+      announceToScreenReader('Failed to remove profile picture');
+      alert('Failed to remove profile picture. Please try again.');
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Cover photo upload handler
+  const handleCoverPhotoUpload = useCallback(async (file: Blob) => {
+    setUploadingCoverPhoto(true);
+    try {
+      if (!firebaseUser?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      // Upload to Firebase Storage
+      const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
+      const { storage } = await import('../../../lib/firebase');
+
+      const storageRef = ref(storage, `users/${firebaseUser.uid}/cover-photo.jpg`);
+      const uploadResult = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+
+      // Update cover photo in local state
+      setCoverPhoto(downloadURL);
+
+      // Update Firestore with the new URL
+      const { doc, updateDoc } = await import('firebase/firestore');
+      const { db } = await import('../../../lib/firebase');
+
+      const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+      await updateDoc(userRef, {
+        coverPhoto: downloadURL,
+        updatedAt: new Date()
+      });
+
+      announceToScreenReader('Cover photo updated successfully');
+    } catch (error) {
+      console.error('Error uploading cover photo:', error);
+      alert('Failed to upload cover photo. Please try again.');
+      // Revert to previous state on error
+      if (firebaseUser?.uid) {
+        const { doc, getDoc } = await import('firebase/firestore');
+        const { db } = await import('../../../lib/firebase');
+        const collection = getCollectionForRole(currentRole);
+        const userDoc = await getDoc(doc(db, collection, firebaseUser.uid));
+        if (userDoc.exists()) {
+          setCoverPhoto(userDoc.data().coverPhoto || null);
+        }
+      }
+    } finally {
+      setUploadingCoverPhoto(false);
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Cover photo delete handler
+  const handleCoverPhotoDelete = useCallback(async () => {
+    try {
+      if (!firebaseUser?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      // Delete from Firebase Storage
+      try {
+        const { ref, deleteObject } = await import('firebase/storage');
+        const { storage } = await import('../../../lib/firebase');
+        const storageRef = ref(storage, `users/${firebaseUser.uid}/cover-photo.jpg`);
+        await deleteObject(storageRef);
+      } catch (storageError: any) {
+        // Ignore if file doesn't exist
+        if (storageError?.code !== 'storage/object-not-found') {
+          throw storageError;
+        }
+      }
+
+      // Update local state
+      setCoverPhoto(null);
+
+      // Update Firestore
+      const { doc, updateDoc } = await import('firebase/firestore');
+      const { db } = await import('../../../lib/firebase');
+
+      const collection = getCollectionForRole(currentRole);
+        const userRef = doc(db, collection, firebaseUser.uid);
+      await updateDoc(userRef, {
+        coverPhoto: null,
+        updatedAt: new Date()
+      });
+
+      announceToScreenReader('Cover photo removed');
+    } catch (error) {
+      console.error('Error removing cover photo:', error);
+      announceToScreenReader('Failed to remove cover photo');
+      alert('Failed to remove cover photo. Please try again.');
+    }
+  }, [announceToScreenReader, firebaseUser]);
+
+  // Messaging and connection states
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'pending' | 'none'>('none');
+  const [targetUserRole, setTargetUserRole] = useState<string>('athlete');
+  const [targetUserDisplayName, setTargetUserDisplayName] = useState<string>('User');
+
+  // Real-time friend requests hook
+  const {
+    incomingRequests,
+    outgoingRequests,
+    loading: friendRequestsLoading
+  } = useRealtimeFriendRequests(firebaseUser?.uid || null);
+
+  // Check connection status with viewed user (for messaging)
+  useEffect(() => {
+    if (isOwner || !userId || !firebaseUser) {
+      setConnectionStatus('none');
+      return;
+    }
+
+    const checkConnectionStatus = async () => {
+      try {
+        // Get the viewed user's profile to fetch their role (checks all role-specific collections)
+        const userData = await userService.getUserProfile(userId);
+
+        if (userData) {
+          setTargetUserRole(userData.role || 'athlete');
+          setTargetUserDisplayName(userData.displayName || 'User');
+
+          // Check for friendships (athlete-to-athlete connections)
+          const areFriends = await friendsService.areFriends(firebaseUser.uid, userId);
+          if (areFriends) {
+            setConnectionStatus('connected');
+            return;
+          }
+
+          // Check for pending friend requests using real-time hook data
+          const hasSentRequest = outgoingRequests.some(req => req.recipientId === userId);
+          const hasReceivedRequest = incomingRequests.some(req => req.requesterId === userId);
+
+          if (hasSentRequest || hasReceivedRequest) {
+            setConnectionStatus('pending');
+            return;
+          }
+
+          // Check for any pending or accepted organization connection requests between the two users
+          const connectionStatus = await organizationConnectionService.getConnectionStatusBetweenUsers(
+            firebaseUser.uid,
+            userId
+          );
+
+          if (connectionStatus === 'pending') {
+            setConnectionStatus('pending');
+            return;
+          }
+
+          if (connectionStatus === 'accepted') {
+            setConnectionStatus('connected');
+            return;
+          }
+
+          setConnectionStatus('none');
+        }
+      } catch (error) {
+        console.error('Error checking connection status:', error);
+        setConnectionStatus('none');
+      }
+    };
+
+    checkConnectionStatus();
+  }, [userId, firebaseUser, isOwner, incomingRequests, outgoingRequests]);
+
+  // Handler to open chat
+  const handleOpenChat = useCallback(() => {
+    if (userId) {
+      navigate(`/messages/${userId}`);
+    }
+  }, [userId, navigate]);
+
+  // Handler for connection request sent
+  const handleConnectionRequestSent = useCallback(() => {
+    setConnectionStatus('pending');
+  }, []);
+
+  // Log render performance after component updates - Disabled
+  // useEffect(() => {
+  //   logRenderTime();
+  // });
+
+  if (isLoading) {
+    return (
+      <main className="profile-page" role="main">
+        <NavigationBar
+          currentUser={firebaseUser}
+          isGuest={isGuest()}
+          onTitleClick={handleTitleClick}
+          title="Profile"
+        />
+        <div className="profile-loading" role="status" aria-label="Loading profile">
+          <div className="loading-spinner"></div>
+          <p>Loading profile...</p>
+        </div>
+        <FooterNav />
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="profile-page" role="main">
+        <NavigationBar
+          currentUser={firebaseUser}
+          isGuest={isGuest()}
+          onTitleClick={handleTitleClick}
+          title="Profile"
+        />
+        <div className="profile-error" role="alert">
+          <p>{error}</p>
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+        <FooterNav />
+      </main>
+    );
+  }
+
+  return (
+    <main className="profile-page" role="main" onKeyDown={handleKeyDown}>
+      {/* Skip Links for Keyboard Navigation */}
+      <div className="skip-links">
+        <a href="#main-content" className="skip-link">Skip to main content</a>
+        <a href="#profile-sections" className="skip-link">Skip to profile sections</a>
+        <a href="#footer-nav" className="skip-link">Skip to navigation</a>
+      </div>
+
+      {/* Live Region for Screen Reader Announcements */}
+      <div
+        className="live-region"
+        aria-live="polite"
+        aria-atomic="true"
+        id="live-region"
+      ></div>
+
+      {/* Network Status Indicator */}
+      {!isOnline && (
+        <div className="offline-indicator" role="alert">
+          You're offline. Some features may not work.
+        </div>
+      )}
+
+      {/* Top Navigation Bar */}
+      <NavigationBar
+        currentUser={firebaseUser}
+        isGuest={isGuest()}
+        onTitleClick={handleTitleClick}
+        title="Profile"
+        showBackButton={true}
+        onBackClick={handleGoBack}
+      />
+
+
+
+      <div className="main-content profile-main-content">
+        {/* Cover Photo Section */}
+        <CoverPhotoManager
+          coverPhoto={coverPhoto}
+          onUpload={handleCoverPhotoUpload}
+          onDelete={handleCoverPhotoDelete}
+          uploading={uploadingCoverPhoto}
+          isOwnProfile={isOwner}
+          isGuest={isGuest()}
+          className="profile-cover-photo"
+        />
+
+        <header className="profile-header" role="banner" id="main-content">
+          <div className="profile-avatar">
+            <ProfilePictureManager
+              profilePicture={profilePicture}
+              onUpload={handleProfilePictureUpload}
+              onDelete={handleProfilePictureDelete}
+              uploading={uploadingProfilePicture}
+              isOwnProfile={isOwner}
+              isGuest={isGuest()}
+              size="large"
+            />
+          </div>
+
+          <div className="profile-info">
+            <div className="profile-name-section">
+              <h1 className="profile-username">{personalDetails.name}</h1>
+              {isOwner && (
+                <button
+                  className="edit-profile-button"
+                  onClick={handleEditPersonalDetails}
+                  aria-label="Edit profile"
+                  type="button"
+                >
+                  <Edit3 size={18} aria-hidden="true" />
+                  <span className="edit-text">Edit</span>
+                </button>
+              )}
+            </div>
+
+            {/* Sport Banner - Shows sport/position info below name */}
+            <SportBanner
+              sport={getDisplayValue(personalDetails.sport)}
+              position={getDisplayValue(personalDetails.position)}
+              playerType={getDisplayValue(personalDetails.playerType)}
+              role={currentRole}
+              organizationType={personalDetails.organizationType}
+              specializations={personalDetails.specializations}
+            />
+
+            <div className="profile-stats" role="group" aria-label="Profile statistics">
+              <div className="stat-item">
+                <span className="stat-number" aria-label={`${profileStats.posts} posts`}>{profileStats.posts}</span>
+                <span className="stat-label">Posts</span>
+              </div>
+            </div>
+
+            {!isOwner && (
+              <div className="profile-action-buttons">
+                <MessageButton
+                  targetUserId={userId || ''}
+                  targetUserName={targetUserDisplayName}
+                  targetUserRole={targetUserRole}
+                  connectionStatus={connectionStatus}
+                  onConnectionRequest={handleConnectionRequestSent}
+                  onOpenChat={handleOpenChat}
+                />
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Track Best Section - Only for Athletes/Players and Parents */}
+        {(currentRole === 'athlete' || currentRole === 'parents') && (
+          <TrackBestSection
+            trackBest={trackBest}
+            sport={getDisplayValue(personalDetails.sport)}
+            isOwner={isOwner}
+            onEditSection={handleEditTrackBest}
+          />
+        )}
+
+        {/* Personal Details Section */}
+        <section className="personal-details" aria-labelledby="personal-details-heading">
+          <div className="section-header">
+            <h2 id="personal-details-heading" className="section-title">Personal Details</h2>
+            {isOwner && (
+              <button
+                className="section-edit-button"
+                onClick={handleEditPersonalDetails}
+                aria-label="Edit personal details"
+                type="button"
+              >
+                <Edit3 size={16} aria-hidden="true" />
+              </button>
+            )}
+          </div>
+          <div className="details-card" role="group" aria-labelledby="personal-details-heading">
+            <div className="field-row">
+              <span className="field-label" id="name-label">NAME</span>
+              <span className="field-value" aria-labelledby="name-label">{personalDetails.name}</span>
+            </div>
+            <div className="field-row">
+              <span className="field-label" id="dob-label">DATE OF BIRTH</span>
+              <span className="field-value" aria-labelledby="dob-label">{formatDateOfBirth(personalDetails.dateOfBirth)}</span>
+            </div>
+            <div className="field-row">
+              <span className="field-label" id="gender-label">GENDER</span>
+              <span className="field-value" aria-labelledby="gender-label">{personalDetails.gender || 'Not specified'}</span>
+            </div>
+            <div className="field-row">
+              <span className="field-label" id="mobile-label">MOBILE</span>
+              <span className="field-value" aria-labelledby="mobile-label">{personalDetails.mobile || 'Not specified'}</span>
+            </div>
+            <div className="field-row">
+              <span className="field-label" id="email-label">EMAIL</span>
+              <span className="field-value" aria-labelledby="email-label">{personalDetails.email || 'Not specified'}</span>
+            </div>
+            <div className="field-row">
+              <span className="field-label" id="city-label">CITY</span>
+              <span className="field-value" aria-labelledby="city-label">{personalDetails.city || 'Not specified'}</span>
+            </div>
+            <div className="field-row">
+              <span className="field-label" id="state-label">STATE</span>
+              <span className="field-value" aria-labelledby="state-label">{personalDetails.state || 'Not specified'}</span>
+            </div>
+            <div className="field-row">
+              <span className="field-label" id="country-label">COUNTRY</span>
+              <span className="field-value" aria-labelledby="country-label">{personalDetails.country || 'Not specified'}</span>
+            </div>
+            <div className="field-row">
+              <span className="field-label" id="role-label">ACCOUNT TYPE</span>
+              <span className="field-value" aria-labelledby="role-label">{currentRoleConfig.displayName}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Physical Attributes Section - Athletes only */}
+        {sections.includes('physicalAttributes') && (
+          <PhysicalAttributesSection
+            physicalAttributes={physicalAttributes}
+            isOwner={isOwner}
+            onEditSection={() => handleEditProfileWithTab('physicalAttributes')}
+          />
+        )}
+
+        {/* Profile Sections Container */}
+        <div id="profile-sections" role="region" aria-label="Profile sections">
+          {/* Role-specific sections */}
+          <RoleSpecificSections
+            currentRole={currentRole}
+            personalDetails={personalDetails}
+            isOwner={isOwner}
+            onEditProfile={handleEditProfile}
+            onSaveOrganizationInfo={handleSaveOrganizationInfo}
+          />
+        </div>
+
+        {/* Achievements & Certificates Section - Combined */}
+        {(sections.includes('achievements') || sections.includes('certificates')) && (
+          <AchievementsCertificatesSection
+            achievements={achievements}
+            certificates={certificates}
+            isOwner={isOwner}
+            {...achievementHandlers}
+            {...certificateHandlers}
+            onEditSection={() => handleEditProfileWithTab('achievements')}
+            onOpenEditModal={handleOpenEditModal}
+          />
+        )}
+
+        {/* Talent Videos Section - Athletes only */}
+        {sections.includes('talentVideos') && (
+          <section
+            aria-labelledby="talent-videos-heading"
+            role="region"
+            tabIndex={-1}
+            id="talent-videos-section"
+          >
+            <Suspense fallback={
+              <div className="section-loading" role="status" aria-label="Loading talent videos">
+                <div className="section-loading-spinner" aria-hidden="true"></div>
+                <p>Loading videos...</p>
+                <div className="sr-only">Please wait while talent videos are loading</div>
+              </div>
+            }>
+              <TalentVideosSection
+                videos={talentVideos}
+                isOwner={isOwner}
+                athleteSports={athleteSports}
+                {...videoHandlers}
+                onOpenEditModal={handleOpenEditModal}
+              />
+            </Suspense>
+          </section>
+        )}
+
+        {/* Posts Section */}
+        {sections.includes('posts') && (
+          <section
+            aria-labelledby="posts-heading"
+            role="region"
+            tabIndex={-1}
+            id="posts-section"
+          >
+
+
+            <Suspense fallback={
+              <div className="section-loading" role="status" aria-label="Loading posts">
+                <div className="section-loading-spinner" aria-hidden="true"></div>
+                <p>Loading posts...</p>
+                <div className="sr-only">Please wait while posts are loading</div>
+              </div>
+            }>
+              <PostsSection
+                posts={posts}
+                isOwner={isOwner}
+                {...postHandlers}
+                onOpenEditModal={handleOpenEditModal}
+              />
+            </Suspense>
+          </section>
+        )}
+
+        {/* Edit Profile Modal */}
+        {isEditModalOpen && (
+          <Suspense fallback={
+            <div className="modal-loading" role="status" aria-label="Loading edit profile modal">
+              <div className="loading-spinner" aria-hidden="true"></div>
+              <p>Loading editor...</p>
+            </div>
+          }>
+            <EditProfileModal
+              isOpen={isEditModalOpen}
+              personalDetails={personalDetails}
+              physicalAttributes={physicalAttributes}
+              currentRole={currentRole}
+              achievements={achievements}
+              certificates={certificates}
+              talentVideos={talentVideos}
+              posts={posts}
+              onSave={editModalHandler}
+              onClose={() => setIsEditModalOpen(false)}
+              initialTab={editModalInitialTab as any}
+            />
+          </Suspense>
+        )}
+
+        {/* Personal Details Modal */}
+        {isPersonalDetailsModalOpen && (
+          <Suspense fallback={
+            <div className="modal-loading" role="status" aria-label="Loading personal details modal">
+              <div className="loading-spinner" aria-hidden="true"></div>
+              <p>Loading editor...</p>
+            </div>
+          }>
+            <PersonalDetailsModal
+              isOpen={isPersonalDetailsModalOpen}
+              personalDetails={personalDetails}
+              currentRole={currentRole}
+              onSave={handleSavePersonalDetails}
+              onClose={() => setIsPersonalDetailsModalOpen(false)}
+            />
+          </Suspense>
+        )}
+
+        {/* Physical Attributes Modal */}
+        {isPhysicalAttributesModalOpen && (
+          <Suspense fallback={
+            <div className="modal-loading" role="status" aria-label="Loading physical attributes modal">
+              <div className="loading-spinner" aria-hidden="true"></div>
+              <p>Loading editor...</p>
+            </div>
+          }>
+            <PhysicalAttributesModal
+              isOpen={isPhysicalAttributesModalOpen}
+              physicalAttributes={physicalAttributes}
+              onSave={handleSavePhysicalAttributes}
+              onClose={() => setIsPhysicalAttributesModalOpen(false)}
+            />
+          </Suspense>
+        )}
+
+        {/* Track Best Modal */}
+        {isTrackBestModalOpen && (
+          <Suspense fallback={
+            <div className="modal-loading" role="status" aria-label="Loading track best modal">
+              <div className="loading-spinner" aria-hidden="true"></div>
+              <p>Loading editor...</p>
+            </div>
+          }>
+            <TrackBestModal
+              isOpen={isTrackBestModalOpen}
+              trackBest={trackBest}
+              sport={getDisplayValue(personalDetails.sport) || 'cricket'}
+              onSave={handleSaveTrackBest}
+              onClose={() => setIsTrackBestModalOpen(false)}
+            />
+          </Suspense>
+        )}
+
+        {/* Achievements Section Modal */}
+        {isAchievementsSectionModalOpen && (
+          <Suspense fallback={
+            <div className="modal-loading" role="status" aria-label="Loading achievements modal">
+              <div className="loading-spinner" aria-hidden="true"></div>
+              <p>Loading editor...</p>
+            </div>
+          }>
+            <AchievementsSectionModal
+              isOpen={isAchievementsSectionModalOpen}
+              achievements={achievements}
+              onSave={handleSaveAchievements}
+              onClose={() => setIsAchievementsSectionModalOpen(false)}
+            />
+          </Suspense>
+        )}
+
+        {/* Certificates Section Modal */}
+        {isCertificatesSectionModalOpen && (
+          <Suspense fallback={
+            <div className="modal-loading" role="status" aria-label="Loading certificates modal">
+              <div className="loading-spinner" aria-hidden="true"></div>
+              <p>Loading editor...</p>
+            </div>
+          }>
+            <CertificatesSectionModal
+              isOpen={isCertificatesSectionModalOpen}
+              certificates={certificates}
+              onSave={handleSaveCertificates}
+              onClose={() => setIsCertificatesSectionModalOpen(false)}
+            />
+          </Suspense>
+        )}
+
+      </div>
+
+      {/* Footer Navigation */}
+      <FooterNav />
+    </main>
+  );
+});
+
+Profile.displayName = 'Profile';
+
+export default Profile;

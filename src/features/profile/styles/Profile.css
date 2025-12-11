@@ -1,0 +1,2252 @@
+/* Profile page styles - Mobile-first responsive design */
+
+.profile-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: 0;
+  padding-top: 60px; /* Add space for NavigationBar */
+  padding-bottom: 80px; /* Account for fixed bottom navigation */
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Profile name section with edit button */
+.profile-name-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.edit-profile-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-primary);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 32px;
+}
+
+.edit-profile-button:hover {
+  background: var(--accent-primary-hover);
+  transform: translateY(-1px);
+}
+
+.edit-profile-button:active {
+  transform: translateY(0);
+}
+
+.edit-profile-button .edit-text {
+  font-size: 13px;
+}
+
+.back-button:active {
+  background-color: rgba(32, 178, 170, 0.15);
+  transform: translateX(0);
+}
+
+.back-text {
+  font-size: 16px;
+}
+
+
+
+
+
+@media (min-width: 768px) {
+  .profile-nav {
+    padding: 16px 24px;
+  }
+  
+  .profile-nav-content {
+    max-width: 800px;
+  }
+  
+  .profile-nav-title {
+    font-size: 20px;
+  }
+  
+  .back-button {
+    padding: 10px 16px;
+  }
+  
+  .edit-profile-nav-button {
+    padding: 10px 16px;
+    font-size: 16px;
+  }
+  
+  .edit-text {
+    font-size: 16px;
+  }
+  
+  .profile-nav-spacer {
+    width: 100px;
+  }
+}
+
+/* Update profile page content padding */
+.profile-page > .profile-header,
+.profile-page > .personal-details {
+  margin-left: 16px;
+  margin-right: 16px;
+}
+
+@media (min-width: 768px) {
+  .profile-page > .profile-header,
+  .profile-page > .personal-details {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+}
+
+/* Main content spacing for NavigationBar */
+.profile-main-content {
+  padding-top: 20px;
+  /* Ensure content doesn't get hidden behind FooterNav */
+  padding-bottom: 100px;
+  position: relative;
+}
+
+/* Responsive breakpoints */
+@media (min-width: 768px) {
+  .profile-page {
+    max-width: 600px;
+    padding: 24px;
+    padding-top: 80px; /* More space for NavigationBar on larger screens */
+    padding-bottom: 120px; /* More space for FooterNav on larger screens */
+  }
+  
+  .profile-main-content {
+    padding-top: 0;
+    padding-bottom: 120px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile-page {
+    max-width: 800px;
+    padding: 32px;
+    padding-bottom: 120px;
+  }
+  
+  .profile-main-content {
+    padding-bottom: 120px;
+  }
+}
+
+/* Mobile-specific FooterNav positioning */
+@media (max-width: 767px) {
+  .profile-main-content {
+    padding-bottom: 90px; /* Account for mobile FooterNav height */
+  }
+  
+  .profile-page {
+    padding-bottom: 90px;
+  }
+}
+
+/* Cover Photo Styles */
+.profile-cover-photo {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-bottom: 16px;
+  border-radius: 0;
+}
+
+@media (min-width: 768px) {
+  .profile-cover-photo {
+    width: 100%;
+    position: static;
+    left: auto;
+    right: auto;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 16px;
+    border-radius: 0 0 16px 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile-cover-photo {
+    width: 100%;
+    margin: 0 auto 24px auto;
+    border-radius: 16px;
+  }
+}
+
+/* Profile Header Styles - Enhanced Flexbox layout with cover photo integration */
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -60px; /* Overlap with cover photo */
+  margin-bottom: 24px;
+  padding: 80px 20px 20px 20px; /* Extra top padding for overlap */
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: var(--shadow-primary);
+  border: 1px solid var(--border-primary);
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 768px) {
+  .profile-header {
+    padding: 32px;
+    margin-bottom: 32px;
+  }
+}
+
+/* Avatar Styles - Integrated with ProfilePictureManager */
+.profile-avatar {
+  margin-bottom: 20px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+}
+
+/* Override ProfilePictureManager styles for profile page integration */
+.profile-avatar .profile-picture-manager {
+  border: 4px solid var(--bg-secondary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.profile-avatar .profile-picture-container {
+  border: none; /* Remove default border since we have white border above */
+}
+
+@media (min-width: 768px) {
+  .profile-avatar {
+    margin-bottom: 24px;
+  }
+  
+  .profile-avatar .profile-picture-manager {
+    border-width: 5px;
+  }
+}
+
+/* Legacy avatar placeholder for fallback */
+.avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.avatar-placeholder:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+@media (min-width: 768px) {
+  .avatar-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+.avatar-icon {
+  font-size: 32px;
+  color: #9ca3af;
+}
+
+@media (min-width: 768px) {
+  .avatar-icon {
+    font-size: 40px;
+  }
+}
+
+/* Profile Info Styles - Improved layout */
+.profile-info {
+  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-primary);
+}
+
+.profile-role-selector {
+  margin: 8px 0;
+}
+
+@media (min-width: 768px) {
+  .profile-info {
+    gap: 20px;
+  }
+}
+
+.profile-username {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+@media (min-width: 768px) {
+  .profile-username {
+    font-size: 28px;
+    letter-spacing: -0.7px;
+  }
+}
+
+/* Stats Styles - Responsive spacing */
+.profile-stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0; /* Allow flex items to shrink */
+}
+
+@media (min-width: 768px) {
+  .profile-stats {
+    gap: 40px;
+    max-width: 400px;
+  }
+  
+  .stat-item {
+    gap: 6px;
+  }
+}
+
+.stat-number {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary) !important;
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary) !important;
+  text-transform: capitalize;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Ensure stats are visible in both themes */
+.profile-stats .stat-item {
+  color: var(--text-primary);
+}
+
+.profile-stats .stat-number {
+  color: var(--text-primary) !important;
+}
+
+.profile-stats .stat-label {
+  color: var(--text-secondary) !important;
+}
+
+/* Ensure profile header content is always visible */
+.profile-header .profile-username {
+  color: var(--text-primary) !important;
+}
+
+.profile-header .stat-number {
+  color: var(--text-primary) !important;
+}
+
+.profile-header .stat-label {
+  color: var(--text-secondary) !important;
+}
+
+@media (min-width: 768px) {
+  .stat-number {
+    font-size: 22px;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+  }
+}
+
+/* Follow Button Styles - Enhanced responsive design */
+.follow-button {
+  background: linear-gradient(135deg, #20B2AA 0%, #1a9a94 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(32, 178, 170, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+  .follow-button {
+    padding: 14px 32px;
+    font-size: 16px;
+    min-width: 140px;
+    border-radius: 10px;
+  }
+}
+
+.follow-button:hover {
+  background: linear-gradient(135deg, #1a9a94 0%, #168a85 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(32, 178, 170, 0.35);
+}
+
+.follow-button:active {
+  background: linear-gradient(135deg, #168a85 0%, #147a75 100%);
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(32, 178, 170, 0.25);
+}
+
+/* Profile Action Buttons Container - Flexbox layout for follow, message, connect buttons */
+.profile-action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 16px;
+  width: 100%;
+  overflow: hidden;
+}
+
+@media (min-width: 480px) {
+  .profile-action-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    overflow: visible;
+  }
+}
+
+@media (min-width: 768px) {
+  .profile-action-buttons {
+    gap: 10px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile-action-buttons {
+    gap: 14px;
+  }
+}
+
+/* Message Button and Connect Button Styles */
+.message-btn,
+.connect-btn,
+.pending-btn,
+.add-friend-btn {
+  background: linear-gradient(135deg, #007AFF 0%, #0051D5 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+  min-width: auto;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .message-btn,
+  .connect-btn,
+  .pending-btn,
+  .add-friend-btn {
+    padding: 12px 24px;
+    font-size: 14px;
+    min-width: auto;
+    min-height: 40px;
+    border-radius: 8px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .message-btn,
+  .connect-btn,
+  .pending-btn,
+  .add-friend-btn {
+    padding: 14px 32px;
+    font-size: 16px;
+    min-width: 140px;
+    min-height: 44px;
+    border-radius: 10px;
+  }
+}
+
+.message-btn:hover,
+.connect-btn:hover {
+  background: linear-gradient(135deg, #0051D5 0%, #003BA3 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
+}
+
+.message-btn:active,
+.connect-btn:active {
+  background: linear-gradient(135deg, #003BA3 0%, #002E7F 100%);
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 122, 255, 0.25);
+}
+
+/* Disabled state for message and connect buttons */
+.message-btn:disabled,
+.connect-btn:disabled {
+  background: linear-gradient(135deg, #B3D9FF 0%, #89BFFF 100%);
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+
+.message-btn:disabled:hover,
+.connect-btn:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.15);
+}
+
+/* Pending Button - Disabled state */
+.pending-btn {
+  background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
+  cursor: not-allowed;
+  opacity: 0.8;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+}
+
+.pending-btn:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+}
+
+/* Add Friend Button - Disabled state */
+.add-friend-btn {
+  background: linear-gradient(135deg, #999999 0%, #777777 100%);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.add-friend-btn:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Error message styling */
+.message-btn-error {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 8px;
+  background: #ffebee;
+  border-radius: 4px;
+  border-left: 3px solid #d32f2f;
+}
+
+/* Spinning animation for loading states */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Bottom Navigation Styles - Enhanced responsive design */
+.bottom-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 12px 16px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+@media (min-width: 768px) {
+  .bottom-navigation {
+    padding: 16px 24px;
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 20px 20px 0 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bottom-navigation {
+    max-width: 800px;
+  }
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  color: #6b7280;
+}
+
+.nav-item:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.nav-item:active {
+  background-color: #e5e7eb;
+  transform: translateY(0);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.nav-item-active {
+  color: #20B2AA;
+  background-color: rgba(32, 178, 170, 0.08);
+}
+
+.nav-item-active:hover {
+  background-color: rgba(32, 178, 170, 0.15);
+  transform: translateY(-1px);
+}
+
+.nav-item-active:active {
+  background-color: rgba(32, 178, 170, 0.2);
+  transform: translateY(0);
+}
+
+/* Personal Details Section Styles - Enhanced card design */
+.personal-details {
+  margin-bottom: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  text-align: left;
+  padding-left: 4px;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+}
+
+.section-edit-button {
+  background: none;
+  border: none;
+  color: #20B2AA;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  min-width: 32px;
+}
+
+.section-edit-button:hover {
+  background-color: rgba(32, 178, 170, 0.08);
+}
+
+.section-edit-button:active {
+  background-color: rgba(32, 178, 170, 0.15);
+}
+
+.details-card {
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow-primary);
+  border: 1px solid var(--border-primary);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.details-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+@media (min-width: 768px) {
+  .personal-details {
+    margin-bottom: 32px;
+  }
+  
+  .section-header {
+    margin-bottom: 20px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+  
+  .details-card {
+    padding: 28px;
+    border-radius: 16px;
+  }
+}
+
+/* Personal Details Field Styles - Enhanced layout */
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.field-row:last-child {
+  border-bottom: none;
+}
+
+.field-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  margin: 0 -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 6px;
+}
+
+@media (min-width: 768px) {
+  .field-row {
+    padding: 16px 0;
+  }
+  
+  .field-row:hover {
+    margin: 0 -28px;
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+}
+
+.field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  line-height: 1.2;
+}
+
+.field-value {
+  font-size: 15px;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+@media (min-width: 768px) {
+  .field-label {
+    font-size: 12px;
+    letter-spacing: 0.9px;
+  }
+  
+  .field-value {
+    font-size: 16px;
+  }
+}
+
+/* Accessibility and Keyboard Navigation Styles */
+
+/* Focus styles for better keyboard navigation */
+.follow-button:focus-visible {
+  outline: 2px solid #20B2AA;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(32, 178, 170, 0.2);
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid #20B2AA;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(32, 178, 170, 0.2);
+}
+
+.edit-profile-nav-button:focus-visible,
+.section-edit-button:focus-visible {
+  outline: 2px solid #20B2AA;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(32, 178, 170, 0.2);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .profile-username {
+    color: #000000;
+  }
+  
+  .stat-number {
+    color: #000000;
+  }
+  
+  .field-value {
+    color: #000000;
+  }
+  
+  .section-title {
+    color: #000000;
+  }
+  
+  .avatar-placeholder {
+    border: 3px solid #000000;
+  }
+  
+  .details-card {
+    border: 2px solid #000000;
+  }
+  
+  .profile-header {
+    border: 2px solid #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .avatar-placeholder:hover {
+    transform: none;
+  }
+  
+  .follow-button:hover {
+    transform: none;
+  }
+  
+  .nav-item:hover {
+    transform: none;
+  }
+  
+  .nav-item-active:hover {
+    transform: none;
+  }
+  
+  .details-card:hover {
+    transform: none;
+  }
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #20B2AA;
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 1001;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Loading and Error States */
+.profile-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e0e0e0;
+  border-top: 3px solid #20B2AA;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.profile-loading p {
+  color: #6b7280;
+  font-size: 16px;
+  margin: 0;
+}
+
+.profile-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.profile-error p {
+  color: #dc2626;
+  font-size: 16px;
+  margin: 0 0 16px 0;
+}
+
+.profile-error button {
+  background: #20B2AA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-error button:hover {
+  background: #1a9a94;
+}
+
+/* Section loading states */
+.section-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+  margin-bottom: 24px;
+}
+
+.section-loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e0e0e0;
+  border-top: 2px solid #20B2AA;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+.section-loading p {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Section error states */
+.section-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+  margin-bottom: 24px;
+}
+
+.section-error p {
+  color: #dc2626;
+  font-size: 14px;
+  margin: 0 0 12px 0;
+}
+
+.section-error button {
+  background: #20B2AA;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 36px;
+}
+
+.section-error button:hover {
+  background: #1a9a94;
+}
+
+/* Empty state styles */
+.section-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e0e0e0;
+  margin-bottom: 24px;
+}
+
+.section-empty-icon {
+  width: 48px;
+  height: 48px;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.section-empty h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 8px 0;
+}
+
+.section-empty p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+}
+
+.section-empty button {
+  background: #20B2AA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+
+.section-empty button:hover {
+  background: #1a9a94;
+}
+
+/* Skeleton loading animations */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-text {
+  height: 16px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+.skeleton-text.medium {
+  width: 80%;
+}
+
+.skeleton-text.long {
+  width: 100%;
+}
+
+.skeleton-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+.skeleton-card {
+  height: 120px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+/* Responsive skeleton adjustments */
+@media (max-width: 767px) {
+  .section-loading,
+  .section-error,
+  .section-empty {
+    padding: 32px 16px;
+    margin-bottom: 20px;
+  }
+  
+  .section-empty-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+  }
+  
+  .section-empty h3 {
+    font-size: 15px;
+  }
+  
+  .section-empty p {
+    font-size: 13px;
+  }
+  
+  .section-empty button {
+    padding: 10px 18px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+  
+  .skeleton-avatar {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .skeleton-card {
+    height: 100px;
+  }
+}
+
+/* Focus management for modals and overlays */
+.focus-trap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+}
+
+/* Smooth scrolling for section navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Modal loading state */
+.modal-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: white;
+}
+
+.modal-loading .loading-spinner {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+}
+
+.modal-loading p {
+  color: white;
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+/* Keyboard navigation improvements */
+.profile-page *:focus-visible {
+  outline: 2px solid #20B2AA;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip links for better keyboard navigation */
+.skip-links {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  z-index: 10000;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #20B2AA;
+  color: white;
+  padding: 8px 12px;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Improved focus indicators for interactive elements */
+.field-row:focus-within {
+  background-color: rgba(32, 178, 170, 0.05);
+  border-radius: 6px;
+  margin: 0 -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+@media (min-width: 768px) {
+  .field-row:focus-within {
+    margin: 0 -28px;
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+}
+
+/* Announce dynamic content changes to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.live-region {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Performance optimizations */
+.profile-page {
+  /* Removed 'contain: layout style paint' as it interferes with fixed positioning of FooterNav */
+  contain: style;
+}
+
+.profile-header,
+.personal-details,
+.achievements-section,
+.certificates-section,
+.talent-videos-section,
+.posts-section {
+  contain: layout style;
+}
+
+/* Image and video loading optimizations */
+img, video {
+  loading: lazy;
+  decoding: async;
+}
+
+/* Reduce layout shifts */
+.avatar-placeholder,
+.skeleton-avatar {
+  aspect-ratio: 1;
+}
+
+.video-thumbnail,
+.post-thumbnail {
+  aspect-ratio: 16/9;
+}
+
+.post-thumbnail.square {
+  aspect-ratio: 1;
+}
+
+/* Safe area adjustments for devices with notches */
+@supports (padding: max(0px)) {
+  .profile-nav {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  
+  .profile-page > .profile-header,
+  .profile-page > .personal-details {
+    margin-left: max(16px, env(safe-area-inset-left));
+    margin-right: max(16px, env(safe-area-inset-right));
+  }
+  
+  .bottom-navigation {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Accessibility improvements for color contrast */
+@media (prefers-contrast: high) {
+  .section-loading-spinner {
+    border-color: #000000;
+    border-top-color: #20B2AA;
+  }
+  
+  .section-loading p,
+  .section-error p,
+  .section-empty p {
+    color: #000000;
+  }
+  
+  .section-empty h3 {
+    color: #000000;
+  }
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .section-loading-spinner,
+  .loading-spinner {
+    animation: none;
+    border: 3px solid #20B2AA;
+  }
+  
+  .skeleton {
+    animation: none;
+    background: #f0f0f0;
+  }
+  
+  .role-options {
+    animation: none;
+  }
+}
+
+/* Ensure NavigationBar is visible */
+.profile-page .nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--bg-navbar);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+/* Ensure FooterNav is always fixed at bottom */
+.profile-page .footer-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  /* Ensure it's not affected by any parent transforms or containment */
+  transform: none !important;
+  will-change: auto !important;
+}
+
+/* Override any potential interference from parent elements */
+body .footer-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  z-index: 1000 !important;
+}
+
+/* Ensure FooterNav is never hidden by any parent overflow or positioning */
+.footer-nav {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  /* Force it to be on top of everything */
+  transform: translateZ(0) !important;
+}
+
+/* Mobile-specific responsive optimizations */
+@media (max-width: 767px) {
+  /* Ensure minimum touch target size */
+  .nav-item {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  .follow-button {
+    min-height: 48px;
+  }
+  
+  .edit-profile-nav-button {
+    min-height: 48px;
+    padding: 12px 16px;
+    gap: 4px;
+  }
+  
+  .edit-text {
+    font-size: 13px;
+  }
+  
+  .section-edit-button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px;
+  }
+  
+  /* Profile header mobile optimizations */
+  .profile-header {
+    padding: 16px;
+    margin-top: 12px;
+  }
+  
+  .profile-username {
+    font-size: 22px;
+  }
+  
+  .profile-role-selector {
+    margin: 6px 0;
+  }
+  
+  .profile-stats {
+    gap: 20px;
+  }
+  
+  .stat-number {
+    font-size: 18px;
+  }
+  
+  .stat-label {
+    font-size: 12px;
+  }
+  
+  /* Personal details mobile optimizations */
+  .personal-details {
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .details-card {
+    padding: 16px;
+  }
+  
+  .field-row {
+    padding: 12px 0;
+  }
+  
+  .field-row:hover {
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .field-label {
+    font-size: 10px;
+  }
+  
+  .field-value {
+    font-size: 14px;
+  }
+  
+  /* Loading and error states mobile */
+  .profile-loading,
+  .profile-error {
+    padding: 40px 16px;
+  }
+  
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 2px;
+  }
+  
+  .profile-loading p,
+  .profile-error p {
+    font-size: 14px;
+  }
+  
+  .profile-error button {
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .profile-page {
+    max-width: 700px;
+    padding: 20px;
+  }
+  
+  .profile-header {
+    padding: 28px;
+  }
+  
+  .profile-username {
+    font-size: 26px;
+  }
+  
+  .profile-stats {
+    gap: 32px;
+  }
+  
+  .personal-details {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  
+  .details-card {
+    padding: 24px;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .back-button:hover,
+  .edit-profile-nav-button:hover,
+  .section-edit-button:hover,
+  .follow-button:hover,
+  .nav-item:hover,
+  .details-card:hover,
+  .field-row:hover {
+    transform: none;
+    background-color: initial;
+    box-shadow: initial;
+  }
+  
+  /* Add active states for touch feedback */
+  .back-button:active,
+  .edit-profile-nav-button:active,
+  .section-edit-button:active {
+    background-color: rgba(32, 178, 170, 0.15);
+    transform: scale(0.98);
+  }
+  
+  .follow-button:active {
+    transform: scale(0.98);
+  }
+  
+  .nav-item:active {
+    background-color: #e5e7eb;
+    transform: scale(0.95);
+  }
+  
+  .details-card:active {
+    transform: scale(0.995);
+  }
+}
+
+/* Landscape mobile optimizations */
+@media (max-width: 767px) and (orientation: landscape) {
+  .profile-header {
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .profile-avatar {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  
+  .avatar-placeholder {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .avatar-icon {
+    font-size: 24px;
+  }
+  
+  .profile-info {
+    text-align: left;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .profile-username {
+    font-size: 20px;
+  }
+  
+  .profile-stats {
+    gap: 16px;
+  }
+  
+  .stat-number {
+    font-size: 16px;
+  }
+  
+  .stat-label {
+    font-size: 11px;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1200px) {
+  .profile-page {
+    max-width: 900px;
+    padding: 40px;
+  }
+  
+  .profile-header {
+    padding: 40px;
+    margin-bottom: 40px;
+  }
+  
+  .profile-username {
+    font-size: 32px;
+  }
+  
+  .profile-stats {
+    gap: 48px;
+    max-width: 500px;
+  }
+  
+  .stat-number {
+    font-size: 24px;
+  }
+  
+  .stat-label {
+    font-size: 15px;
+  }
+  
+  .personal-details {
+    margin-bottom: 40px;
+  }
+  
+  .details-card {
+    padding: 32px;
+  }
+  
+  .field-row {
+    padding: 18px 0;
+  }
+  
+  .field-row:hover {
+    margin: 0 -32px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .profile-nav,
+  .edit-profile-nav-button,
+  .section-edit-button,
+  .follow-button,
+  .bottom-navigation {
+    display: none !important;
+  }
+  
+  .profile-page {
+    background: white !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+  
+  .profile-header,
+  .details-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+}/* 
+Profile sections container responsive styles */
+#profile-sections {
+  margin: 0 16px;
+}
+
+@media (min-width: 768px) {
+  #profile-sections {
+    margin: 0 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  #profile-sections {
+    margin: 0 auto;
+    max-width: 800px;
+  }
+}
+
+/* Section spacing for mobile */
+@media (max-width: 767px) {
+  #profile-sections > section {
+    margin-bottom: 20px;
+  }
+  
+  #profile-sections > section:last-child {
+    margin-bottom: 24px;
+  }
+}
+
+/* Touch-friendly section interactions */
+@media (hover: none) and (pointer: coarse) {
+  .section-header button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px;
+  }
+  
+  .section-action {
+    min-height: 48px;
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Enhanced loading states for sections */
+.section-loading {
+  min-height: 120px;
+}
+
+@media (max-width: 767px) {
+  .section-loading {
+    min-height: 100px;
+    padding: 24px 16px;
+  }
+}
+
+/* Responsive grid layouts for content */
+.content-grid {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 767px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .content-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .content-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
+
+/* Mobile-first responsive typography */
+.section-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 768px) {
+  .section-subtitle {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+}
+
+/* Enhanced error handling styles */
+.section-retry-button {
+  background: #20B2AA;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  margin-top: 12px;
+}
+
+.section-retry-button:hover {
+  background: #1a9a94;
+  transform: translateY(-1px);
+}
+
+.section-retry-button:active {
+  background: #168a85;
+  transform: translateY(0);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .section-retry-button:hover {
+    transform: none;
+  }
+  
+  .section-retry-button:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Improved focus management for dynamic content */
+.section-content:focus-within {
+  outline: 2px solid rgba(32, 178, 170, 0.3);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+/* Performance optimizations for large lists */
+.virtualized-list {
+  height: 400px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+@media (max-width: 767px) {
+  .virtualized-list {
+    height: 300px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .virtualized-list {
+    scroll-behavior: auto;
+  }
+}
+
+/* Network status indicators */
+.offline-indicator {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #dc2626;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 1001;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.online-indicator {
+  background: #059669;
+}
+
+/* Responsive modal adjustments */
+@media (max-width: 767px) {
+  .modal-content {
+    margin: 20px;
+    max-height: calc(100vh - 40px);
+    border-radius: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .modal-content {
+    margin: 40px auto;
+    max-width: 600px;
+    max-height: calc(100vh - 80px);
+    border-radius: 16px;
+  }
+}
+
+/* Enhanced accessibility for dynamic content */
+.content-announcement {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Responsive image and video handling */
+.media-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.media-container img,
+.media-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.media-container:hover img,
+.media-container:hover video {
+  transform: scale(1.02);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .media-container:hover img,
+  .media-container:hover video {
+    transform: none;
+  }
+}
+
+/* Cropper placeholder styles */
+.cropper-placeholder {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cropper-placeholder .cropper-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.cropper-placeholder .cropper-container {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90vw;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.cropper-placeholder h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.cropper-placeholder img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  object-fit: contain;
+}
+
+.cropper-placeholder div:last-child {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.cropper-placeholder button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+}
+
+.cropper-placeholder button:first-child {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.cropper-placeholder button:first-child:hover {
+  background: #e5e7eb;
+}
+
+.cropper-placeholder button:last-child {
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.cropper-placeholder button:last-child:hover {
+  background: #2563eb;
+}
+
+/* Progressive loading indicators */
+.progressive-image {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.progressive-image.loaded {
+  animation: none;
+  background: none;
+}
+
+/* Responsive spacing utilities */
+.spacing-xs { margin: 8px 0; }
+.spacing-sm { margin: 12px 0; }
+.spacing-md { margin: 16px 0; }
+.spacing-lg { margin: 24px 0; }
+.spacing-xl { margin: 32px 0; }
+
+@media (min-width: 768px) {
+  .spacing-xs { margin: 12px 0; }
+  .spacing-sm { margin: 16px 0; }
+  .spacing-md { margin: 24px 0; }
+  .spacing-lg { margin: 32px 0; }
+  .spacing-xl { margin: 40px 0; }
+}
+
+/* Enhanced button states for better UX */
+.button-loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.button-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Improved contrast for better readability */
+@media (prefers-contrast: high) {
+  .section-loading-spinner,
+  .loading-spinner {
+    border-color: #000000;
+    border-top-color: #20B2AA;
+  }
+  
+  .progressive-image {
+    background: #cccccc;
+  }
+  
+  .button-loading::after {
+    border-top-color: #000000;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .progressive-image {
+    animation: none;
+    background: #f0f0f0;
+  }
+
+  .button-loading::after {
+    animation: none;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+  }
+
+  .media-container img,
+  .media-container video {
+    transition: none;
+  }
+
+  .media-container:hover img,
+  .media-container:hover video {
+    transform: none;
+  }
+}
+
+/* Dark theme text visibility fixes */
+/* Field values remain white on dark cards */
+[data-theme="dark"] .profile-page .field-value {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .profile-page .field-label,
+[data-theme="dark"] .profile-page .section-title {
+  color: #b0b0b0 !important;
+}
+
+/* Extra specificity for stat numbers in dark mode */
+/* Stats are in white card, so text should be dark/black for visibility */
+[data-theme="dark"] .profile-stats .stat-item .stat-number,
+[data-theme="dark"] .profile-stats .stat-number,
+[data-theme="dark"] .profile-page .profile-stats .stat-item .stat-number,
+[data-theme="dark"] .profile-page .profile-header .profile-stats .stat-number {
+  color: #1a1a1a !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .profile-stats .stat-item .stat-label,
+[data-theme="dark"] .profile-stats .stat-label,
+[data-theme="dark"] .profile-page .profile-stats .stat-item .stat-label,
+[data-theme="dark"] .profile-page .profile-header .profile-stats .stat-label {
+  color: #333333 !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .profile-page .profile-header {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Keep username and other header text visible on white background in dark mode */
+[data-theme="dark"] .profile-page .profile-header .profile-username {
+  color: #1a1a1a !important;
+}
+
+[data-theme="dark"] .profile-page .details-card {
+  background: #1f1f1f;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Light theme text visibility */
+[data-theme="light"] .profile-page .profile-username,
+[data-theme="light"] .profile-page .stat-number,
+[data-theme="light"] .profile-page .field-value {
+  color: #1a202c !important;
+}
+
+[data-theme="light"] .profile-page .stat-label,
+[data-theme="light"] .profile-page .field-label,
+[data-theme="light"] .profile-page .section-title {
+  color: #4a5568 !important;
+}
+
+/* Extra specificity for stat numbers in light mode */
+[data-theme="light"] .profile-stats .stat-item .stat-number,
+[data-theme="light"] .profile-stats .stat-number,
+[data-theme="light"] .profile-page .profile-stats .stat-item .stat-number,
+[data-theme="light"] .profile-page .profile-header .profile-stats .stat-number {
+  color: #1a202c !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+}
+
+[data-theme="light"] .profile-stats .stat-item .stat-label,
+[data-theme="light"] .profile-stats .stat-label,
+[data-theme="light"] .profile-page .profile-stats .stat-item .stat-label,
+[data-theme="light"] .profile-page .profile-header .profile-stats .stat-label {
+  color: #4a5568 !important;
+  opacity: 1 !important;
+}
+
+[data-theme="light"] .profile-page .profile-header {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .profile-page .details-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme field row borders */
+[data-theme="dark"] .profile-page .field-row {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .profile-page .field-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Light theme field row borders */
+[data-theme="light"] .profile-page .field-row {
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .profile-page .field-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}

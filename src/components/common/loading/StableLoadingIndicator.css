@@ -1,0 +1,125 @@
+.stable-loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+  will-change: opacity, transform;
+  /* Prevent layout shifts with stable positioning */
+  contain: layout style paint;
+  position: relative;
+  /* Ensure loading indicator doesn't affect layout */
+  pointer-events: none;
+}
+
+.stable-loading-indicator.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stable-loading-indicator.fading {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+
+.stable-loading-indicator.hidden {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Prevent spinner from affecting cursor */
+  pointer-events: none;
+}
+
+.spinner-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e1e5e9;
+  border-top: 2px solid #1877f2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  /* Hardware acceleration for smooth animation */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg) translateZ(0); }
+  100% { transform: rotate(360deg) translateZ(0); }
+}
+
+.loading-message {
+  font-size: 14px;
+  color: #65676b;
+  font-weight: 500;
+  /* Prevent text from affecting cursor */
+  pointer-events: none;
+}
+
+/* Variants for different contexts */
+.stable-loading-indicator.compact {
+  padding: 8px;
+  gap: 8px;
+}
+
+.stable-loading-indicator.compact .spinner-circle {
+  width: 16px;
+  height: 16px;
+  border-width: 1.5px;
+}
+
+.stable-loading-indicator.compact .loading-message {
+  font-size: 12px;
+}
+
+.stable-loading-indicator.inline {
+  display: inline-flex;
+  padding: 4px 8px;
+}
+
+/* Prevent layout shift with stable dimensions */
+.stable-loading-indicator {
+  min-height: 52px; /* Consistent height to prevent layout shifts */
+  box-sizing: border-box;
+  /* Reserve space to prevent content jumping */
+  margin: 0;
+}
+
+.stable-loading-indicator.compact {
+  min-height: 36px;
+}
+
+.stable-loading-indicator.inline {
+  min-height: auto;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .stable-loading-indicator {
+    transition: none;
+  }
+  
+  .spinner-circle {
+    animation: none;
+    border-top-color: transparent;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .spinner-circle {
+    border-color: #3a3b3c;
+    border-top-color: #1877f2;
+  }
+  
+  .loading-message {
+    color: #b0b3b8;
+  }
+}

@@ -1,0 +1,45 @@
+/* Performance optimizations - Most moved to global.css */
+
+/* Component-specific performance optimizations */
+.fixed-message-input {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+@media (hover: none) {
+  .fixed-message-input {
+    backdrop-filter: none !important;
+    background: var(--bg-navbar) !important;
+  }
+  
+  /* Component-specific mobile optimizations */
+  .post:hover,
+  .message:hover,
+  .friend-item:hover {
+    transform: none !important;
+  }
+  
+  .post-actions button {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .post,
+  .chat-interface,
+  .options-menu {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .post,
+  .message,
+  .friend-item {
+    transition: background 0.1s ease !important;
+  }
+}
+
+/* Optimize component scrolling */
+.chat-messages,
+.posts-feed {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}

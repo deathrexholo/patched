@@ -1,0 +1,61 @@
+/* Certificate Modal Styles */
+
+.certificate-modal {
+  /* Inherits base modal styles from AchievementModal.css */
+}
+
+/* Form Row for side-by-side inputs */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
+}
+
+/* Mobile Responsive Styles for Form Row */
+@media (max-width: 767px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .form-row .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-row .form-group:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Tablet Styles */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .form-row {
+    gap: 20px;
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 1024px) {
+  .form-row {
+    gap: 24px;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .certificate-modal {
+    /* Inherits high contrast styles from base modal */
+  }
+}
+
+/* Print Styles */
+@media print {
+  .certificate-modal {
+    display: none;
+  }
+}

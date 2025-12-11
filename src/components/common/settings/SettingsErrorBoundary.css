@@ -1,0 +1,207 @@
+.settings-error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 1rem;
+  background: var(--background-color, #ffffff);
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.settings-error-content {
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.settings-error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  background: var(--error-background, #fef2f2);
+  border-radius: 50%;
+  color: var(--error-color, #dc2626);
+}
+
+.settings-error-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+.settings-error-message {
+  margin: 0 0 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary, #6b7280);
+  line-height: 1.5;
+}
+
+.settings-error-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.settings-retry-button,
+.settings-report-button,
+.settings-home-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 6px;
+  background: var(--background-color, #ffffff);
+  color: var(--text-primary, #1f2937);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-retry-button:hover,
+.settings-report-button:hover,
+.settings-home-button:hover {
+  background: var(--hover-background, #f9fafb);
+  border-color: var(--hover-border, #d1d5db);
+}
+
+.settings-retry-button:focus,
+.settings-report-button:focus,
+.settings-home-button:focus {
+  outline: 2px solid var(--focus-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+.settings-retry-button {
+  background: var(--primary-color, #3b82f6);
+  color: white;
+  border-color: var(--primary-color, #3b82f6);
+}
+
+.settings-retry-button:hover {
+  background: var(--primary-hover, #2563eb);
+  border-color: var(--primary-hover, #2563eb);
+}
+
+.settings-error-id {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #9ca3af);
+  font-family: monospace;
+}
+
+.settings-error-details {
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.settings-error-details summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 0.5rem;
+}
+
+.settings-error-stack {
+  background: var(--code-background, #f3f4f6);
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-primary, #1f2937);
+}
+
+.settings-error-stack pre {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .settings-error-boundary {
+  background: var(--dark-background, #1f2937);
+  border-color: var(--dark-border, #374151);
+}
+
+[data-theme="dark"] .settings-error-icon {
+  background: var(--dark-error-background, #7f1d1d);
+  color: var(--dark-error-color, #fca5a5);
+}
+
+[data-theme="dark"] .settings-error-title {
+  color: var(--dark-text-primary, #f9fafb);
+}
+
+[data-theme="dark"] .settings-error-message {
+  color: var(--dark-text-secondary, #d1d5db);
+}
+
+[data-theme="dark"] .settings-retry-button,
+[data-theme="dark"] .settings-report-button,
+[data-theme="dark"] .settings-home-button {
+  background: var(--dark-background, #374151);
+  border-color: var(--dark-border, #4b5563);
+  color: var(--dark-text-primary, #f9fafb);
+}
+
+[data-theme="dark"] .settings-retry-button:hover,
+[data-theme="dark"] .settings-report-button:hover,
+[data-theme="dark"] .settings-home-button:hover {
+  background: var(--dark-hover-background, #4b5563);
+  border-color: var(--dark-hover-border, #6b7280);
+}
+
+[data-theme="dark"] .settings-error-stack {
+  background: var(--dark-code-background, #111827);
+  border-color: var(--dark-border, #374151);
+  color: var(--dark-text-primary, #f9fafb);
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .settings-error-boundary {
+    min-height: 150px;
+    padding: 0.75rem;
+  }
+
+  .settings-error-content {
+    max-width: 100%;
+  }
+
+  .settings-error-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.75rem;
+  }
+
+  .settings-error-title {
+    font-size: 1.125rem;
+  }
+
+  .settings-error-message {
+    font-size: 0.8rem;
+  }
+
+  .settings-error-actions {
+    gap: 0.5rem;
+  }
+
+  .settings-retry-button,
+  .settings-report-button,
+  .settings-home-button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}

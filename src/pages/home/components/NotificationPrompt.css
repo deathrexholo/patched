@@ -1,0 +1,118 @@
+/* NotificationPrompt Component Styles */
+
+.notification-prompt {
+  background: var(--bg-primary, white);
+  border: 1px solid var(--border-color, #eee);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-prompt-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.notification-prompt-icon {
+  font-size: 24px;
+}
+
+.notification-prompt-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+
+.notification-prompt-message {
+  margin: 0 0 16px 0;
+  color: var(--text-secondary, #666);
+  line-height: 1.5;
+}
+
+.notification-prompt-error {
+  background: var(--error-bg, #fee);
+  color: var(--error-color, #dc3545);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.notification-prompt-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.notification-prompt-enable-btn,
+.notification-prompt-dismiss-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notification-prompt-enable-btn {
+  background: var(--primary-color, #007bff);
+  color: white;
+}
+
+.notification-prompt-enable-btn:hover {
+  background: var(--primary-color-hover, #0056b3);
+}
+
+.notification-prompt-enable-btn:disabled {
+  background: var(--disabled-color, #ccc);
+  cursor: not-allowed;
+}
+
+.notification-prompt-dismiss-btn {
+  background: var(--bg-secondary, #f5f5f5);
+  color: var(--text-primary, #333);
+}
+
+.notification-prompt-dismiss-btn:hover {
+  background: var(--bg-hover, #e9ecef);
+}
+
+.notification-prompt-dismiss-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .notification-prompt {
+    margin: 12px;
+    padding: 16px;
+  }
+  
+  .notification-prompt-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .notification-prompt-enable-btn,
+  .notification-prompt-dismiss-btn {
+    width: 100%;
+  }
+}

@@ -1,0 +1,441 @@
+{
+  "users": {
+    "description": "User profiles and account data",
+    "schema": {
+      "displayName": "string",
+      "email": "string",
+      "photoURL": "string | null",
+      "bio": "string (optional)",
+      "location": "string (optional)",
+      "website": "string (optional)",
+      "username": "string (optional)",
+      "createdAt": "Timestamp",
+      "updatedAt": "Timestamp",
+      "postsCount": "number (default: 0)",
+      "storiesCount": "number (default: 0)",
+      "followersCount": "number (default: 0)",
+      "followingCount": "number (default: 0)",
+      "followers": "array<string> (user IDs)",
+      "following": "array<string> (user IDs)",
+      "isVerified": "boolean (default: false)",
+      "isActive": "boolean (default: true)",
+      "isOnline": "boolean (optional)",
+      "lastSeen": "Timestamp (optional)",
+      "role": "string - 'athlete' | 'parent' | 'organization' | 'coach' (optional)",
+      "sports": "array<string> (sport IDs) (optional)",
+      "eventTypes": "array<string> (5000m|10000m|marathon|etc) (optional)",
+      "position": "string (optional)",
+      "specializations": "array<string> (optional)",
+      "dateOfBirth": "string (optional)",
+      "gender": "string (optional)",
+      "height": "string (in cm) (optional)",
+      "weight": "string (in kg) (optional)",
+      "country": "string (optional)",
+      "state": "string (optional)",
+      "city": "string (optional)",
+      "phone": "string (optional)",
+      "mobile": "string (optional)",
+      "languagePreference": "string (ISO code: en|hi|pa|mr|bn|ta|te|kn|ml|gu|or|as) (optional)",
+      "languagePreferenceUpdatedAt": "Timestamp (optional)"
+    }
+  },
+  "posts": {
+    "description": "User-generated posts with engagement tracking",
+    "schema": {
+      "userId": "string",
+      "userDisplayName": "string",
+      "userPhotoURL": "string | null",
+      "userRole": "string (optional)",
+      "userSport": "string (optional)",
+      "userPosition": "string (optional)",
+      "caption": "string",
+      "mediaUrl": "string | null (optional)",
+      "mediaType": "string - 'image' | 'video' (optional)",
+      "mediaMetadata": {
+        "size": "number",
+        "type": "string (mime type)",
+        "name": "string (filename)",
+        "uploadedAt": "string (ISO timestamp)",
+        "thumbnail": "string (optional)"
+      },
+      "timestamp": "Timestamp",
+      "likes": "array<{userId: string, userName: string, userPhotoURL: string, timestamp: Timestamp}>",
+      "likesCount": "number",
+      "comments": "array<Comment> (denormalized, optional)",
+      "commentsCount": "number",
+      "shares": "array<string> (user IDs)",
+      "sharesCount": "number",
+      "visibility": "string - 'public' | 'friends' | 'private'",
+      "location": "string (optional)",
+      "tags": "array<string> (optional)",
+      "isActive": "boolean (default: true)",
+      "deletedAt": "string (optional)",
+      "isLiked": "boolean (computed, optional)",
+      "hasShared": "boolean (computed, optional)"
+    }
+  },
+  "stories": {
+    "description": "24-hour ephemeral story posts",
+    "schema": {
+      "userId": "string",
+      "userDisplayName": "string",
+      "userPhotoURL": "string",
+      "mediaType": "string - 'image' | 'video'",
+      "mediaUrl": "string",
+      "thumbnail": "string | null (optional)",
+      "caption": "string",
+      "timestamp": "Timestamp",
+      "expiresAt": "Timestamp (24 hours from creation)",
+      "viewCount": "number (default: 0)",
+      "viewers": "array<string> (user IDs)",
+      "isHighlight": "boolean",
+      "highlightId": "string | null",
+      "sharingEnabled": "boolean",
+      "publicLink": "string"
+    }
+  },
+  "moments": {
+    "description": "Short-form video content (9:16 vertical videos)",
+    "schema": {
+      "userId": "string",
+      "userDisplayName": "string",
+      "userPhotoURL": "string | null",
+      "videoUrl": "string",
+      "thumbnailUrl": "string",
+      "caption": "string",
+      "duration": "number (seconds)",
+      "metadata": {
+        "width": "number (pixels)",
+        "height": "number (pixels)",
+        "fileSize": "number (bytes)",
+        "format": "string (mp4|mov|etc)",
+        "bitrate": "number (optional)",
+        "frameRate": "number (optional)",
+        "aspectRatio": "string - '9:16' | '16:9' (etc)",
+        "uploadedAt": "string (ISO timestamp)",
+        "processingStatus": "string - 'pending' | 'processing' | 'completed' | 'failed' (optional)",
+        "qualityVersions": "array<{resolution: string, url: string, bitrate: number}> (optional)"
+      },
+      "engagement": {
+        "likes": "array<{userId: string, userName: string, userPhotoURL: string, timestamp: Timestamp}>",
+        "likesCount": "number",
+        "comments": "array<VideoComment> (optional)",
+        "commentsCount": "number",
+        "shares": "array<string> (user IDs)",
+        "sharesCount": "number",
+        "views": "number",
+        "watchTime": "number (total seconds watched)",
+        "completionRate": "number (0-100, percentage)"
+      },
+      "createdAt": "Timestamp",
+      "updatedAt": "Timestamp",
+      "isActive": "boolean (default: true)",
+      "moderationStatus": "string - 'pending' | 'approved' | 'rejected'",
+      "isTalentVideo": "boolean (optional)",
+      "isPostVideo": "boolean (optional)",
+      "isLiked": "boolean (computed, optional)",
+      "hasShared": "boolean (computed, optional)"
+    }
+  },
+  "comments": {
+    "description": "Unified comments collection for posts, stories, and moments",
+    "schema": {
+      "text": "string",
+      "userId": "string",
+      "userDisplayName": "string",
+      "userPhotoURL": "string | null",
+      "contentId": "string (ID of post/story/moment)",
+      "contentType": "string - 'post' | 'story' | 'moment'",
+      "timestamp": "string (ISO 8601 timestamp)",
+      "likes": "array<string> (user IDs who liked this comment)",
+      "likesCount": "number",
+      "replies": "array<unknown> (optional, for nested comments)",
+      "edited": "boolean (optional, default: false)",
+      "editedAt": "string (ISO timestamp, optional)"
+    },
+    "indexes": [
+      ["contentId", "contentType", "timestamp (asc)"]
+    ]
+  },
+  "shares": {
+    "description": "Post/content sharing tracking",
+    "schema": {
+      "contentId": "string",
+      "contentType": "string - 'post' | 'story' | 'moment'",
+      "userId": "string",
+      "sharedWith": "array<string> (user IDs)",
+      "sharedInGroups": "array<string> (group IDs) (optional)",
+      "timestamp": "Timestamp",
+      "message": "string (optional)"
+    }
+  },
+  "friendships": {
+    "description": "Bidirectional friend connections",
+    "schema": {
+      "requesterId": "string",
+      "requesterName": "string",
+      "requesterPhotoURL": "string",
+      "recipientId": "string",
+      "recipientName": "string",
+      "recipientPhotoURL": "string",
+      "status": "string - 'accepted' | 'pending' | 'rejected' | 'blocked'",
+      "createdAt": "Timestamp",
+      "updatedAt": "Timestamp (optional)"
+    }
+  },
+  "friendRequests": {
+    "description": "Pending friend requests (separate from accepted friendships)",
+    "schema": {
+      "requesterId": "string",
+      "requesterName": "string",
+      "requesterPhotoURL": "string",
+      "recipientId": "string",
+      "status": "string - 'pending' | 'accepted' | 'rejected'",
+      "createdAt": "Timestamp"
+    }
+  },
+  "organizationConnections": {
+    "description": "Athlete ↔ Organization/Coach peer-to-peer connections (no admin approval required)",
+    "schema": {
+      "connectionType": "string - 'org_to_athlete' | 'coach_to_org'",
+      "senderId": "string",
+      "senderName": "string",
+      "senderPhotoURL": "string",
+      "senderRole": "string - 'organization' | 'coach'",
+      "recipientId": "string",
+      "recipientName": "string",
+      "recipientPhotoURL": "string",
+      "recipientRole": "string - 'athlete' | 'organization'",
+      "status": "string - 'pending' | 'accepted' | 'rejected'",
+      "createdAt": "Timestamp",
+      "acceptedAt": "Timestamp (optional)",
+      "rejectedAt": "Timestamp (optional)",
+      "friendshipId": "string (created when accepted) (optional)",
+      "createdViaConnection": "boolean (tracking flag)"
+    }
+  },
+  "connectionActivity": {
+    "description": "Audit trail for all organization connection operations",
+    "schema": {
+      "connectionId": "string",
+      "action": "string - 'request_sent' | 'request_accepted' | 'request_rejected' | 'request_cancelled' | 'message_sent' | 'call_initiated'",
+      "actorId": "string",
+      "targetId": "string",
+      "timestamp": "Timestamp",
+      "metadata": "object (optional)"
+    }
+  },
+  "follows": {
+    "description": "User follow relationships",
+    "schema": {
+      "followerId": "string",
+      "followerName": "string",
+      "followerPhotoURL": "string",
+      "followingId": "string",
+      "followingName": "string",
+      "followingPhotoURL": "string",
+      "createdAt": "Timestamp"
+    }
+  },
+  "verificationRequests": {
+    "description": "User verification requests (community-verified badge system)",
+    "schema": {
+      "userId": "string",
+      "userDisplayName": "string",
+      "userPhotoURL": "string",
+      "userRole": "string",
+      "userInfo": {
+        "name": "string",
+        "age": "number | null",
+        "bio": "string",
+        "location": "string",
+        "sport": "string",
+        "achievements": "array<string>",
+        "certificates": "array<string>"
+      },
+      "showcaseVideos": "array<{title: string, url: string, timestamp: Timestamp}>",
+      "verificationCount": "number (votes received)",
+      "verificationGoal": "number (votes required)",
+      "verifiedBy": "array<unknown>",
+      "status": "string - 'pending' | 'verified' | 'rejected' | 'expired'",
+      "createdAt": "Timestamp",
+      "expiresAt": "Date (30 days from creation)",
+      "isPublic": "boolean",
+      "shareableLink": "string",
+      "verificationIPs": "array<string> (fraud prevention)",
+      "flagged": "boolean",
+      "flagReason": "string | null"
+    }
+  },
+  "verifications": {
+    "description": "Individual verification votes (immutable voting records)",
+    "schema": {
+      "verificationRequestId": "string",
+      "voterId": "string",
+      "voterName": "string",
+      "voterPhotoURL": "string",
+      "verificationId": "string",
+      "vote": "boolean (true=verified, false=not verified)",
+      "comment": "string (optional)",
+      "timestamp": "Timestamp",
+      "ipAddress": "string (fraud prevention)"
+    }
+  },
+  "messages": {
+    "description": "Direct messages between users",
+    "schema": {
+      "senderId": "string",
+      "senderName": "string",
+      "senderPhotoURL": "string | null",
+      "receiverId": "string",
+      "receiverName": "string",
+      "message": "string",
+      "timestamp": "Timestamp",
+      "isRead": "boolean (optional, default: false)",
+      "attachments": "array<{url: string, type: string}> (optional)"
+    }
+  },
+  "conversations": {
+    "description": "Message conversation threads",
+    "schema": {
+      "participantIds": "array<string>",
+      "participantNames": "array<string>",
+      "lastMessage": "string",
+      "lastMessageTime": "Timestamp",
+      "lastMessageSenderId": "string",
+      "createdAt": "Timestamp",
+      "updatedAt": "Timestamp",
+      "isGroupChat": "boolean (default: false)",
+      "groupName": "string (optional)",
+      "groupIcon": "string (optional)"
+    }
+  },
+  "notifications": {
+    "description": "User notifications (likes, comments, follows, messages, etc)",
+    "schema": {
+      "type": "string - 'like' | 'comment' | 'follow' | 'friendRequest' | 'share' | 'message' | 'connection_request'",
+      "senderId": "string",
+      "senderName": "string",
+      "receiverId": "string",
+      "message": "string",
+      "contentId": "string (optional, e.g., post/moment ID)",
+      "contentType": "string (optional, e.g., 'post' | 'moment')",
+      "timestamp": "Timestamp",
+      "isRead": "boolean (optional, default: false)",
+      "actionUrl": "string (optional)"
+    }
+  },
+  "groups": {
+    "description": "Community discussion groups",
+    "schema": {
+      "name": "string",
+      "description": "string",
+      "icon": "string (optional)",
+      "creatorId": "string",
+      "createdAt": "Timestamp",
+      "members": "array<string> (user IDs)",
+      "admins": "array<string> (user IDs)",
+      "privacy": "string - 'public' | 'private' | 'closed'",
+      "postingPermissions": "string - 'members' | 'admins' | 'public'",
+      "memberCount": "number",
+      "isActive": "boolean"
+    }
+  },
+  "reports": {
+    "description": "User-reported content (for moderation)",
+    "schema": {
+      "contentId": "string",
+      "contentType": "string - 'post' | 'story' | 'moment' | 'comment' | 'user'",
+      "reporterId": "string",
+      "reporterName": "string",
+      "reasons": "array<string> - 'inappropriate' | 'spam' | 'harassment' | 'copyright' | 'other'",
+      "description": "string (optional)",
+      "timestamp": "Timestamp",
+      "status": "string - 'pending' | 'reviewed' | 'resolved' | 'dismissed'",
+      "adminNotes": "string (optional)",
+      "actionTaken": "string - 'removed' | 'warning' | 'ban' (optional)",
+      "resolvedAt": "Timestamp (optional)",
+      "resolvedBy": "string (admin ID) (optional)"
+    }
+  },
+  "adminLogs": {
+    "description": "Admin action audit trail",
+    "schema": {
+      "adminId": "string",
+      "adminName": "string",
+      "action": "string - 'create' | 'read' | 'update' | 'delete' | 'approve' | 'reject' | 'ban'",
+      "collection": "string (posts|users|comments|events|etc)",
+      "documentId": "string",
+      "changes": "object (optional, what was changed)",
+      "timestamp": "Timestamp",
+      "ipAddress": "string (optional)",
+      "userAgent": "string (optional)"
+    }
+  },
+  "admins": {
+    "description": "Admin user management",
+    "schema": {
+      "userId": "string",
+      "displayName": "string",
+      "email": "string",
+      "photoURL": "string | null",
+      "role": "string - 'super_admin' | 'admin' | 'moderator' | 'content_moderator'",
+      "permissions": "array<string>",
+      "active": "boolean (default: true)",
+      "createdAt": "Timestamp",
+      "lastLoginAt": "Timestamp (optional)"
+    }
+  },
+  "videos": {
+    "description": "General user-uploaded videos",
+    "schema": {
+      "userId": "string",
+      "userName": "string",
+      "userPhotoURL": "string | null",
+      "title": "string",
+      "description": "string (optional)",
+      "videoUrl": "string",
+      "thumbnail": "string",
+      "uploadDate": "Timestamp",
+      "duration": "number (seconds)",
+      "sport": "string (optional)",
+      "likes": "number (default: 0)",
+      "views": "number (default: 0)",
+      "shares": "number (default: 0)",
+      "comments": "array<string> (optional)",
+      "isPublic": "boolean",
+      "verificationStatus": "string - 'pending' | 'verified' | 'rejected'",
+      "tags": "array<string> (optional)"
+    }
+  },
+  "talentVideos": {
+    "description": "Approved talent showcase videos",
+    "schema": {
+      "userId": "string",
+      "userName": "string",
+      "userPhotoURL": "string | null",
+      "title": "string",
+      "videoUrl": "string",
+      "thumbnail": "string",
+      "uploadDate": "Timestamp",
+      "sport": "string",
+      "likes": "number (default: 0)",
+      "views": "number (default: 0)",
+      "isApproved": "boolean",
+      "approvedBy": "string (admin ID) (optional)",
+      "approvedAt": "Timestamp (optional)",
+      "isHighlight": "boolean (default: false)"
+    }
+  },
+  "momentInteractions": {
+    "description": "Detailed tracking of user interactions with moments",
+    "schema": {
+      "momentId": "string",
+      "userId": "string",
+      "interactionType": "string - 'view' | 'like' | 'share' | 'comment' | 'download'",
+      "timestamp": "Timestamp",
+      "duration": "number (seconds, for views only) (optional)",
+      "metadata": "object (optional)"
+    }
+  }
+}

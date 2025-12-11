@@ -1,0 +1,153 @@
+/* Profile Avatar Component Styling */
+
+.profile-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  display: block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Hover state with scale and enhanced shadow */
+.profile-avatar:hover {
+  transform: scale(1.15) translateZ(0);
+  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.25),
+              0 0 0 4px rgba(33, 150, 243, 0.1);
+}
+
+/* Active/click state */
+.profile-avatar:active {
+  transform: scale(0.95);
+}
+
+/* Focus state for accessibility */
+.profile-avatar:focus-visible {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Light theme specific */
+[data-theme="light"] .profile-avatar {
+  border-color: #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .profile-avatar:hover {
+  border-color: #2196f3;
+  box-shadow: 0 4px 16px rgba(33, 150, 243, 0.25),
+              0 0 0 4px rgba(33, 150, 243, 0.1);
+}
+
+/* Dark theme specific */
+[data-theme="dark"] .profile-avatar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .profile-avatar:hover {
+  border-color: #4a9eff;
+  box-shadow: 0 4px 16px rgba(74, 158, 255, 0.3),
+              0 0 0 4px rgba(74, 158, 255, 0.1);
+}
+
+[data-theme="dark"] .profile-avatar:focus-visible {
+  outline-color: #4a9eff;
+}
+
+/* Placeholder loading state */
+.profile-avatar.loading {
+  opacity: 0.7;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Specific sizes */
+.profile-avatar[width="32"],
+.profile-avatar[height="32"] {
+  width: 32px;
+  height: 32px;
+}
+
+.profile-avatar[width="40"],
+.profile-avatar[height="40"] {
+  width: 40px;
+  height: 40px;
+}
+
+.profile-avatar[width="48"],
+.profile-avatar[height="48"] {
+  width: 48px;
+  height: 48px;
+}
+
+.profile-avatar[width="56"],
+.profile-avatar[height="56"] {
+  width: 56px;
+  height: 56px;
+}
+
+.profile-avatar[width="64"],
+.profile-avatar[height="64"] {
+  width: 64px;
+  height: 64px;
+}
+
+/* Avatar with status indicator */
+.profile-avatar-with-status {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-avatar-with-status .status-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: #4caf50;
+  animation: statusPulse 2s infinite;
+}
+
+.profile-avatar-with-status .status-indicator.offline {
+  background: #9e9e9e;
+  animation: none;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
+  }
+}
+
+/* Error state */
+.profile-avatar.error {
+  opacity: 0.6;
+  border: 2px dashed var(--border-color, #ddd);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .profile-avatar {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-avatar:hover {
+    transform: scale(1.12);
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+  }
+}

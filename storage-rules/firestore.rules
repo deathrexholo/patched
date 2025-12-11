@@ -1,0 +1,1216 @@
+// Cloud Firestore Security Rules for AmaPlayer
+// COMPREHENSIVE RULES - All Collections Covered
+// Last Updated: 2024-12-06
+// Covers: default database + events database
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================================================
+    // HELPER FUNCTIONS - Shared across all rules
+    // ============================================================================
+
+    // Check if user is authenticated with anonymous sign-in (guest)
+    function isGuestUser() {
+      return request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
+
+    // Check if user has admin role in admins collection
+    function isAdminUser() {
+      let adminDoc = get(/databases/$(database)/documents/admins/$(request.auth.uid));
+      return request.auth != null &&
+        adminDoc.data.active == true &&
+        adminDoc.data.role in ['super_admin', 'admin', 'moderator', 'content_moderator'];
+    }
+
+    // Validate string field length
+    function isValidStringLength(field, maxLength) {
+      return field is string && field.size() <= maxLength;
+    }
+
+    // ============================================================================
+    // USERS COLLECTION (LEGACY - Preserved for backward compatibility)
+    // ============================================================================
+    // NOTE: After December 2024 migration, all new profiles are created in
+    // role-specific collections (parents/, coaches/, organizations/, athletes/).
+    // This collection is kept for:
+    // 1. Backward compatibility with existing data
+    // 2. Fallback during migration period
+    // 3. Reading legacy user profiles
+    // Consider making this read-only after migration is complete and verified.
+    match /users/{userId} {
+      // Anyone authenticated can read user profiles (for search, display)
+      allow read: if request.auth != null;
+
+      // Users can create their own profile, admins can create any
+      // NOTE: New signups should go to role-specific collections instead
+      allow create: if request.auth != null && (
+        (!isGuestUser() && request.auth.uid == userId) ||
+        isAdminUser()
+      );
+
+      // Users can update their own profile, admins can update any
+      // Allow follower count updates from follow system
+      // NOTE: Profile updates now go to role-specific collections
+      allow update: if request.auth != null && (
+        (!isGuestUser() && request.auth.uid == userId) ||
+        isAdminUser() ||
+        onlyFollowCountsChanged()
+      );
+
+      // Only admins can delete users
+      allow delete: if request.auth != null && isAdminUser();
+    }
+
+    function onlyFollowCountsChanged() {
+      let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return affectedKeys.hasOnly(['followers']) ||
+             affectedKeys.hasOnly(['following']) ||
+             affectedKeys.hasOnly(['followersCount']) ||
+             affectedKeys.hasOnly(['followingCount']) ||
+             affectedKeys.hasOnly(['fcmTokens']) ||
+             affectedKeys.hasOnly(['fcmTokens', 'lastTokenUpdate']) ||
+             affectedKeys.hasOnly(['postsCount']) ||
+             affectedKeys.hasOnly(['storiesCount']);
+    }
+
+    // ============================================================================
+    // PARENTS COLLECTION (Role-specific collection for parent users)
+    // ============================================================================
+    match /parents/{parentId} {
+      // Anyone authenticated can read parent profiles (for search, display)
+      allow read: if request.auth != null;
+
+      // Parents can create their own profile
+      allow create: if request.auth != null &&
+        !isGuestUser() &&
+        request.auth.uid == parentId &&
+        request.resource.data.role == 'parent' &&
+        request.resource.data.uid == parentId;
+
+      // Parents can update their own profile, admins can update any
+      // Prevent role changes by non-admins
+      allow update: if request.auth != null && (
+        (
+          !isGuestUser() &&
+          request.auth.uid == parentId &&
+          (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'parent')
+        ) ||
+        isAdminUser()
+      );
+
+      // Only admins can delete parent profiles
+      allow delete: if false;
+    }
+
+    // ============================================================================
+    // COACHES COLLECTION (Role-specific collection for coach users)
+    // ============================================================================
+    match /coaches/{coachId} {
+      // Anyone authenticated can read coach profiles (for search, display)
+      allow read: if request.auth != null;
+
+      // Coaches can create their own profile
+      allow create: if request.auth != null &&
+        !isGuestUser() &&
+        request.auth.uid == coachId &&
+        request.resource.data.role == 'coach' &&
+        request.resource.data.uid == coachId;
+
+      // Coaches can update their own profile, admins can update any
+      // Prevent role changes by non-admins
+      allow update: if request.auth != null && (
+        (
+          !isGuestUser() &&
+          request.auth.uid == coachId &&
+          (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'coach')
+        ) ||
+        isAdminUser()
+      );
+
+      // Only admins can delete coach profiles
+      allow delete: if false;
+    }
+
+    // ============================================================================
+    // ORGANIZATIONS COLLECTION (Role-specific collection for organization users)
+    // ============================================================================
+    match /organizations/{orgId} {
+      // Anyone authenticated can read organization profiles (for search, display)
+      allow read: if request.auth != null;
+
+      // Organizations can create their own profile
+      allow create: if request.auth != null &&
+        !isGuestUser() &&
+        request.auth.uid == orgId &&
+        request.resource.data.role == 'organization' &&
+        request.resource.data.uid == orgId;
+
+      // Organizations can update their own profile, admins can update any
+      // Prevent role changes by non-admins
+      allow update: if request.auth != null && (
+        (
+          !isGuestUser() &&
+          request.auth.uid == orgId &&
+          (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'organization')
+        ) ||
+        isAdminUser()
+      );
+
+      // Only admins can delete organization profiles
+      allow delete: if false;
+    }
+
+    // ============================================================================
+    // ATHLETES COLLECTION (Role-specific collection for athlete users)
+    // ============================================================================
+    match /athletes/{athleteId} {
+      // Anyone authenticated can read athlete profiles (for search, display)
+      allow read: if request.auth != null;
+
+      // Athletes can create their own profile
+      allow create: if request.auth != null &&
+        !isGuestUser() &&
+        request.auth.uid == athleteId &&
+        request.resource.data.role == 'athlete' &&
+        request.resource.data.uid == athleteId;
+
+      // Athletes can update their own profile, admins can update any
+      // Prevent role changes by non-admins
+      allow update: if request.auth != null && (
+        (
+          !isGuestUser() &&
+          request.auth.uid == athleteId &&
+          (!request.resource.data.keys().hasAny(['role']) || request.resource.data.role == 'athlete')
+        ) ||
+        isAdminUser()
+      );
+
+      // Only admins can delete athlete profiles
+      allow delete: if false;
+    }
+
+    // ============================================================================
+    // POSTS COLLECTION
+    // ============================================================================
+    match /posts/{postId} {
+      // Anyone can read posts (including guests for public feed)
+      allow read: if true;
+
+      // Only authenticated non-guest users can create posts
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.userId
+        && validatePostData();
+
+      // Allow updates for:
+      // - Owner editing their post
+      // - Anyone adding likes
+      // - Authenticated users adding comments
+      // - Authenticated users sharing
+      allow update: if request.auth != null && (
+        (!isGuestUser() && request.auth.uid == resource.data.userId) ||
+        onlyLikesChanged() ||
+        (!isGuestUser() && onlyCommentsChanged()) ||
+        (!isGuestUser() && onlySharesChanged())
+      );
+
+      // Users can soft-delete their own posts (set isActive=false)
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    function validatePostData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['caption', 'userId', 'userDisplayName', 'timestamp', 'visibility', 'isActive'])
+        && isValidStringLength(data.caption, 1000)
+        && data.userId is string
+        && data.userDisplayName is string
+        && data.visibility in ['public', 'friends', 'private']
+        && data.isActive is bool
+        && (!data.keys().hasAny(['mediaType']) || data.mediaType in ['image', 'video', 'text'])
+        && (!data.keys().hasAny(['mediaUrl']) || data.mediaUrl is string || data.mediaUrl == null)
+        && data.userId == request.auth.uid;
+    }
+
+    function onlyLikesChanged() {
+      let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return affectedKeys.hasOnly(['likes', 'likesCount', 'updatedAt']) ||
+             affectedKeys.hasOnly(['likes', 'likesCount']) ||
+             affectedKeys.hasOnly(['likes', 'updatedAt']) ||
+             affectedKeys.hasOnly(['likes']) ||
+             affectedKeys.hasOnly(['likesCount']);
+    }
+
+    function onlyCommentsChanged() {
+      let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return affectedKeys.hasOnly(['comments', 'commentsCount', 'updatedAt']) ||
+             affectedKeys.hasOnly(['comments', 'commentsCount']) ||
+             affectedKeys.hasOnly(['comments', 'updatedAt']) ||
+             affectedKeys.hasOnly(['comments']) ||
+             affectedKeys.hasOnly(['commentsCount']);
+    }
+
+    function onlySharesChanged() {
+      let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return affectedKeys.hasOnly(['shares', 'sharesCount', 'updatedAt']) ||
+             affectedKeys.hasOnly(['shares', 'sharesCount']) ||
+             affectedKeys.hasOnly(['shares']) ||
+             affectedKeys.hasOnly(['sharesCount']) ||
+             affectedKeys.hasOnly(['shareMetadata']);
+    }
+
+    // ============================================================================
+    // COMMENTS COLLECTION (Unified for posts, stories, moments)
+    // ============================================================================
+    match /comments/{commentId} {
+      // Anyone can read comments
+      allow read: if true;
+
+      // Authenticated non-guest users can create comments
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && validateCommentData();
+
+      // Users can update/delete their own comments
+      allow update, delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    function validateCommentData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['text', 'userId', 'userDisplayName', 'timestamp', 'contentId', 'contentType'])
+        && isValidStringLength(data.text, 500)
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && data.userDisplayName is string
+        && data.contentId is string
+        && data.contentType in ['post', 'story', 'moment']
+        && (!data.keys().hasAny(['likes']) || data.likes is list)
+        && (!data.keys().hasAny(['likesCount']) || data.likesCount is number);
+    }
+
+    // ============================================================================
+    // STORIES COLLECTION
+    // ============================================================================
+    match /stories/{storyId} {
+      // Anyone can read stories
+      allow read: if true;
+
+      // Only authenticated non-guest users can create stories
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.userId
+        && validateStoryData();
+
+      // Users can update their own stories (for view counts, etc.)
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        onlyStoryViewDataChanged()
+      );
+
+      // Users can delete their own stories
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    function validateStoryData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['userId', 'userDisplayName', 'mediaType', 'mediaUrl', 'caption', 'timestamp', 'expiresAt'])
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && data.userDisplayName is string
+        && data.mediaType in ['image', 'video']
+        && data.mediaUrl is string
+        && isValidStringLength(data.caption, 200)
+        && data.expiresAt != null;
+    }
+
+    function onlyStoryViewDataChanged() {
+      let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return affectedKeys.hasOnly(['viewCount', 'viewers', 'likes', 'likesCount']) ||
+             affectedKeys.hasOnly(['viewCount', 'viewers']) ||
+             affectedKeys.hasOnly(['viewCount']) ||
+             affectedKeys.hasOnly(['viewers']);
+    }
+
+    // ============================================================================
+    // HIGHLIGHTS COLLECTION (Story archives)
+    // ============================================================================
+    match /highlights/{highlightId} {
+      // Anyone can read highlights
+      allow read: if true;
+
+      // Only authenticated non-guest users can create highlights
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.userId
+        && validateHighlightData();
+
+      // Users can update their own highlights
+      allow update: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+
+      // Users can delete their own highlights
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    function validateHighlightData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['userId', 'title', 'storyIds'])
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && isValidStringLength(data.title, 30)
+        && data.storyIds is list;
+    }
+
+    // ============================================================================
+    // STORY VIEWS COLLECTION (Analytics)
+    // ============================================================================
+    match /storyViews/{viewId} {
+      // Anyone can read story views
+      allow read: if true;
+
+      // Anyone can create story views (for tracking)
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.viewerId;
+
+      // Only view creator can update
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.viewerId;
+
+      // No deletes
+      allow delete: if false;
+    }
+
+    // ============================================================================
+    // STORY COMMENTS COLLECTION
+    // ============================================================================
+    match /storyComments/{commentId} {
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && validateStoryCommentData();
+
+      allow update, delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    function validateStoryCommentData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['storyId', 'userId', 'userDisplayName', 'text', 'timestamp'])
+        && data.storyId is string
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && data.userDisplayName is string
+        && isValidStringLength(data.text, 500);
+    }
+
+    // ============================================================================
+    // MOMENTS COLLECTION (Short-form videos)
+    // ============================================================================
+    match /moments/{momentId} {
+      // Anyone can read active moments
+      // Owners can read their own moments regardless of status
+      allow read: if resource.data.isActive == true ||
+                     (request.auth != null && request.auth.uid == resource.data.userId);
+
+      // Only authenticated non-guest users can create moments
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.userId
+        && validateMomentData();
+
+      // Users can update their own moments or engagement data can be updated
+      allow update: if request.auth != null && (
+        (!isGuestUser() && request.auth.uid == resource.data.userId) ||
+        onlyMomentEngagementChanged()
+      );
+
+      // Users can delete their own moments
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    function validateMomentData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['userId', 'userDisplayName', 'videoUrl', 'caption', 'duration', 'createdAt', 'isActive', 'moderationStatus'])
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && data.userDisplayName is string
+        && data.videoUrl is string
+        && isValidStringLength(data.caption, 500)
+        && data.duration is number
+        && data.duration > 0
+        && data.duration <= 180 // Max 3 minutes
+        && data.isActive is bool
+        && data.moderationStatus in ['pending', 'approved', 'rejected'];
+    }
+
+    function onlyMomentEngagementChanged() {
+      let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return affectedKeys.hasOnly(['engagement', 'updatedAt']) ||
+             affectedKeys.hasOnly(['engagement']) ||
+             affectedKeys.hasOnly(['updatedAt']);
+    }
+
+    // ============================================================================
+    // INTERACTIONS COLLECTION (Moment analytics - append-only)
+    // ============================================================================
+    match /interactions/{interactionId} {
+      // Anyone can read interactions
+      allow read: if true;
+
+      // Anyone can create interactions (for tracking views, likes, etc.)
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && validateInteractionData();
+
+      // No updates or deletes (append-only)
+      allow update, delete: if false;
+    }
+
+    function validateInteractionData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['momentId', 'userId', 'type', 'timestamp'])
+        && data.momentId is string
+        && data.userId is string
+        && data.type in ['view', 'like', 'comment', 'share']
+        && data.timestamp != null;
+    }
+
+    // ============================================================================
+    // MOMENT INTERACTIONS COLLECTION (Detailed analytics)
+    // ============================================================================
+    match /momentInteractions/{interactionId} {
+      // Anyone can read
+      allow read: if true;
+
+      // Anyone can create
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+
+      // No updates or deletes (append-only)
+      allow update, delete: if false;
+    }
+
+    // ============================================================================
+    // VIDEOS COLLECTION (General videos)
+    // ============================================================================
+    match /videos/{videoId} {
+      // Anyone can read videos
+      allow read: if true;
+
+      // Only authenticated non-guest users can create videos
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.userId
+        && validateVideoData();
+
+      // Users can update their own videos or engagement can be updated
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        onlyVideoEngagementChanged()
+      );
+
+      // Users can delete their own videos
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    function validateVideoData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['userId', 'userDisplayName', 'title', 'videoUrl', 'timestamp'])
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && data.userDisplayName is string
+        && isValidStringLength(data.title, 100)
+        && data.videoUrl is string;
+    }
+
+    function onlyVideoEngagementChanged() {
+      let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return affectedKeys.hasOnly(['views', 'likes', 'likesCount']) ||
+             affectedKeys.hasOnly(['views']) ||
+             affectedKeys.hasOnly(['likes']);
+    }
+
+    // ============================================================================
+    // TALENT VIDEOS COLLECTION (Profile showcase videos)
+    // ============================================================================
+    match /talentVideos/{videoId} {
+      // Anyone can read talent videos
+      allow read: if true;
+
+      // Only authenticated non-guest users can create talent videos
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.userId
+        && validateTalentVideoData();
+
+      // Users can update their own videos, admins can update any (for verification)
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        onlyVideoEngagementChanged() ||
+        isAdminUser()
+      );
+
+      // Users can delete their own talent videos
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    function validateTalentVideoData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['userId', 'title', 'videoUrl', 'uploadDate', 'sport'])
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && isValidStringLength(data.title, 200)
+        && data.videoUrl is string
+        && data.uploadDate != null
+        && data.sport is string;
+    }
+
+    // ============================================================================
+    // FRIENDSHIPS COLLECTION (Accepted friend connections)
+    // ============================================================================
+    match /friendships/{friendshipId} {
+      // Users can read their own friendships
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.user1 ||
+        request.auth.uid == resource.data.user2
+      );
+
+      // System can create friendships (from accepted friend requests)
+      allow create: if request.auth != null && !isGuestUser() && (
+        request.auth.uid == request.resource.data.user1 ||
+        request.auth.uid == request.resource.data.user2
+      );
+
+      // No updates allowed (immutable once created)
+      allow update: if false;
+
+      // Users can delete their own friendships (unfriend)
+      allow delete: if request.auth != null && !isGuestUser() && (
+        request.auth.uid == resource.data.user1 ||
+        request.auth.uid == resource.data.user2
+      );
+    }
+
+    // ============================================================================
+    // FRIEND REQUESTS COLLECTION (Pending requests)
+    // ============================================================================
+    match /friendRequests/{requestId} {
+      // Users can read requests they're involved in
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.requesterId ||
+        request.auth.uid == resource.data.recipientId
+      );
+
+      // Users can create friend requests
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && validateFriendRequestData();
+
+      // Recipient can update (accept/reject), requester can cancel
+      allow update: if request.auth != null && !isGuestUser() && (
+        request.auth.uid == resource.data.recipientId ||
+        request.auth.uid == resource.data.requesterId
+      );
+
+      // Users can delete their own requests
+      allow delete: if request.auth != null && !isGuestUser() && (
+        request.auth.uid == resource.data.requesterId ||
+        request.auth.uid == resource.data.recipientId
+      );
+    }
+
+    function validateFriendRequestData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['requesterId', 'recipientId', 'status', 'createdAt'])
+        && data.requesterId is string
+        && data.requesterId == request.auth.uid
+        && data.recipientId is string
+        && data.status in ['pending', 'accepted', 'rejected'];
+    }
+
+    // ============================================================================
+    // FRIEND CONNECTIONS COLLECTION (Alternative friendship storage)
+    // ============================================================================
+    match /friendConnections/{connectionId} {
+      // Users can read their own connections
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.user1 ||
+        request.auth.uid == resource.data.user2
+      );
+
+      // Users can create connections
+      allow create: if request.auth != null && !isGuestUser() && (
+        request.auth.uid == request.resource.data.user1 ||
+        request.auth.uid == request.resource.data.user2
+      );
+
+      // No updates (immutable)
+      allow update: if false;
+
+      // Users can delete their connections
+      allow delete: if request.auth != null && !isGuestUser() && (
+        request.auth.uid == resource.data.user1 ||
+        request.auth.uid == resource.data.user2
+      );
+    }
+
+    // ============================================================================
+    // FOLLOWS COLLECTION (Unidirectional follow relationships)
+    // ============================================================================
+    match /follows/{followId} {
+      // Anyone authenticated can read follows
+      allow read: if request.auth != null;
+
+      // Users can create follows for themselves
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.followerId
+        && validateFollowData();
+
+      // No updates (create or delete only)
+      allow update: if false;
+
+      // Users can delete their own follows (unfollow)
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.followerId;
+    }
+
+    function validateFollowData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['followerId', 'followingId', 'timestamp'])
+        && data.followerId is string
+        && data.followerId == request.auth.uid
+        && data.followingId is string
+        && data.followerId != data.followingId; // Can't follow yourself
+    }
+
+    // ============================================================================
+    // ORGANIZATION CONNECTIONS COLLECTION (Peer-to-peer org/athlete connections)
+    // ============================================================================
+    match /organizationConnections/{connectionId} {
+      // Admins can read all, users can read their own connections
+      allow read: if request.auth != null && (
+        isAdminUser() ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.recipientId
+      );
+
+      // Senders can create connections
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.senderId
+        && validateOrgConnectionData();
+
+      // Recipients can accept/reject, senders can cancel
+      allow update: if request.auth != null && !isGuestUser() && (
+        (request.auth.uid == resource.data.recipientId &&
+         request.resource.data.status in ['accepted', 'rejected'] &&
+         resource.data.status == 'pending') ||
+        (request.auth.uid == resource.data.senderId &&
+         request.resource.data.status == 'rejected' &&
+         resource.data.status == 'pending')
+      );
+
+      // Users can delete their own connections
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && (request.auth.uid == resource.data.senderId ||
+            request.auth.uid == resource.data.recipientId);
+    }
+
+    function validateOrgConnectionData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['senderId', 'senderName', 'senderRole', 'recipientId', 'recipientName', 'recipientRole', 'connectionType', 'status', 'createdAt', 'createdViaConnection'])
+        && data.senderId is string
+        && data.senderId == request.auth.uid
+        && data.senderName is string
+        && data.senderRole in ['organization', 'coach']
+        && data.recipientId is string
+        && data.recipientName is string
+        && data.recipientRole in ['athlete', 'organization']
+        && data.connectionType in ['org_to_athlete', 'coach_to_org']
+        && data.status == 'pending'
+        && data.createdViaConnection == true;
+    }
+
+    // ============================================================================
+    // CONNECTION ACTIVITY COLLECTION (Audit trail - append-only)
+    // ============================================================================
+    match /connectionActivity/{activityId} {
+      // Sender, recipient, and admins can read activity logs
+      allow read: if request.auth != null && (
+        isAdminUser() ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.recipientId
+      );
+
+      // System can create activity logs
+      allow create: if request.auth != null && validateConnectionActivityData();
+
+      // Activity logs are immutable (append-only)
+      allow update, delete: if false;
+    }
+
+    function validateConnectionActivityData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['connectionId', 'connectionType', 'action', 'actionDate', 'performedByUserId', 'performedByName', 'senderId', 'senderName', 'recipientId', 'recipientName'])
+        && data.connectionId is string
+        && data.connectionType in ['org_to_athlete', 'coach_to_org']
+        && data.action in ['request_sent', 'request_accepted', 'request_rejected', 'request_cancelled', 'message_sent', 'call_initiated']
+        && data.actionDate != null
+        && data.performedByUserId is string
+        && data.performedByName is string
+        && data.senderId is string
+        && data.senderName is string
+        && data.recipientId is string
+        && data.recipientName is string;
+    }
+
+    // ============================================================================
+    // CONNECTION INTERACTIONS COLLECTION (Org-athlete interaction tracking)
+    // ============================================================================
+    match /connectionInteractions/{interactionId} {
+      // Only admins can read and write
+      allow read, write: if request.auth != null && isAdminUser();
+    }
+
+    // ============================================================================
+    // MESSAGES COLLECTION (Direct messaging)
+    // ============================================================================
+    match /messages/{messageId} {
+      // Sender and receiver can read
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.receiverId
+      );
+
+      // Users can create messages
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && validateMessageData();
+
+      // Sender and receiver can update (mark as read, etc.)
+      allow update: if request.auth != null && !isGuestUser() && (
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.receiverId
+      );
+
+      // Only sender can delete
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.senderId;
+    }
+
+    function validateMessageData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['senderId', 'receiverId', 'message', 'timestamp'])
+        && data.senderId is string
+        && data.senderId == request.auth.uid
+        && data.receiverId is string
+        && isValidStringLength(data.message, 1000);
+    }
+
+    // ============================================================================
+    // CONVERSATIONS COLLECTION (Message threads)
+    // ============================================================================
+    match /conversations/{conversationId} {
+      // Participants can read
+      allow read: if request.auth != null &&
+        resource.data.participantIds.hasAny([request.auth.uid]);
+
+      // Users can create conversations
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && validateConversationData();
+
+      // Participants can update (last message, etc.)
+      allow update: if request.auth != null
+        && !isGuestUser()
+        && resource.data.participantIds.hasAny([request.auth.uid]);
+
+      // Participants can delete conversations
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && resource.data.participantIds.hasAny([request.auth.uid]);
+    }
+
+    function validateConversationData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['participantIds', 'createdAt'])
+        && data.participantIds is list
+        && data.participantIds.size() >= 2
+        && data.participantIds.hasAny([request.auth.uid]);
+    }
+
+    // ============================================================================
+    // NOTIFICATIONS COLLECTION
+    // ============================================================================
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.receiverId ||
+        request.auth.uid == resource.data.senderId
+      );
+
+      // System and users can create notifications
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && validateNotificationData();
+
+      // Receivers can update (mark as read)
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.receiverId;
+
+      // Receivers and senders can delete
+      allow delete: if request.auth != null && (
+        request.auth.uid == resource.data.receiverId ||
+        request.auth.uid == resource.data.senderId
+      );
+    }
+
+    function validateNotificationData() {
+      let data = request.resource.data;
+
+      return data.keys().hasAll(['type', 'senderId', 'senderName', 'receiverId', 'message', 'timestamp', 'read'])
+        // Required fields with strict type checking
+        && data.type is string
+        && data.senderId is string
+        && data.senderName is string
+        && data.receiverId is string
+        && data.message is string
+        && data.read is bool
+        // Optional fields with type validation
+        && (!data.keys().hasAny(['postId']) || data.postId is string || data.postId == null)
+        && (!data.keys().hasAny(['storyId']) || data.storyId is string || data.storyId == null)
+        && (!data.keys().hasAny(['momentId']) || data.momentId is string || data.momentId == null)
+        && (!data.keys().hasAny(['url']) || data.url is string || data.url == null)
+        && (!data.keys().hasAny(['actionUrl']) || data.actionUrl is string || data.actionUrl == null)
+        && (!data.keys().hasAny(['title']) || data.title is string || data.title == null)
+        // Prevent object storage in primitive fields
+        && (!data.keys().hasAny(['senderPhotoURL']) || data.senderPhotoURL is string || data.senderPhotoURL == null)
+        // Validate sender authorization
+        && (
+          // Normal notifications: sender must be authenticated user
+          data.senderId == request.auth.uid ||
+          // System notifications: allow system-generated senders
+          data.senderId in ['org-system', 'coach-system', 'athlete-system'] ||
+          // Test notifications: allow test type for self
+          (data.type == 'test' && data.receiverId == request.auth.uid)
+        );
+    }
+
+    // ============================================================================
+    // SHARES COLLECTION (Content sharing tracking)
+    // ============================================================================
+    match /shares/{shareId} {
+      // Users can read shares they created, shares of their posts, or shares to them
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.sharerId ||
+        request.auth.uid == resource.data.originalAuthorId ||
+        (resource.data.shareType == 'friends' && resource.data.targets.hasAny([request.auth.uid]))
+      );
+
+      // Users can create shares
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.sharerId
+        && validateShareData();
+
+      // Users can update their own shares
+      allow update: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.sharerId;
+
+      // Users can delete their own shares
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.sharerId;
+    }
+
+    function validateShareData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['postId', 'originalAuthorId', 'sharerId', 'shareType', 'targets', 'timestamp', 'privacy'])
+        && data.postId is string
+        && data.originalAuthorId is string
+        && data.sharerId is string
+        && data.sharerId == request.auth.uid
+        && data.shareType in ['friends', 'feed', 'groups']
+        && data.targets is list
+        && data.targets.size() > 0
+        && data.targets.size() <= 50
+        && data.privacy in ['public', 'friends', 'private']
+        && (!data.keys().hasAny(['message']) || isValidStringLength(data.message, 500))
+        && validateShareTargets(data.shareType, data.targets);
+    }
+
+    function validateShareTargets(shareType, targets) {
+      return (shareType == 'friends' && targets.size() <= 50) ||
+             (shareType == 'feed' && targets.size() == 1 && targets[0] == 'feed') ||
+             (shareType == 'groups' && targets.size() <= 10);
+    }
+
+    // ============================================================================
+    // GROUPS COLLECTION (Community groups)
+    // ============================================================================
+    match /groups/{groupId} {
+      // Anyone can read public groups, members can read private groups
+      allow read: if resource.data.privacy == 'public' || (
+        request.auth != null &&
+        resource.data.members.hasAny([request.auth.uid])
+      );
+
+      // Users can create groups
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid in request.resource.data.admins
+        && validateGroupData();
+
+      // Group admins can update
+      allow update: if request.auth != null
+        && !isGuestUser()
+        && resource.data.admins.hasAny([request.auth.uid]);
+
+      // Group admins can delete
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && resource.data.admins.hasAny([request.auth.uid]);
+    }
+
+    function validateGroupData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['name', 'description', 'members', 'admins', 'privacy', 'postingPermissions', 'createdAt', 'memberCount'])
+        && isValidStringLength(data.name, 100)
+        && isValidStringLength(data.description, 500)
+        && data.members is list
+        && data.admins is list
+        && data.admins.size() > 0
+        && data.privacy in ['public', 'private']
+        && data.postingPermissions in ['all', 'admins', 'approved']
+        && data.memberCount is number
+        && data.memberCount >= 0
+        && data.memberCount == data.members.size(); // Validate count matches array
+    }
+
+    // ============================================================================
+    // REPORTS COLLECTION (Content moderation)
+    // ============================================================================
+    match /reports/{reportId} {
+      // Users can read their own reports, admins can read all
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.reporterId ||
+        isAdminUser()
+      );
+
+      // Users can create reports
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && validateReportData();
+
+      // Only admins can update/delete reports
+      allow update, delete: if request.auth != null && isAdminUser();
+    }
+
+    function validateReportData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['contentId', 'contentType', 'reporterId', 'reasons', 'timestamp'])
+        && data.contentId is string
+        && data.contentType in ['post', 'message', 'user', 'comment', 'story', 'moment']
+        && data.reporterId is string
+        && data.reporterId == request.auth.uid
+        && data.reasons is list
+        && data.reasons.size() > 0;
+    }
+
+    // ============================================================================
+    // MODERATION LOGS COLLECTION (Admin moderation actions)
+    // ============================================================================
+    match /moderationLogs/{logId} {
+      // Only admins can read/write
+      allow read, write: if request.auth != null && isAdminUser();
+    }
+
+    // ============================================================================
+    // USER VIOLATIONS COLLECTION (Repeat offender tracking)
+    // ============================================================================
+    match /userViolations/{userId} {
+      // Only admins can read/write
+      allow read, write: if request.auth != null && isAdminUser();
+    }
+
+    // ============================================================================
+    // VERIFICATION REQUESTS COLLECTION (User verification system)
+    // ============================================================================
+    match /verificationRequests/{requestId} {
+      // Anyone can read (for public verification page)
+      allow read: if true;
+
+      // Users can create verification requests for themselves
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.userId;
+
+      // Users can update their own requests, or system can update for votes
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        onlyVerificationDataChanged()
+      );
+
+      // Users can delete their own requests
+      allow delete: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == resource.data.userId;
+    }
+
+    function onlyVerificationDataChanged() {
+      let affectedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      return affectedKeys.hasOnly(['verificationCount', 'verificationIPs', 'verifiedBy', 'status', 'verifiedAt']) ||
+             affectedKeys.hasOnly(['verificationCount', 'verifiedBy']) ||
+             affectedKeys.hasOnly(['verificationCount']);
+    }
+
+    // ============================================================================
+    // VERIFICATIONS COLLECTION (Individual verification votes - immutable)
+    // ============================================================================
+    match /verifications/{verificationId} {
+      // Anyone can read verifications
+      allow read: if true;
+
+      // Anyone can create verifications (public voting)
+      allow create: if validateVerificationVoteData();
+
+      // No updates or deletes (immutable voting records)
+      allow update, delete: if false;
+    }
+
+    function validateVerificationVoteData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['verificationId', 'userId', 'verifiedAt'])
+        && data.verificationId is string
+        && data.userId is string
+        && data.verifiedAt != null;
+    }
+
+    // ============================================================================
+    // ADMINS COLLECTION (Admin user management)
+    // ============================================================================
+    match /admins/{adminId} {
+      // Authenticated users can read their own admin document (for login verification)
+      allow read: if request.auth != null;
+
+      // Only existing admins can create new admins
+      allow create: if request.auth != null && isAdminUser();
+
+      // Only admins can update admin documents
+      allow update: if request.auth != null && isAdminUser();
+
+      // Only admins can delete admin documents
+      allow delete: if request.auth != null && isAdminUser();
+    }
+
+    // ============================================================================
+    // ADMIN LOGS COLLECTION (Admin action audit trail - append-only)
+    // ============================================================================
+    match /adminLogs/{logId} {
+      // Only admins can read
+      allow read: if request.auth != null && isAdminUser();
+
+      // Only admins can create logs
+      allow create: if request.auth != null && isAdminUser();
+
+      // No updates or deletes (append-only audit trail)
+      allow update, delete: if false;
+    }
+
+    // ============================================================================
+    // BULK OPERATION LOGS COLLECTION (Bulk operation audit - append-only)
+    // ============================================================================
+    match /bulk_operation_logs/{logId} {
+      // Only admins can read
+      allow read: if request.auth != null && isAdminUser();
+
+      // Only admins can create logs
+      allow create: if request.auth != null && isAdminUser();
+
+      // No updates or deletes (append-only)
+      allow update, delete: if false;
+    }
+
+    // ============================================================================
+    // VIDEO VERIFICATIONS COLLECTION (Admin video moderation)
+    // ============================================================================
+    match /videoVerifications/{videoId} {
+      // Only admins can read/write
+      allow read, write: if request.auth != null && isAdminUser();
+    }
+
+    // ============================================================================
+    // EVENTS DATABASE RULES (Separate database for events)
+    // ============================================================================
+    // Note: These rules apply to the "events" database
+
+    // EVENTS COLLECTION (Competition events - admin managed)
+    match /events/{eventId} {
+      // Anyone authenticated can read active events
+      allow read: if request.auth != null;
+
+      // Only admins can create, update, delete events
+      allow create, update, delete: if request.auth != null && isAdminUser();
+    }
+
+    // EVENT SUBMISSIONS COLLECTION (User submissions to events)
+    match /eventSubmissions/{submissionId} {
+      // Anyone can read submissions
+      allow read: if true;
+
+      // Users can create submissions for themselves
+      allow create: if request.auth != null
+        && !isGuestUser()
+        && request.auth.uid == request.resource.data.userId
+        && validateEventSubmissionData();
+
+      // Users can update their own submissions
+      allow update: if request.auth != null && (
+        (!isGuestUser() && request.auth.uid == resource.data.userId) ||
+        isAdminUser()
+      );
+
+      // Users can delete their own submissions, admins can delete any
+      allow delete: if request.auth != null && (
+        (!isGuestUser() && request.auth.uid == resource.data.userId) ||
+        isAdminUser()
+      );
+    }
+
+    function validateEventSubmissionData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['eventId', 'userId', 'userName', 'videoUrl', 'uploadedAt'])
+        && data.eventId is string
+        && data.userId is string
+        && data.userId == request.auth.uid
+        && data.userName is string
+        && data.videoUrl is string
+        && data.uploadedAt != null
+        && (!data.keys().hasAny(['title']) || isValidStringLength(data.title, 100))
+        && (!data.keys().hasAny(['description']) || isValidStringLength(data.description, 500));
+    }
+  }
+}

@@ -1,0 +1,174 @@
+/* Sport Banner Component Styles */
+
+.sport-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, var(--accent-primary, #00ff88) 0%, var(--accent-secondary, #00cc6f) 100%);
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 255, 136, 0.25);
+  margin-top: 8px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.sport-banner:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 255, 136, 0.35);
+}
+
+.sport-banner-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.sport-banner-text {
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+/* Alternative color schemes for different roles */
+.sport-banner[data-role="coaches"] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+}
+
+.sport-banner[data-role="coaches"]:hover {
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+}
+
+.sport-banner[data-role="organization"] {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 2px 8px rgba(240, 147, 251, 0.25);
+}
+
+.sport-banner[data-role="organization"]:hover {
+  box-shadow: 0 4px 12px rgba(240, 147, 251, 0.35);
+}
+
+.sport-banner[data-role="parents"] {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  box-shadow: 0 2px 8px rgba(79, 172, 254, 0.25);
+}
+
+.sport-banner[data-role="parents"]:hover {
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.35);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .sport-banner {
+    box-shadow: 0 2px 8px rgba(0, 255, 136, 0.4);
+  }
+
+  .sport-banner:hover {
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.5);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sport-banner {
+    padding: 5px 12px;
+    margin-top: 6px;
+    margin-bottom: 10px;
+  }
+
+  .sport-banner-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .sport-banner-text {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sport-banner {
+    padding: 4px 10px;
+    gap: 6px;
+    max-width: calc(100vw - 40px);
+  }
+
+  .sport-banner-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .sport-banner-text {
+    font-size: 11px;
+    letter-spacing: 0.2px;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .sport-banner {
+    transition: none;
+  }
+
+  .sport-banner:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .sport-banner {
+    border: 2px solid white;
+  }
+
+  .sport-banner-text {
+    font-weight: 700;
+  }
+}
+
+/* Ensure text is always readable */
+.sport-banner-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading state */
+.sport-banner.loading {
+  background: linear-gradient(135deg, #e0e0e0 0%, #c0c0c0 100%);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.sport-banner.loading .sport-banner-text {
+  color: transparent;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "name": "myapp",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^4.6.2",
+    "@tanstack/react-query": "^5.84.2",
+    "dotenv": "^17.2.3",
+    "firebase": "^11.10.0",
+    "firebase-admin": "^13.6.0",
+    "lucide-react": "^0.525.0",
+    "postprocessing": "^6.37.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-easy-crop": "^5.5.6",
+    "react-router-dom": "^7.9.2",
+    "react-scripts": "^5.0.1",
+    "react-window": "^2.2.0",
+    "react-window-infinite-loader": "^2.0.0",
+    "socket.io-client": "^4.8.1",
+    "three": "^0.178.0",
+    "web-vitals": "^2.1.4",
+    "websocket": "^1.0.35",
+    "ws": "^8.18.3",
+    "zustand": "^5.0.8"
+  },
+  "scripts": {
+    "start": "craco start",
+    "dev": "craco start",
+    "build": "craco build && node scripts/optimize-build.js",
+    "build:all": "node build-all.js",
+    "build:analyze": "set ANALYZE=true && craco build",
+    "build:serve": "npm run build && npx serve -s build",
+    "deploy:all": "npm run build:all && firebase deploy --only hosting",
+    "test": "craco test --watchAll=false",
+    "test:watch": "craco test",
+    "test:coverage": "craco test --coverage --watchAll=false",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
+    "format": "prettier --write src/**/*.{js,jsx,ts,tsx,css,scss,json}",
+    "format:check": "prettier --check src/**/*.{js,jsx,ts,tsx,css,scss,json}",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "validate": "npm run type-check && npm run lint",
+    "pre-commit": "npm run lint:fix && npm run format",
+    "eject": "craco eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ],
+    "rules": {
+      "no-console": "off",
+      "@typescript-eslint/no-unused-vars": "warn"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.6.2",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@types/react-window": "^1.8.8",
+    "@types/react-window-infinite-loader": "^1.0.9",
+    "@types/three": "^0.180.0",
+    "@types/ws": "^8.18.1",
+    "compression-webpack-plugin": "^11.1.0",
+    "css-minimizer-webpack-plugin": "^7.0.2",
+    "fs-extra": "^11.3.2",
+    "typescript": "^5.9.3",
+    "webpack-bundle-analyzer": "^4.10.2"
+  }
+}

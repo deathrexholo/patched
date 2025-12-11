@@ -1,0 +1,488 @@
+/**
+ * Accessibility Enhancements for Share Modal
+ * WCAG 2.1 AA Compliance
+ */
+
+/* Focus Management */
+.share-modal *:focus-visible {
+  outline: 2px solid var(--accent-primary, #3b82f6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Skip to content link for keyboard users */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent-primary);
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 100;
+}
+
+.skip-to-content:focus {
+  top: 10px;
+}
+
+/* Screen Reader Only Content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Ensure sufficient color contrast */
+.share-modal {
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --bg-card: #ffffff;
+  --bg-secondary: #f3f4f6;
+  --bg-hover: #e5e7eb;
+  --border-primary: #d1d5db;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #2563eb;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+}
+
+@media (prefers-color-scheme: dark) {
+  .share-modal {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-tertiary: #9ca3af;
+    --bg-card: #1f2937;
+    --bg-secondary: #111827;
+    --bg-hover: #374151;
+    --border-primary: #374151;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .share-modal {
+    border: 2px solid currentColor;
+  }
+  
+  .share-tab,
+  .friend-item,
+  .group-item,
+  .privacy-option {
+    border: 1px solid currentColor;
+  }
+  
+  .share-tab.active {
+    background: var(--accent-primary);
+    color: white;
+  }
+  
+  .friend-item.selected,
+  .group-item.selected {
+    background: var(--accent-primary);
+    color: white;
+  }
+}
+
+/* Keyboard Navigation Indicators */
+.share-tab:focus-visible,
+.friend-item:focus-visible,
+.group-item:focus-visible,
+.privacy-option:focus-visible {
+  outline: 3px solid var(--accent-primary);
+  outline-offset: 2px;
+  z-index: 1;
+}
+
+/* Touch Target Sizes (Minimum 44x44px) */
+@media (max-width: 768px) {
+  .share-tab {
+    min-height: 48px;
+    padding: 14px 12px;
+  }
+  
+  .friend-item,
+  .group-item {
+    min-height: 60px;
+    padding: 16px 20px;
+  }
+  
+  .close-btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+  }
+  
+  .share-submit-btn {
+    min-height: 48px;
+    padding: 14px 24px;
+  }
+  
+  .friend-checkbox,
+  .group-checkbox {
+    min-width: 28px;
+    min-height: 28px;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay,
+  .share-modal,
+  .share-tab,
+  .friend-item,
+  .group-item,
+  .privacy-option,
+  .share-submit-btn {
+    animation: none;
+    transition: none;
+  }
+  
+  .share-tab:hover,
+  .friend-item:hover,
+  .group-item:hover {
+    transform: none;
+  }
+}
+
+/* Loading State Announcements */
+.loading-announcement {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.loading-announcement[aria-live="polite"],
+.loading-announcement[aria-live="assertive"] {
+  position: static;
+  width: auto;
+  height: auto;
+}
+
+/* Error Message Accessibility */
+.share-modal-error {
+  padding: 16px 20px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin: 16px 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .share-modal-error {
+    background: #7f1d1d;
+    border-color: #991b1b;
+  }
+}
+
+.share-modal-error .error-message {
+  color: #991b1b;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .share-modal-error .error-message {
+    color: #fecaca;
+  }
+}
+
+/* Success Message Accessibility */
+.share-success-message {
+  padding: 16px 20px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  margin: 16px 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .share-success-message {
+    background: #14532d;
+    border-color: #166534;
+  }
+}
+
+.share-success-message p {
+  color: #166534;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .share-success-message p {
+    color: #bbf7d0;
+  }
+}
+
+/* Form Label Associations */
+.share-message-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Input Focus States */
+.share-message-input:focus,
+.friends-search:focus,
+.groups-search:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-color: var(--accent-primary);
+}
+
+/* Disabled State Clarity */
+.share-tab:disabled,
+.share-submit-btn:disabled,
+.friend-item.unavailable,
+.group-item.unavailable {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.share-tab:disabled::after,
+.share-submit-btn:disabled::after {
+  content: ' (disabled)';
+  position: absolute;
+  left: -10000px;
+}
+
+/* ARIA Live Regions */
+[aria-live="polite"],
+[aria-live="assertive"] {
+  position: relative;
+}
+
+/* Status Messages */
+.status-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 12px 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.status-message.info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+}
+
+.status-message.warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+@media (prefers-color-scheme: dark) {
+  .status-message.info {
+    background: #1e3a8a;
+    border-color: #1e40af;
+    color: #bfdbfe;
+  }
+  
+  .status-message.warning {
+    background: #78350f;
+    border-color: #92400e;
+    color: #fde68a;
+  }
+}
+
+/* Tooltip Accessibility */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 12px;
+  background: var(--text-primary);
+  color: var(--bg-card);
+  font-size: 12px;
+  white-space: nowrap;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus::after {
+  opacity: 1;
+}
+
+/* Mobile Viewport Optimization */
+@media (max-width: 768px) {
+  /* Prevent zoom on input focus */
+  .share-message-input,
+  .friends-search,
+  .groups-search {
+    font-size: 16px;
+  }
+  
+  /* Full-screen modal on mobile */
+  .modal-overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+  
+  .share-modal {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+  }
+  
+  /* Sticky header on mobile */
+  .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Sticky tabs on mobile */
+  .share-tabs {
+    position: sticky;
+    top: 61px;
+    z-index: 9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Sticky actions on mobile */
+  .share-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Landscape Mobile Optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .share-modal {
+    max-height: 100vh;
+  }
+  
+  .share-content {
+    max-height: calc(100vh - 200px);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .modal-overlay,
+  .share-modal {
+    display: none;
+  }
+}
+
+/* Focus Trap Indicator */
+.focus-trap-start,
+.focus-trap-end {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Loading Skeleton Accessibility */
+.skeleton-line {
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary) 0%,
+    var(--bg-hover) 50%,
+    var(--bg-secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+    background: var(--bg-secondary);
+  }
+}
+
+/* Ensure Modal is Announced to Screen Readers */
+.share-modal[role="dialog"] {
+  /* Modal should have role="dialog" and aria-labelledby */
+}
+
+.modal-header h3[id] {
+  /* Header should have an id for aria-labelledby */
+}
+
+/* Keyboard Navigation Help */
+.keyboard-help {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-modal);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.share-modal:focus-within .keyboard-help {
+  opacity: 1;
+}
+
+.keyboard-help kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+/* Ensure Proper Heading Hierarchy */
+.share-modal h3 {
+  font-size: 18px;
+}
+
+.share-modal h4 {
+  font-size: 16px;
+}
+
+.share-modal h5 {
+  font-size: 14px;
+}
+
+.share-modal h6 {
+  font-size: 13px;
+}

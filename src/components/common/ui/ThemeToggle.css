@@ -1,0 +1,142 @@
+.theme-toggle {
+  background: none;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-primary);
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-primary);
+  transform: scale(1.05);
+}
+
+.theme-icon {
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover .theme-icon {
+  color: var(--accent-primary);
+  transform: rotate(15deg);
+}
+
+/* Dark mode styles */
+[data-theme="dark"] .theme-toggle {
+  border-color: rgba(0, 255, 136, 0.3);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: #00ff88;
+}
+
+/* Light mode styles */
+[data-theme="light"] .theme-toggle {
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #333;
+}
+
+[data-theme="light"] .theme-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: #667eea;
+}
+
+/* Inline variant styles */
+.theme-toggle-inline-container {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.theme-toggle-label {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.theme-toggle-switch {
+  display: flex !important;
+  gap: 8px;
+  background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+  border-radius: 8px;
+  padding: 4px;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.theme-toggle-option {
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  min-width: 44px;
+  min-height: 36px;
+}
+
+.theme-toggle-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.theme-toggle-option.active {
+  background: var(--accent-primary);
+  color: white;
+  cursor: default;
+}
+
+.theme-toggle-option.active:hover {
+  background: var(--accent-primary);
+}
+
+/* Dark mode inline styles */
+[data-theme="dark"] .theme-toggle-switch {
+  background: rgba(0, 255, 136, 0.1);
+}
+
+[data-theme="dark"] .theme-toggle-option:hover {
+  background: rgba(0, 255, 136, 0.15);
+}
+
+[data-theme="dark"] .theme-toggle-option.active {
+  background: #00ff88;
+  color: #000;
+}
+
+[data-theme="dark"] .theme-toggle-option.active:hover {
+  background: #00ff88;
+}
+
+/* Light mode inline styles */
+[data-theme="light"] .theme-toggle-switch {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .theme-toggle-option:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .theme-toggle-option.active {
+  background: #667eea;
+  color: white;
+}
+
+[data-theme="light"] .theme-toggle-option.active:hover {
+  background: #667eea;
+}

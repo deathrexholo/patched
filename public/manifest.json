@@ -1,0 +1,22 @@
+{
+  "short_name": "AmaPlayer",
+  "name": "AmaPlayer - Sports Social Media v2.1",
+  "description": "Connect with athletes, share your talent, and discover amazing sports content - Updated Landing Page",
+  "version": "2.1.0",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#00ff88",
+  "background_color": "#0f1419",
+  "categories": ["sports", "social", "entertainment"],
+  "lang": "en",
+  "scope": "/",
+  "prefer_related_applications": false
+}

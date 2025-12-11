@@ -1,0 +1,116 @@
+// Firebase Storage Security Rules for AmaPlayer
+// Rules are organized by content type and user/ownership verification
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ==================== HELPER FUNCTIONS ====================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function userOwnsFolderContent(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ==================== USER PROFILE MEDIA ====================
+    // Path: users/{userId}/profile-picture.jpg, users/{userId}/cover-photo.jpg, etc.
+    // Used by: Profile.tsx for profile pictures and cover photos
+    // Permissions: Only the user can read their own or any user's profile (for public profiles)
+    //              Only the user can upload/delete their own profile media
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write, delete: if userOwnsFolderContent(userId);
+    }
+
+    // ==================== TALENT VIDEOS ====================
+    // Path: talent-videos/{userId}/{filename}
+    // Used by: Profile.tsx talent video management
+    // Permissions: Any authenticated user can read, only owner can write/delete
+    match /talent-videos/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write, delete: if userOwnsFolderContent(userId);
+    }
+
+    // ==================== VIDEO THUMBNAILS ====================
+    // Path: thumbnails/{userId}/{filename}
+    // Used by: Profile.tsx for video thumbnail uploads
+    // Permissions: Any authenticated user can read, only owner can write/delete
+    match /thumbnails/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write, delete: if userOwnsFolderContent(userId);
+    }
+
+    // ==================== POST MEDIA (ORGANIZED BY USER) ====================
+    // Path: posts/images/{userId}/{filename}
+    // Used by: AddPost.tsx for organized post uploads
+    // Permissions: Any authenticated user can read, only owner can write/delete
+    match /posts/images/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write, delete: if userOwnsFolderContent(userId);
+    }
+
+    // ==================== POST MEDIA (FLAT STRUCTURE) ====================
+    // Path: posts/{timestamp}_{filename}
+    // Used by: postsService.ts for media uploads
+    // Note: No userId in path, so we only allow authenticated users
+    //       Firestore rules and ownership checks provide additional security
+    match /posts/{file=**} {
+      // Only allow access to files that match timestamp_filename pattern
+      allow read: if isAuthenticated();
+      allow write, delete: if isAuthenticated();
+    }
+
+    // ==================== STORY MEDIA ====================
+    // Path: stories/images/{userId}/{filename} and stories/videos/{userId}/{filename}
+    // Used by: storiesService.ts for story uploads
+    // Permissions: Any authenticated user can read, only owner can write/delete
+    match /stories/{mediaType}/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write, delete: if userOwnsFolderContent(userId);
+    }
+
+    // ==================== MOMENTS/REELS MEDIA ====================
+    // Path: moments/{momentId}/video.{ext}
+    // Used by: momentsService.ts for moment uploads
+    // Note: No userId in path, so we only allow authenticated users
+    //       Firestore rules and ownership checks provide additional security
+    match /moments/{momentId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write, delete: if isAuthenticated();
+    }
+
+    // ==================== EVENT MEDIA ====================
+    // Path: events/{eventPath}
+    // Used by: EventSubmissionForm for event video uploads
+    // Permissions: Any authenticated user can read, write, delete
+    //              Real access control handled by Firestore rules
+    match /events/{eventPath=**} {
+      allow read: if isAuthenticated();
+      allow write, delete: if isAuthenticated();
+    }
+
+    // ==================== GROUP MEDIA ====================
+    // Path: groups/{groupId}/{userId}/{filename}
+    // Used by: Group features for group member uploads
+    // Permissions: Any authenticated user can read, only owner can write/delete
+    match /groups/{groupId}/{userId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write, delete: if userOwnsFolderContent(userId);
+    }
+
+    // ==================== TEMPORARY UPLOADS ====================
+    // Path: temp/{userId}/{filename}
+    // Used by: Temporary uploads for in-progress content
+    // Permissions: Any authenticated user can manage only their own temp files
+    match /temp/{userId}/{allPaths=**} {
+      allow read, write, delete: if userOwnsFolderContent(userId);
+    }
+
+    // ==================== GENERAL CATCH-ALL ====================
+    // Deny all other paths by default for security
+    match /{allPaths=**} {
+      allow read, write, delete: if false;
+    }
+  }
+}

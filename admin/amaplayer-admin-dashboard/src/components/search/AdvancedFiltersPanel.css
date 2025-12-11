@@ -1,0 +1,287 @@
+/* Advanced Filters Panel Styles */
+.advanced-filters-panel {
+  @apply bg-white border border-gray-200 rounded-lg shadow-sm;
+}
+
+.filters-header {
+  @apply border-b border-gray-200;
+}
+
+.filters-toggle-button {
+  @apply w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50 focus:outline-none focus:bg-gray-50 transition-colors duration-150;
+}
+
+.filters-title {
+  @apply text-sm font-medium text-gray-900 flex items-center gap-2;
+}
+
+.active-filter-count {
+  @apply bg-blue-600 text-white text-xs px-2 py-1 rounded-full min-w-[20px] text-center;
+}
+
+.chevron-icon {
+  @apply w-5 h-5 text-gray-400 transition-transform duration-200;
+}
+
+.chevron-icon.collapsed {
+  @apply transform -rotate-90;
+}
+
+.chevron-icon.expanded {
+  @apply transform rotate-0;
+}
+
+.filters-content {
+  @apply p-4 space-y-6;
+}
+
+.filter-group {
+  @apply space-y-2;
+}
+
+.filter-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+/* Date Range Styles */
+.date-range-container {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.date-field-select {
+  @apply px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+.date-input {
+  @apply px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+.date-separator {
+  @apply text-sm text-gray-500 px-1;
+}
+
+/* Checkbox Group Styles */
+.checkbox-group {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2;
+}
+
+.checkbox-item {
+  @apply flex items-center gap-2 cursor-pointer;
+}
+
+.checkbox-input {
+  @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2;
+}
+
+.checkbox-label {
+  @apply text-sm text-gray-700 select-none;
+}
+
+/* Text Input Styles */
+.text-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+/* Age Range Styles */
+.age-range-container {
+  @apply space-y-2;
+}
+
+.age-slider {
+  @apply w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer;
+}
+
+.age-slider::-webkit-slider-thumb {
+  @apply appearance-none w-4 h-4 bg-blue-600 rounded-full cursor-pointer;
+}
+
+.age-slider::-moz-range-thumb {
+  @apply w-4 h-4 bg-blue-600 rounded-full cursor-pointer border-none;
+}
+
+.age-inputs {
+  @apply flex gap-2;
+}
+
+.age-number-input {
+  @apply flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+/* Action Buttons */
+.filter-actions {
+  @apply flex gap-3 pt-4 border-t border-gray-200;
+}
+
+.apply-filters-button {
+  @apply flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.clear-filters-button {
+  @apply flex-1 bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:text-gray-400 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+}
+
+.clear-filters-button:disabled {
+  @apply cursor-not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filters-content {
+    @apply p-3 space-y-4;
+  }
+  
+  .date-range-container {
+    @apply flex-col items-stretch gap-2;
+  }
+  
+  .date-field-select,
+  .date-input {
+    @apply w-full;
+  }
+  
+  .checkbox-group {
+    @apply grid-cols-1;
+  }
+  
+  .filter-actions {
+    @apply flex-col gap-2;
+  }
+  
+  .age-inputs {
+    @apply flex-col gap-2;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters-toggle-button {
+    @apply px-3 py-2;
+  }
+  
+  .filters-content {
+    @apply p-2 space-y-3;
+  }
+  
+  .filter-label {
+    @apply text-xs;
+  }
+  
+  .date-field-select,
+  .date-input,
+  .text-input,
+  .age-number-input {
+    @apply text-xs py-1.5;
+  }
+}
+
+/* Focus States */
+.filters-toggle-button:focus {
+  @apply ring-2 ring-blue-500 ring-inset;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .advanced-filters-panel {
+    @apply border-2 border-gray-900;
+  }
+  
+  .checkbox-input {
+    @apply border-2 border-gray-900;
+  }
+  
+  .date-field-select,
+  .date-input,
+  .text-input,
+  .age-number-input {
+    @apply border-2 border-gray-900;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .filters-toggle-button,
+  .apply-filters-button,
+  .clear-filters-button,
+  .chevron-icon {
+    @apply transition-none;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .advanced-filters-panel {
+    @apply bg-gray-800 border-gray-600;
+  }
+  
+  .filters-header {
+    @apply border-gray-600;
+  }
+  
+  .filters-toggle-button {
+    @apply hover:bg-gray-700 focus:bg-gray-700;
+  }
+  
+  .filters-title {
+    @apply text-gray-100;
+  }
+  
+  .filter-label {
+    @apply text-gray-200;
+  }
+  
+  .checkbox-label {
+    @apply text-gray-300;
+  }
+  
+  .date-separator {
+    @apply text-gray-400;
+  }
+  
+  .date-field-select,
+  .date-input,
+  .text-input,
+  .age-number-input {
+    @apply bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400;
+  }
+  
+  .checkbox-input {
+    @apply bg-gray-700 border-gray-600;
+  }
+  
+  .age-slider {
+    @apply bg-gray-600;
+  }
+  
+  .filter-actions {
+    @apply border-gray-600;
+  }
+  
+  .clear-filters-button {
+    @apply bg-gray-700 hover:bg-gray-600 text-gray-200;
+  }
+  
+  .clear-filters-button:disabled {
+    @apply bg-gray-800 text-gray-500;
+  }
+}
+
+/* Animation for collapsible content */
+.filters-content {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filters-content {
+    animation: none;
+  }
+}

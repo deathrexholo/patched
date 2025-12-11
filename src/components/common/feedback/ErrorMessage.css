@@ -1,0 +1,134 @@
+/* Error Message Component Styles */
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid;
+  font-size: 14px;
+  line-height: 1.4;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Error type variants */
+.error-message.error {
+  background: var(--error-bg, #fee);
+  color: var(--error-text, #c53030);
+  border-color: var(--error-border, #feb2b2);
+}
+
+.error-message.warning {
+  background: var(--warning-bg, #fffbeb);
+  color: var(--warning-text, #d69e2e);
+  border-color: var(--warning-border, #fbd38d);
+}
+
+.error-message.info {
+  background: var(--info-bg, #ebf8ff);
+  color: var(--info-text, #3182ce);
+  border-color: var(--info-border, #90cdf4);
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.error-icon {
+  flex-shrink: 0;
+}
+
+.error-text {
+  flex: 1;
+  word-break: break-word;
+}
+
+.error-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.retry-button,
+.dismiss-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.retry-button:hover {
+  background: currentColor;
+  color: var(--bg-card);
+}
+
+.dismiss-button {
+  border: none;
+  padding: 4px;
+  opacity: 0.7;
+}
+
+.dismiss-button:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Compact variant for inline use */
+.error-message.compact {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.error-message.compact .error-actions {
+  margin-left: 8px;
+}
+
+/* Full width variant */
+.error-message.full-width {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .error-message {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .error-actions {
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+  
+  .retry-button span {
+    display: none;
+  }
+}

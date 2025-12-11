@@ -1,0 +1,353 @@
+{
+  "metadata": {
+    "project": "amaplay007",
+    "database": "default",
+    "totalCollections": 23,
+    "lastUpdated": "2024-12-04",
+    "description": "Complete reference of all Firestore collections in AmaPlay default database"
+  },
+  "collections": {
+    "content": {
+      "category": "Content",
+      "count": 5,
+      "collections": [
+        {
+          "name": "posts",
+          "description": "User-generated posts with media and engagement tracking",
+          "documentIdType": "auto-generated",
+          "primaryKey": "userId",
+          "indexes": ["userId,isActive,timestamp", "isActive,timestamp", "likesCount,timestamp"],
+          "ttl": null,
+          "realTimeEnabled": true,
+          "fieldsCount": 20
+        },
+        {
+          "name": "stories",
+          "description": "24-hour ephemeral story posts that auto-expire",
+          "documentIdType": "auto-generated",
+          "primaryKey": "userId",
+          "indexes": ["userId,expiresAt", "expiresAt,timestamp"],
+          "ttl": "24 hours (expiresAt field)",
+          "realTimeEnabled": true,
+          "fieldsCount": 11
+        },
+        {
+          "name": "moments",
+          "description": "Short-form vertical video content (9:16 aspect ratio)",
+          "documentIdType": "auto-generated",
+          "primaryKey": "userId",
+          "indexes": ["createdAt", "userId,createdAt", "moderationStatus,createdAt"],
+          "ttl": null,
+          "realTimeEnabled": true,
+          "fieldsCount": 18
+        },
+        {
+          "name": "videos",
+          "description": "General user-uploaded videos for talent showcase",
+          "documentIdType": "auto-generated",
+          "primaryKey": "userId",
+          "indexes": ["sport", "verificationStatus"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 14
+        },
+        {
+          "name": "talentVideos",
+          "description": "Admin-approved talent showcase videos",
+          "documentIdType": "auto-generated",
+          "primaryKey": "userId",
+          "indexes": ["isApproved", "sport"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 12
+        }
+      ]
+    },
+    "engagement": {
+      "category": "Comments & Engagement",
+      "count": 2,
+      "collections": [
+        {
+          "name": "comments",
+          "description": "Centralized comments collection for posts, stories, and moments",
+          "documentIdType": "auto-generated",
+          "primaryKey": "contentId,contentType",
+          "indexes": ["contentId,contentType,timestamp"],
+          "ttl": null,
+          "realTimeEnabled": true,
+          "fieldsCount": 10,
+          "notes": "Universal comments table that links to multiple content types via contentId + contentType"
+        },
+        {
+          "name": "shares",
+          "description": "Tracking of post/content shares",
+          "documentIdType": "auto-generated",
+          "primaryKey": "contentId,userId",
+          "indexes": ["contentId,timestamp", "userId,timestamp"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 6
+        }
+      ]
+    },
+    "users_relationships": {
+      "category": "Users & Relationships",
+      "count": 6,
+      "collections": [
+        {
+          "name": "users",
+          "description": "User profiles and account data",
+          "documentIdType": "Firebase UID",
+          "primaryKey": "uid",
+          "indexes": ["displayName", "isVerified,followersCount"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 30
+        },
+        {
+          "name": "friendships",
+          "description": "Bidirectional friend connections",
+          "documentIdType": "auto-generated",
+          "primaryKey": "requesterId,recipientId",
+          "indexes": ["requesterId,status", "recipientId,status"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 7
+        },
+        {
+          "name": "friendRequests",
+          "description": "Pending friend requests (separate from accepted friendships)",
+          "documentIdType": "auto-generated",
+          "primaryKey": "recipientId",
+          "indexes": ["recipientId,status", "recipientId,createdAt"],
+          "ttl": null,
+          "realTimeEnabled": true,
+          "fieldsCount": 6
+        },
+        {
+          "name": "organizationConnections",
+          "description": "Peer-to-peer connections between athletes and organizations/coaches",
+          "documentIdType": "auto-generated",
+          "primaryKey": "senderId,recipientId",
+          "indexes": ["senderId,status", "recipientId,status"],
+          "ttl": null,
+          "realTimeEnabled": true,
+          "fieldsCount": 11,
+          "notes": "No admin approval required - direct peer-to-peer model"
+        },
+        {
+          "name": "connectionActivity",
+          "description": "Audit trail for all organization connection operations",
+          "documentIdType": "auto-generated",
+          "primaryKey": "connectionId",
+          "indexes": ["connectionId,timestamp", "actorId,timestamp"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 6
+        },
+        {
+          "name": "follows",
+          "description": "User follow relationships",
+          "documentIdType": "auto-generated",
+          "primaryKey": "followerId,followingId",
+          "indexes": ["followerId,createdAt", "followingId,createdAt"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 7
+        }
+      ]
+    },
+    "verification": {
+      "category": "Verification System",
+      "count": 2,
+      "collections": [
+        {
+          "name": "verificationRequests",
+          "description": "User verification requests for community-verified badge",
+          "documentIdType": "auto-generated",
+          "primaryKey": "userId",
+          "indexes": ["userId,status", "status,createdAt"],
+          "ttl": "30 days (expiresAt field)",
+          "realTimeEnabled": false,
+          "fieldsCount": 15
+        },
+        {
+          "name": "verifications",
+          "description": "Individual verification votes (immutable voting records)",
+          "documentIdType": "auto-generated",
+          "primaryKey": "verificationRequestId,voterId",
+          "indexes": ["verificationRequestId,timestamp"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 8,
+          "notes": "Immutable - votes cannot be edited, only new votes added"
+        }
+      ]
+    },
+    "messaging": {
+      "category": "Messaging & Notifications",
+      "count": 3,
+      "collections": [
+        {
+          "name": "messages",
+          "description": "Direct messages between users",
+          "documentIdType": "auto-generated",
+          "primaryKey": "senderId,receiverId",
+          "indexes": ["senderId,receiverId,timestamp", "receiverId,timestamp", "receiverId,isRead"],
+          "ttl": null,
+          "realTimeEnabled": true,
+          "fieldsCount": 9
+        },
+        {
+          "name": "conversations",
+          "description": "Message conversation threads/groups",
+          "documentIdType": "auto-generated",
+          "primaryKey": "participantIds",
+          "indexes": ["participantIds", "lastMessageTime"],
+          "ttl": null,
+          "realTimeEnabled": true,
+          "fieldsCount": 10
+        },
+        {
+          "name": "notifications",
+          "description": "User notifications (likes, comments, follows, messages, etc)",
+          "documentIdType": "auto-generated",
+          "primaryKey": "receiverId",
+          "indexes": ["receiverId,timestamp", "receiverId,isRead"],
+          "ttl": null,
+          "realTimeEnabled": true,
+          "fieldsCount": 10
+        }
+      ]
+    },
+    "community_admin": {
+      "category": "Community & Admin",
+      "count": 5,
+      "collections": [
+        {
+          "name": "groups",
+          "description": "Community discussion groups",
+          "documentIdType": "auto-generated",
+          "primaryKey": "creatorId",
+          "indexes": ["privacy,memberCount", "createdAt"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 11
+        },
+        {
+          "name": "reports",
+          "description": "User-reported content for moderation",
+          "documentIdType": "auto-generated",
+          "primaryKey": "contentId",
+          "indexes": ["status,timestamp", "reporterId,timestamp"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 12
+        },
+        {
+          "name": "adminLogs",
+          "description": "Audit trail of all admin actions",
+          "documentIdType": "auto-generated",
+          "primaryKey": "adminId",
+          "indexes": ["adminId,timestamp", "action,timestamp"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 10,
+          "notes": "Admin-only write access"
+        },
+        {
+          "name": "admins",
+          "description": "Admin user management and role assignment",
+          "documentIdType": "Firebase UID",
+          "primaryKey": "userId",
+          "indexes": ["active", "role"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 9,
+          "notes": "Referenced in security rules for admin access control"
+        },
+        {
+          "name": "momentInteractions",
+          "description": "Detailed interaction tracking for moment videos",
+          "documentIdType": "auto-generated",
+          "primaryKey": "momentId,userId",
+          "indexes": ["momentId,timestamp", "userId,timestamp"],
+          "ttl": null,
+          "realTimeEnabled": false,
+          "fieldsCount": 6
+        }
+      ]
+    }
+  },
+  "statistics": {
+    "totalCollections": 23,
+    "collectionsWithRealTime": 10,
+    "collectionsWithTTL": 2,
+    "totalIndexes": 30,
+    "averageFieldsPerCollection": 10.7,
+    "maxFieldsCollection": "users (30 fields)",
+    "minFieldsCollection": "shares (6 fields)"
+  },
+  "relationships": {
+    "users": {
+      "hasMany": ["posts", "stories", "moments", "comments", "messages"],
+      "belongsToMany": ["friendships", "friendRequests", "organizationConnections", "follows"]
+    },
+    "posts": {
+      "hasMany": ["comments"],
+      "belongsTo": "users",
+      "manyToMany": ["shares"]
+    },
+    "moments": {
+      "hasMany": ["comments", "momentInteractions"],
+      "belongsTo": "users"
+    },
+    "comments": {
+      "belongsTo": ["posts", "stories", "moments"],
+      "references": "users"
+    },
+    "organizationConnections": {
+      "createsOnAccept": "friendships"
+    }
+  },
+  "database_info": {
+    "name": "default",
+    "project": "amaplay007",
+    "region": "us-central1",
+    "type": "Cloud Firestore",
+    "securityRulesFile": "storage-rules/firestore.rules",
+    "indexesFile": "firestore.indexes.json",
+    "backupRetention": "30 days (default)"
+  },
+  "access_patterns": {
+    "frequentReads": [
+      "posts feed (isActive=true, timestamp desc)",
+      "user profile (by uid)",
+      "comments (by contentId + contentType)",
+      "moments feed (moderationStatus=approved, createdAt desc)"
+    ],
+    "frequentWrites": [
+      "Like/unlike posts (increment likesCount)",
+      "Add comments",
+      "Update user stats (postsCount, followersCount)",
+      "Share posts (append to shares array)"
+    ],
+    "batch_operations": [
+      "Create post + update user.postsCount",
+      "Add comment + update post.commentsCount",
+      "Accept friendship request + create friendship doc"
+    ]
+  },
+  "security_notes": {
+    "allCollectionsProtected": true,
+    "rulesFile": "storage-rules/firestore.rules",
+    "rulesLines": 825,
+    "keySecurityFeatures": [
+      "Authentication required for write operations",
+      "User can only create own posts/comments",
+      "Admin-only access for events, reports, adminLogs",
+      "Peer-to-peer connections (no admin middleman)",
+      "Verification is community-driven voting"
+    ]
+  }
+}

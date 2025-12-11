@@ -1,0 +1,85 @@
+/* Base role badge styles */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+/* Size variants */
+.role-badge--small {
+  padding: 2px 6px;
+  font-size: 11px;
+  gap: 3px;
+}
+
+.role-badge--medium {
+  padding: 3px 8px;
+  font-size: 12px;
+  gap: 4px;
+}
+
+.role-badge--large {
+  padding: 4px 10px;
+  font-size: 14px;
+  gap: 5px;
+}
+
+/* Icon styles */
+.role-badge__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+}
+
+/* Label styles */
+.role-badge__label {
+  line-height: 1;
+}
+
+/* Athlete role - Blue theme */
+.role-badge--athlete {
+  background-color: var(--role-athlete-bg);
+  color: var(--role-athlete-text);
+  border-color: var(--role-athlete-border);
+}
+
+.role-badge--athlete:hover {
+  background-color: var(--role-athlete-hover-bg);
+}
+
+/* Parent role - Warm orange theme */
+.role-badge--parent {
+  background-color: var(--role-parent-bg);
+  color: var(--role-parent-text);
+  border-color: var(--role-parent-border);
+}
+
+.role-badge--parent:hover {
+  background-color: var(--role-parent-hover-bg);
+}
+
+/* Organization role - Purple theme */
+.role-badge--organization {
+  background-color: var(--role-organization-bg);
+  color: var(--role-organization-text);
+  border-color: var(--role-organization-border);
+}
+
+.role-badge--organization:hover {
+  background-color: var(--role-organization-hover-bg);
+}
+
+/* Coach role - Green theme */
+.role-badge--coach {
+  background-color: var(--role-coach-bg);
+  color: var(--role-coach-text);
+  border-color: var(--role-coach-border);
+}
+
+.role-badge--coach:hover {
+  background-color: var(--role-coach-hover-bg);
+}

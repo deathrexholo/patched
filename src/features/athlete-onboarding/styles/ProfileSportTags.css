@@ -1,0 +1,236 @@
+/* Profile Sport Tags */
+.profile-sport-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-sport-tags.vertical {
+  flex-direction: column;
+}
+
+.profile-sport-tags.horizontal {
+  flex-direction: row;
+}
+
+/* Sport Tag Styles */
+.sport-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+/* Size variants */
+.profile-sport-tags.small .sport-tag {
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 12px;
+}
+
+.profile-sport-tags.medium .sport-tag {
+  padding: 4px 12px;
+  font-size: 14px;
+  border-radius: 16px;
+}
+
+.profile-sport-tags.large .sport-tag {
+  padding: 6px 16px;
+  font-size: 16px;
+  border-radius: 20px;
+}
+
+/* Primary sport tag */
+.sport-tag.primary {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.sport-tag.primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(var(--accent-primary-rgb), 0.3);
+}
+
+/* Secondary sport tags */
+.sport-tag.secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+.sport-tag.secondary:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+/* Overflow tag */
+.sport-tag.overflow {
+  background: var(--bg-disabled);
+  color: var(--text-secondary);
+  border-color: var(--border-light);
+  cursor: default;
+}
+
+/* Primary indicator */
+.primary-indicator {
+  color: #FFD700;
+  font-size: 0.9em;
+  margin-left: 2px;
+}
+
+.profile-sport-tags.small .primary-indicator {
+  font-size: 0.8em;
+}
+
+/* Profile Header with Sports */
+.profile-header-with-sports {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.profile-basic-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-light);
+}
+
+.profile-text {
+  flex: 1;
+}
+
+.profile-name {
+  margin: 0 0 4px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.primary-sport-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-sport-tags.horizontal {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .profile-header-with-sports {
+    padding: 12px;
+  }
+  
+  .profile-basic-info {
+    gap: 8px;
+  }
+  
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .profile-name {
+    font-size: 18px;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .sport-tag.secondary {
+    background: var(--bg-tertiary);
+    border-color: var(--border-dark);
+  }
+  
+  .sport-tag.secondary:hover {
+    background: var(--bg-secondary);
+  }
+}
+
+/* Animation for tag appearance */
+.sport-tag {
+  animation: fadeInScale 0.3s ease-out;
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Hover effects for interactive tags */
+.sport-tag:hover {
+  cursor: pointer;
+}
+
+.sport-tag.overflow:hover {
+  cursor: default;
+  transform: none;
+}
+
+/* Focus states for accessibility */
+.sport-tag:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Loading state for tags */
+.sport-tag.loading {
+  background: var(--bg-disabled);
+  color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.sport-tag.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}

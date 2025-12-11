@@ -1,0 +1,214 @@
+.organization-info-modal {
+  max-width: 500px;
+  width: 90%;
+}
+
+.organization-info-modal .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.organization-info-modal .modal-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.organization-info-modal .modal-icon {
+  color: #20B2AA;
+}
+
+.organization-info-modal .modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.organization-info-modal .modal-close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: #666;
+}
+
+.organization-info-modal .modal-close-button:hover:not(:disabled) {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.organization-info-modal .modal-close-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.organization-info-modal .modal-form {
+  padding: 24px;
+}
+
+.organization-info-modal .form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.organization-info-modal .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.organization-info-modal .form-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.organization-info-modal .form-input,
+.organization-info-modal .form-select {
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: white;
+}
+
+.organization-info-modal .form-input:focus,
+.organization-info-modal .form-select:focus {
+  outline: none;
+  border-color: #20B2AA;
+  box-shadow: 0 0 0 3px rgba(32, 178, 170, 0.1);
+}
+
+.organization-info-modal .form-input.error,
+.organization-info-modal .form-select.error {
+  border-color: #ef4444;
+}
+
+.organization-info-modal .form-input.error:focus,
+.organization-info-modal .form-select.error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.organization-info-modal .form-error {
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 4px;
+}
+
+.organization-info-modal .submit-error {
+  padding: 12px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.organization-info-modal .modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+}
+
+.organization-info-modal .modal-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.organization-info-modal .modal-button.secondary {
+  background: white;
+  color: #333;
+  border: 1px solid #d0d0d0;
+}
+
+.organization-info-modal .modal-button.secondary:hover:not(:disabled) {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.organization-info-modal .modal-button.primary {
+  background: #20B2AA;
+  color: white;
+}
+
+.organization-info-modal .modal-button.primary:hover:not(:disabled) {
+  background: #1a9b94;
+}
+
+.organization-info-modal .modal-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 13px -3px rgba(0, 0, 0, 0.1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .organization-info-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .organization-info-modal .modal-form {
+    padding: 16px;
+  }
+
+  .organization-info-modal .form-section {
+    gap: 12px;
+  }
+
+  .organization-info-modal .modal-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .organization-info-modal .modal-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,98 @@
+/* Home Page Layout Styles */
+.home {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  background-attachment: fixed;
+  overflow-y: auto;
+}
+
+.home-content {
+  max-width: 600px;
+  margin: 80px auto 0;
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+/* Shared utility classes for lazy loading images */
+.lazy-image-container {
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.lazy-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .home-content {
+    margin: 70px auto 0;
+    padding: 15px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-content {
+    margin: 60px auto 0;
+    padding: 10px;
+  }
+}
+
+/* Medium devices (768px to 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+  .home-content {
+    margin: 80px auto 0;
+    padding: 15px;
+    max-width: 90%;
+  }
+}
+
+/* Large devices (992px to 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .home-content {
+    margin: 85px auto 0;
+    padding: 18px;
+    max-width: 750px;
+  }
+}
+
+/* Extra large devices (1200px to 1399px) */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .home-content {
+    margin: 90px auto 0;
+    padding: 20px;
+    max-width: 800px;
+  }
+}
+
+/* Ultra wide screens (1400px and up) */
+@media (min-width: 1400px) {
+  .home-content {
+    margin: 95px auto 0;
+    padding: 25px;
+    max-width: 900px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .home {
+    background: var(--bg-primary-high-contrast, var(--bg-primary));
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .home {
+    background-attachment: scroll;
+  }
+}

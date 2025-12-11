@@ -1,0 +1,145 @@
+.error-boundary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 20px;
+  background-color: var(--bg-primary, #ffffff);
+}
+
+.error-boundary-content {
+  text-align: center;
+  max-width: 500px;
+  padding: 40px;
+  border-radius: 12px;
+  background-color: var(--bg-card, #f8f9fa);
+  border: 1px solid var(--border-color, #e1e5e9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.error-boundary h2 {
+  color: var(--text-primary, #1a1a1a);
+  margin-bottom: 12px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.error-message {
+  color: var(--text-secondary, #666666);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.error-details {
+  text-align: left;
+  margin: 20px 0;
+  padding: 16px;
+  background-color: var(--bg-secondary, #f1f3f4);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #e1e5e9);
+}
+
+.error-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  margin-bottom: 12px;
+}
+
+.error-stack {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--text-secondary, #666666);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.error-stack pre {
+  background-color: var(--bg-primary, #ffffff);
+  padding: 8px;
+  border-radius: 4px;
+  margin: 8px 0;
+  overflow-x: auto;
+  max-height: 200px;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.error-actions button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.retry-button {
+  background-color: var(--accent-primary, #007bff);
+  color: white;
+}
+
+.retry-button:hover {
+  background-color: var(--accent-primary-hover, #0056b3);
+  transform: translateY(-1px);
+}
+
+.report-button {
+  background-color: var(--warning-color, #ffc107);
+  color: var(--text-primary, #1a1a1a);
+}
+
+.report-button:hover {
+  background-color: var(--warning-color-hover, #e0a800);
+  transform: translateY(-1px);
+}
+
+.home-button {
+  background-color: var(--bg-secondary, #f1f3f4);
+  color: var(--text-primary, #1a1a1a);
+  border: 1px solid var(--border-color, #e1e5e9);
+}
+
+.home-button:hover {
+  background-color: var(--bg-tertiary, #e8eaed);
+  transform: translateY(-1px);
+}
+
+.error-id {
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--text-tertiary, #999999);
+  font-family: 'Courier New', monospace;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .error-boundary {
+    padding: 16px;
+    min-height: 300px;
+  }
+
+  .error-boundary-content {
+    padding: 24px;
+  }
+
+  .error-actions {
+    flex-direction: column;
+  }
+
+  .error-actions button {
+    width: 100%;
+  }
+}

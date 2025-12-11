@@ -1,0 +1,588 @@
+.athlete-onboarding-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  position: relative;
+}
+
+/* Header Section */
+.onboarding-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  position: relative;
+  z-index: 10;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-card);
+  border: 2px solid var(--border-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--text-primary);
+  padding: 0;
+}
+
+.back-btn:hover {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+}
+
+.back-btn:active {
+  transform: translateY(-1px) scale(1.02);
+}
+
+.back-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  opacity: 0;
+  border-radius: 50%;
+  transition: opacity var(--transition-normal);
+}
+
+.back-btn:hover::before {
+  opacity: 1;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Progress Section */
+.progress-section {
+  padding: 0 20px 30px;
+  text-align: center;
+}
+
+.progress-info {
+  margin-bottom: 20px;
+}
+
+.onboarding-title {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  opacity: 0.95;
+  transition: all 0.3s ease;
+}
+
+.onboarding-title:hover {
+  opacity: 1;
+  color: var(--accent-primary);
+}
+
+.step-counter {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.progress-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--border-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2.5s infinite;
+}
+
+.progress-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  opacity: 0.8;
+  animation: pulse 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.progress-percentage {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: right;
+  transition: all var(--transition-normal);
+}
+
+.progress-percentage.updating {
+  color: var(--accent-primary);
+  transform: scale(1.1);
+  animation: progressUpdate 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes progressUpdate {
+  0% { 
+    transform: scale(1);
+    color: var(--text-secondary);
+  }
+  50% { 
+    transform: scale(1.2);
+    color: var(--accent-primary);
+  }
+  100% { 
+    transform: scale(1.1);
+    color: var(--accent-primary);
+  }
+}
+
+/* Content Area */
+.onboarding-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 40px;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+/* Page transition animations */
+.onboarding-content.page-enter {
+  animation: pageEnter 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.onboarding-content.page-exit {
+  animation: pageExit 0.3s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateX(30px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes pageExit {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.98);
+  }
+}
+
+/* Dark theme specific styles */
+[data-theme="dark"] .athlete-onboarding-container {
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 25%, #2d2d2d 50%, #1a1a1a 75%, #000000 100%);
+}
+
+[data-theme="dark"] .back-btn {
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(0, 0, 0, 0.8));
+  border-color: rgba(0, 255, 136, 0.4);
+}
+
+[data-theme="dark"] .back-btn:hover {
+  border-color: var(--accent-primary);
+}
+
+[data-theme="dark"] .progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .onboarding-header {
+    padding: 15px;
+  }
+  
+  .progress-section {
+    padding: 0 15px 25px;
+  }
+  
+  .onboarding-title {
+    font-size: 1.75rem;
+  }
+  
+  .step-counter {
+    font-size: 0.8rem;
+  }
+  
+  .progress-bar-container {
+    gap: 12px;
+  }
+  
+  .progress-percentage {
+    font-size: 0.8rem;
+    min-width: 35px;
+  }
+  
+  .onboarding-content {
+    padding: 0 15px 30px;
+  }
+  
+  .header-left,
+  .header-right {
+    flex-shrink: 0;
+  }
+  
+  .header-controls {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .onboarding-header {
+    padding: 12px;
+  }
+  
+  .progress-section {
+    padding: 0 12px 20px;
+  }
+  
+  .onboarding-title {
+    font-size: 1.5rem;
+  }
+  
+  .step-counter {
+    font-size: 0.75rem;
+  }
+  
+  .progress-bar-container {
+    gap: 10px;
+  }
+  
+  .progress-bar {
+    height: 6px;
+  }
+  
+  .progress-percentage {
+    font-size: 0.75rem;
+    min-width: 30px;
+  }
+  
+  .onboarding-content {
+    padding: 0 12px 25px;
+  }
+  
+  .back-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .header-left,
+  .header-right {
+    flex-shrink: 0;
+  }
+  
+  .header-controls {
+    gap: 6px;
+  }
+}
+
+/* Error Banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--accent-danger, #e74c3c);
+  padding: 12px 20px;
+  margin: 0 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  backdrop-filter: blur(5px);
+  animation: slideDown 0.3s ease;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.error-dismiss {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.error-dismiss:hover {
+  background: rgba(231, 76, 60, 0.2);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .error-banner {
+    margin: 0 15px;
+    padding: 10px 15px;
+  }
+  
+  .error-content {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-banner {
+    margin: 0 12px;
+    padding: 8px 12px;
+  }
+  
+  .error-content {
+    gap: 6px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Touch-friendly design for mobile */
+@media (max-width: 768px) and (pointer: coarse) {
+  .back-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .progress-bar {
+    height: 10px;
+  }
+  
+  .progress-bar-container {
+    margin-top: 5px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .progress-bar {
+    border: 1px solid var(--text-primary);
+  }
+  
+  .progress-fill {
+    background: var(--text-primary);
+  }
+  
+  .back-btn {
+    border-width: 3px;
+  }
+}
+
+/* Additional Animations */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0); 
+  }
+}
+
+/* Enhanced progress bar animations */
+.progress-bar-container {
+  animation: slideUp 0.6s ease-out 0.4s both;
+}
+
+.progress-info {
+  animation: slideUp 0.5s ease-out 0.3s both;
+}
+
+.onboarding-header {
+  animation: slideUp 0.5s ease-out 0.1s both;
+}
+
+/* Enhanced loading states */
+.loading-state {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading-state::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+  animation: loadingShimmer 1.5s infinite;
+  z-index: 1;
+}
+
+@keyframes loadingShimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Enhanced micro-interactions */
+.interactive-element {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.interactive-element::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.interactive-element:hover::after {
+  width: 100px;
+  height: 100px;
+}
+
+.interactive-element:active::after {
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(0, 255, 136, 0.4) 0%, transparent 70%);
+}
+
+/* Success state animations */
+.success-state {
+  animation: successPulse 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .progress-fill,
+  .back-btn,
+  .onboarding-title,
+  .onboarding-content,
+  .progress-bar-container,
+  .progress-info,
+  .onboarding-header,
+  .interactive-element,
+  .loading-state::before {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .progress-fill::after,
+  .progress-fill::before {
+    animation: none !important;
+  }
+  
+  .back-btn:hover,
+  .interactive-element:hover {
+    transform: none !important;
+  }
+  
+  .interactive-element::after {
+    display: none !important;
+  }
+}

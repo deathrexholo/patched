@@ -1,0 +1,387 @@
+/* Dark Overlay Background */
+.settings-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 2099;
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+  visibility: visible;
+  
+  /* Default state - visible */
+  opacity: 1;
+  
+  /* Smooth transitions */
+  transition: opacity 0.3s ease-out, backdrop-filter 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Modal Container */
+.settings-menu-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 90%;
+  max-width: 500px;
+  max-height: 85vh;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-primary, #e5e7eb);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 2100;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  visibility: visible;
+  color: var(--text-primary, #1f2937);
+  
+  /* Default state - properly centered and visible */
+  transform: translate(-50%, -50%);
+  opacity: 1;
+  
+  /* Smooth transitions for all changes */
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Close Button */
+.settings-menu-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  z-index: 2101;
+}
+
+.settings-menu-close-btn:hover {
+  background: var(--hover-bg, rgba(0, 0, 0, 0.1));
+  color: var(--accent-primary);
+}
+
+/* Modal Header */
+.settings-menu-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  border-bottom: 1px solid var(--border-secondary);
+  background: var(--bg-card);
+  flex-shrink: 0;
+}
+
+.settings-menu-modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.settings-menu-modal-header svg {
+  color: var(--accent-primary);
+}
+
+/* Modal Content - Scrollable */
+.settings-menu-modal-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Settings Section */
+.settings-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-section-title {
+  margin: 8px 0 0 0;
+  padding: 0 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.settings-menu-section:first-child .settings-section-title {
+  display: none;
+}
+
+/* Settings Option */
+.settings-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.settings-menu-option:hover {
+  background: var(--hover-bg, rgba(0, 0, 0, 0.05));
+  border-color: var(--border-primary);
+}
+
+.settings-menu-option:active {
+  transform: scale(0.98);
+}
+
+/* Option Icon */
+.settings-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+/* Option Text */
+.settings-option-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-option-text h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-option-text p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Option Control (Theme, Language) */
+.settings-option-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+/* Theme and Language Options */
+.theme-option,
+.language-option {
+  cursor: default;
+}
+
+.theme-option:hover,
+.language-option:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
+.theme-option:active,
+.language-option:active {
+  transform: none;
+}
+
+/* Logout Section */
+.logout-section {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-secondary);
+}
+
+.logout-option {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.logout-option:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.logout-option .settings-option-icon {
+  background: #ef4444;
+}
+
+/* Scrollbar Styling */
+.settings-menu-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.settings-menu-modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-menu-modal-content::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 3px;
+}
+
+.settings-menu-modal-content::-webkit-scrollbar-thumb:hover {
+  background: var(--border-secondary);
+}
+
+/* Firefox Scrollbar */
+.settings-menu-modal-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-primary) transparent;
+}
+
+/* Portal Container */
+#settings-modal-root {
+  position: relative;
+  z-index: 2098;
+  pointer-events: none;
+}
+
+#settings-modal-root > * {
+  pointer-events: auto;
+}
+
+/* Animation state classes for better control */
+.settings-menu-modal.entering {
+  opacity: 0;
+  transform: translate(-50%, -40%);
+}
+
+.settings-menu-modal.entered {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+.settings-menu-overlay.entering {
+  opacity: 0;
+  backdrop-filter: blur(0px);
+}
+
+.settings-menu-overlay.entered {
+  opacity: 1;
+  backdrop-filter: blur(4px);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .settings-menu-overlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .settings-menu-modal {
+    background: var(--bg-card, #1f2937);
+    color: var(--text-primary, #f9fafb);
+  }
+
+  .settings-option-icon {
+    background: var(--accent-primary);
+  }
+}
+
+/* Mobile Optimization */
+@media (max-width: 480px) {
+  .settings-menu-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .settings-menu-modal-header {
+    padding: 20px;
+  }
+
+  .settings-menu-modal-header h2 {
+    font-size: 20px;
+  }
+
+  .settings-option-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .settings-option-text h3 {
+    font-size: 15px;
+  }
+
+  .settings-option-text p {
+    font-size: 12px;
+  }
+}
+
+/* Tablet Optimization */
+@media (min-width: 481px) and (max-width: 768px) {
+  .settings-menu-modal {
+    max-width: 450px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .settings-menu-overlay,
+  .settings-menu-modal {
+    animation: none;
+  }
+
+  .settings-menu-option {
+    transition: none;
+  }
+
+  .settings-menu-option:active {
+    transform: none;
+  }
+}
+
+/* Focus Visible */
+.settings-menu-option:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.settings-menu-close-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}

@@ -1,0 +1,267 @@
+/* Send Button Component Styles */
+.send-button {
+  /* Base styling */
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  
+  /* Transitions and animations */
+  transition: var(--transition-bounce);
+  
+  /* Shadow and depth */
+  box-shadow: 
+    0 2px 8px rgba(0, 255, 136, 0.2),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  
+  /* Accessibility - minimum touch target */
+  min-width: 44px;
+  min-height: 44px;
+  
+  /* Remove default button styles */
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Hover state - only on devices that support hover */
+@media (hover: hover) and (pointer: fine) {
+  .send-button:hover:not(.disabled):not(.loading) {
+    transform: scale(1.05);
+    box-shadow: 
+      0 4px 16px rgba(0, 255, 136, 0.4),
+      0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Active state */
+.send-button:active:not(.disabled):not(.loading) {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}
+
+/* Disabled state */
+.send-button.disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  opacity: 0.6;
+}
+
+/* Loading state */
+.send-button.loading {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  cursor: wait;
+  transform: none;
+}
+
+.send-button.loading .spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Error state */
+.send-button.error {
+  background: linear-gradient(135deg, var(--accent-danger), #c0392b);
+  animation: shake 0.5s ease-in-out;
+}
+
+.send-button.error:hover:not(.disabled):not(.loading) {
+  box-shadow: 
+    0 4px 16px rgba(231, 76, 60, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+/* Focus styles for accessibility */
+.send-button:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Dark theme adjustments */
+.dark-theme .send-button {
+  box-shadow: 
+    0 2px 8px rgba(0, 255, 136, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .send-button:hover:not(.disabled):not(.loading) {
+  box-shadow: 
+    0 4px 16px rgba(0, 255, 136, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.dark-theme .send-button.disabled {
+  background: #4a5568;
+  opacity: 0.5;
+}
+
+/* Tablet optimizations - Task 5.2 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .send-button {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    /* Enhanced tablet interactions */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .send-button:hover:not(.disabled):not(.loading) {
+    transform: scale(1.08);
+    box-shadow: 
+      0 6px 20px rgba(0, 255, 136, 0.4),
+      0 3px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .send-button:active:not(.disabled):not(.loading) {
+    transform: scale(0.98);
+  }
+}
+
+/* Desktop optimizations - Task 5.2 */
+@media (min-width: 1025px) {
+  .send-button {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+    /* Enhanced desktop interactions */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .send-button svg {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .send-button:hover:not(.disabled):not(.loading) {
+    transform: scale(1.1) translateY(-1px);
+    box-shadow: 
+      0 8px 24px rgba(0, 255, 136, 0.5),
+      0 4px 16px rgba(0, 0, 0, 0.15);
+    /* Subtle glow effect */
+    filter: brightness(1.1);
+  }
+  
+  .send-button:active:not(.disabled):not(.loading) {
+    transform: scale(1.05) translateY(0);
+    transition: transform 0.1s ease;
+  }
+  
+  .send-button.error:hover:not(.disabled):not(.loading) {
+    box-shadow: 
+      0 8px 24px rgba(231, 76, 60, 0.5),
+      0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .send-button {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    /* Ensure button is visible and accessible */
+    position: relative;
+    z-index: 1002; /* Higher than message input area */
+    /* Enhanced shadow for better visibility */
+    box-shadow: 
+      0 3px 10px rgba(0, 255, 136, 0.3),
+      0 1px 4px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Reduce hover effects on mobile for better performance */
+  .send-button:hover {
+    transform: none;
+  }
+  
+  /* Enhance active state for touch feedback */
+  .send-button:active:not(.disabled):not(.loading) {
+    transform: scale(0.9);
+    background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+  }
+}
+
+@media (max-width: 480px) {
+  .send-button {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    /* Ensure visibility on small screens */
+    position: relative;
+    z-index: 1002; /* Higher than message input area */
+    /* More prominent shadow for small screens */
+    box-shadow: 
+      0 4px 12px rgba(0, 255, 136, 0.4),
+      0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .send-button svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .send-button {
+    border: 2px solid currentColor;
+  }
+  
+  .send-button.disabled {
+    border-color: var(--text-muted);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .send-button {
+    transition: none;
+  }
+  
+  .send-button:hover {
+    transform: none;
+  }
+  
+  .send-button:active {
+    transform: none;
+  }
+  
+  .send-button.loading .spinner {
+    animation: none;
+  }
+}

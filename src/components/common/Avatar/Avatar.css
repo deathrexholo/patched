@@ -1,0 +1,323 @@
+/* Universal Avatar Component Styles */
+
+.avatar {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  font-family: var(--font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
+}
+
+.avatar__container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--avatar-size, 48px);
+  height: var(--avatar-size, 48px);
+  flex-shrink: 0;
+}
+
+.avatar__image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-secondary, #f7fafc);
+  border: 2px solid var(--border-color, #e2e8f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Avatar Image */
+.avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
+.avatar__placeholder {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Initials Fallback */
+.avatar__initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  font-size: calc(var(--avatar-size, 48px) * 0.35);
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.avatar__initials-text {
+  letter-spacing: 0.5px;
+}
+
+.avatar__icon {
+  font-size: calc(var(--avatar-size, 48px) * 0.5);
+}
+
+/* Loading Spinner */
+.avatar__spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.avatar--loading .avatar__spinner {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.spinner {
+  width: 60%;
+  height: 60%;
+  border: 2px solid var(--border-color, #e2e8f0);
+  border-top-color: var(--primary-color, #667eea);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Badge (medals, status indicators) */
+.avatar__badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--avatar-size, 48px) * 0.4);
+  height: calc(var(--avatar-size, 48px) * 0.4);
+  background: white;
+  border: 2px solid white;
+  border-radius: 50%;
+  font-size: calc(var(--avatar-size, 48px) * 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 5;
+}
+
+/* Display Name */
+.avatar__name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary, #1f2937);
+  text-align: center;
+  max-width: calc(var(--avatar-size, 48px) + 20px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Variant Sizes */
+.avatar--small .avatar__container {
+  width: 32px;
+  height: 32px;
+}
+
+.avatar--small .avatar__initials {
+  font-size: 11px;
+}
+
+.avatar--small .avatar__badge {
+  width: 13px;
+  height: 13px;
+  font-size: 9px;
+}
+
+.avatar--medium .avatar__container {
+  width: 48px;
+  height: 48px;
+}
+
+.avatar--medium .avatar__initials {
+  font-size: 16px;
+}
+
+.avatar--large .avatar__container {
+  width: 64px;
+  height: 64px;
+}
+
+.avatar--large .avatar__initials {
+  font-size: 22px;
+}
+
+.avatar--large .avatar__badge {
+  width: 26px;
+  height: 26px;
+  font-size: 18px;
+}
+
+.avatar--xl .avatar__container {
+  width: 96px;
+  height: 96px;
+}
+
+.avatar--xl .avatar__initials {
+  font-size: 32px;
+}
+
+.avatar--xl .avatar__badge {
+  width: 38px;
+  height: 38px;
+  font-size: 28px;
+  bottom: -8px;
+  right: -8px;
+}
+
+/* Type Variants */
+
+/* Comment Type - Minimal styling */
+.avatar--comment .avatar__image-wrapper {
+  border-width: 1px;
+}
+
+/* Event Winner - Enhanced styling with shadow */
+.avatar--event-winner .avatar__image-wrapper {
+  border: 3px solid gold;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.avatar--event-winner.avatar--large .avatar__image-wrapper {
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+/* Profile Type - Larger border */
+.avatar--profile .avatar__image-wrapper {
+  border-width: 3px;
+}
+
+/* Search Type - Compact */
+.avatar--search .avatar__image-wrapper {
+  border-width: 1px;
+}
+
+/* Clickable States */
+.avatar--clickable {
+  cursor: pointer;
+}
+
+.avatar--clickable .avatar__image-wrapper {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.avatar--clickable:hover .avatar__image-wrapper {
+  transform: scale(1.15);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.avatar--clickable.avatar--event-winner:hover .avatar__image-wrapper {
+  box-shadow: 0 6px 24px rgba(255, 215, 0, 0.5);
+}
+
+/* Focus State (for accessibility) */
+.avatar--clickable:focus-within .avatar__image-wrapper {
+  outline: 2px solid var(--primary-color, #667eea);
+  outline-offset: 2px;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .avatar__image-wrapper {
+    background: var(--bg-secondary, #1f2937);
+    border-color: var(--border-color, #374151);
+  }
+
+  .avatar__spinner {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .avatar__initials {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .avatar__name {
+    color: var(--text-primary, #f3f4f6);
+  }
+
+  .spinner {
+    border-color: var(--border-color, #4b5563);
+    border-top-color: var(--primary-color, #667eea);
+  }
+}
+
+/* Responsive Mobile */
+@media (max-width: 640px) {
+  .avatar__badge {
+    bottom: -6px;
+    right: -6px;
+  }
+
+  .avatar--xl .avatar__badge {
+    bottom: -10px;
+    right: -10px;
+  }
+}
+
+/* High DPI Screens */
+@media (min-resolution: 192dpi) {
+  .avatar__image {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .avatar__spinner {
+    display: none;
+  }
+}
+
+/* Accessibility - Reduce Motion */
+@media (prefers-reduced-motion: reduce) {
+  .avatar__image-wrapper,
+  .avatar--clickable .avatar__image-wrapper {
+    transition: none;
+  }
+
+  .spinner {
+    animation: none;
+  }
+
+  @keyframes fadeIn {
+    from,
+    to {
+      opacity: 1;
+    }
+  }
+}

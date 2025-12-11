@@ -1,0 +1,261 @@
+.profile-picture-manager {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-picture-container {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 3px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.profile-picture-container:hover {
+  border-color: #3b82f6;
+  transform: scale(1.02);
+}
+
+.profile-picture-container.drag-over {
+  border-color: #10b981;
+  background: #ecfdf5;
+  transform: scale(1.05);
+}
+
+/* Size variants */
+.profile-picture-small .profile-picture-container {
+  width: 60px;
+  height: 60px;
+  border-width: 2px;
+}
+
+.profile-picture-medium .profile-picture-container {
+  width: 100px;
+  height: 100px;
+  border-width: 2px;
+}
+
+.profile-picture-large .profile-picture-container {
+  width: 150px;
+  height: 150px;
+  border-width: 3px;
+}
+
+.profile-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-picture-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #9ca3af;
+}
+
+/* Overlay for upload controls */
+.profile-picture-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 50%;
+}
+
+.profile-picture-container:hover .profile-picture-overlay {
+  opacity: 1;
+}
+
+.profile-picture-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.upload-profile-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.delete-profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-profile-btn:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.delete-profile-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Drag and drop overlay */
+.drag-drop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(16, 185, 129, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.drag-drop-content {
+  text-align: center;
+  color: white;
+}
+
+.drag-drop-content p {
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Loading overlay */
+.profile-picture-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.profile-picture-loading .loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ffffff33;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Small size adjustments */
+.profile-picture-small .upload-profile-btn {
+  padding: 4px 8px;
+  font-size: 10px;
+  gap: 4px;
+}
+
+.profile-picture-small .delete-profile-btn {
+  width: 20px;
+  height: 20px;
+}
+
+.profile-picture-small .drag-drop-content p {
+  font-size: 10px;
+}
+
+/* Medium size adjustments */
+.profile-picture-medium .upload-profile-btn {
+  padding: 6px 10px;
+  font-size: 11px;
+  gap: 5px;
+}
+
+.profile-picture-medium .delete-profile-btn {
+  width: 24px;
+  height: 24px;
+}
+
+.profile-picture-medium .drag-drop-content p {
+  font-size: 11px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .profile-picture-large .profile-picture-container {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .profile-picture-medium .profile-picture-container {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .upload-profile-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+/* Accessibility */
+.upload-profile-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.delete-profile-btn:focus {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .profile-picture-container {
+    border-width: 4px;
+    border-color: #000;
+  }
+  
+  .profile-picture-overlay {
+    background: rgba(0, 0, 0, 0.9);
+  }
+}

@@ -1,0 +1,367 @@
+/* Track Best Section Styles */
+.track-best-section {
+  background: #ffffff !important;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.track-best-section:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.track-best-section .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.track-best-section .section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.track-best-section .section-icon {
+  color: #f59e0b;
+}
+
+.track-best-section .section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.track-best-section .section-edit-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid #d1d5db;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.track-best-section .section-edit-button:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+/* Empty State */
+.track-best-section .empty-section-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.track-best-section .empty-icon {
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.track-best-section .empty-message {
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+  margin: 0 0 8px 0;
+}
+
+.track-best-section .empty-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 20px 0;
+}
+
+.track-best-section .empty-state-button {
+  background: #f59e0b;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.track-best-section .empty-state-button:hover {
+  background: #d97706;
+}
+
+/* Track Best Content */
+.track-best-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Performance Metrics */
+.performance-metrics {
+  flex: 1;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.metric-card:hover {
+  background: #ffffff;
+  border-color: #f59e0b;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.metric-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d97706;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+}
+
+.metric-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Match Information */
+.match-info {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.match-info-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.match-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.match-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-icon {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #6b7280;
+  min-width: 80px;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .track-best-section {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .track-best-section .section-header {
+    margin-bottom: 16px;
+  }
+  
+  .track-best-section .section-title {
+    font-size: 18px;
+  }
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .metric-card {
+    padding: 12px;
+  }
+  
+  .metric-value {
+    font-size: 16px;
+  }
+  
+  .match-details {
+    gap: 6px;
+  }
+  
+  .match-detail-row {
+    flex-wrap: wrap;
+  }
+  
+  .detail-label {
+    min-width: 70px;
+  }
+}
+
+@media (max-width: 480px) {
+  .track-best-section .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .track-best-section .section-edit-button {
+    align-self: flex-end;
+  }
+  
+  .metric-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .metric-content {
+    align-items: center;
+  }
+}
+/* The
+me Support for Better Visibility */
+[data-theme="light"] .metric-card,
+.metric-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .metric-value,
+.metric-value {
+  color: #111827 !important;
+}
+
+[data-theme="light"] .metric-label,
+.metric-label {
+  color: #374151 !important;
+}
+
+[data-theme="dark"] .metric-card {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+[data-theme="dark"] .metric-value {
+  color: #f9fafb !important;
+}
+
+[data-theme="dark"] .metric-label {
+  color: #d1d5db !important;
+}
+
+/* High contrast overlay for maximum visibility */
+.track-best-section .metric-card {
+  position: relative;
+  backdrop-filter: blur(1px);
+}
+
+.track-best-section .metric-value {
+  position: relative;
+  z-index: 2;
+}
+
+.track-best-section .metric-label {
+  position: relative;
+  z-index: 2;
+}
+
+/* Force visibility on white backgrounds */
+body[style*="background: white"] .metric-value,
+body[style*="background-color: white"] .metric-value,
+.theme-light .metric-value {
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+body[style*="background: white"] .metric-label,
+body[style*="background-color: white"] .metric-label,
+.theme-light .metric-label {
+  color: #374151 !important;
+  font-weight: 600 !important;
+}/* S
+pecific class for track best metrics with maximum visibility */
+.track-best-metric-card {
+  background: #ffffff !important;
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+.track-best-metric-card .metric-value {
+  color: #000000 !important;
+  font-weight: 800 !important;
+  font-size: 20px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.track-best-metric-card .metric-label {
+  color: #374151 !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+}
+
+.track-best-metric-card:hover {
+  border-color: #d97706 !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+}

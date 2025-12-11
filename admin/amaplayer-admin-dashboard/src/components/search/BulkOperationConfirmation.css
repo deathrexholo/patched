@@ -1,0 +1,662 @@
+/* Bulk Operation Confirmation Styles */
+.bulk-operation-confirmation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.confirmation-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.confirmation-content {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-width: 600px;
+  width: 100%;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Confirmation Header */
+.confirmation-header {
+  display: flex;
+  align-items: flex-start;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.confirmation-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-right: 16px;
+  border-radius: 12px;
+  background: #f3f4f6;
+  flex-shrink: 0;
+}
+
+.confirmation-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.confirmation-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.confirmation-description {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.confirmation-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.confirmation-close-button:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.confirmation-close-button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.confirmation-close-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Confirmation Body */
+.confirmation-body {
+  padding: 0 24px 24px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Affected Items Section */
+.affected-items-section {
+  margin-bottom: 20px;
+}
+
+.affected-items-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.affected-items-preview {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  space-y: 8px;
+}
+
+.affected-item-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.affected-item-preview:not(:last-child) {
+  margin-bottom: 8px;
+}
+
+.item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-id {
+  font-size: 12px;
+  color: #6b7280;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.affected-item-preview.more-items {
+  background: #f3f4f6;
+  border-style: dashed;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.affected-item-preview.more-items:hover {
+  background: #e5e7eb;
+}
+
+.affected-item-preview.more-items .item-name {
+  font-style: italic;
+  color: #6b7280;
+}
+
+.affected-item-preview.more-items .item-id {
+  color: #9ca3af;
+}
+
+/* Reason Section */
+.reason-section {
+  margin-bottom: 20px;
+}
+
+.reason-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.reason-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #111827;
+  background: white;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+}
+
+.reason-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.reason-textarea:disabled {
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.reason-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.reason-error {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #dc2626;
+  font-weight: 500;
+}
+
+/* Warning Section */
+.warning-section {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.warning-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+  border-radius: 6px;
+  background: #fee2e2;
+  color: #dc2626;
+  flex-shrink: 0;
+}
+
+.warning-content {
+  flex: 1;
+}
+
+.warning-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #b91c1c;
+  margin-bottom: 4px;
+}
+
+.warning-message {
+  font-size: 13px;
+  color: #dc2626;
+  line-height: 1.4;
+}
+
+/* Confirmation Actions */
+.confirmation-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.cancel-button,
+.confirm-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.cancel-button {
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+}
+
+.cancel-button:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.cancel-button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.confirm-button {
+  border: 1px solid #3b82f6;
+  background: #3b82f6;
+  color: white;
+}
+
+.confirm-button:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.confirm-button:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.confirm-button.destructive {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.confirm-button.destructive:hover {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.cancel-button:disabled,
+.confirm-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animations */
+.confirmation-content {
+  animation: slideInConfirmation 0.3s ease-out;
+}
+
+@keyframes slideInConfirmation {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.confirmation-overlay {
+  animation: fadeInConfirmation 0.3s ease-out;
+}
+
+@keyframes fadeInConfirmation {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.affected-item-preview {
+  animation: slideInItem 0.2s ease-out;
+}
+
+@keyframes slideInItem {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.warning-section {
+  animation: slideInWarning 0.3s ease-out;
+}
+
+@keyframes slideInWarning {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .bulk-operation-confirmation {
+    padding: 8px;
+  }
+
+  .confirmation-content {
+    max-height: 90vh;
+  }
+
+  .confirmation-header {
+    padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .confirmation-icon {
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+
+  .confirmation-close-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    margin-left: 0;
+  }
+
+  .confirmation-body {
+    padding: 0 20px 20px 20px;
+  }
+
+  .confirmation-actions {
+    flex-direction: column;
+    padding: 16px 20px;
+  }
+
+  .cancel-button,
+  .confirm-button {
+    width: 100%;
+  }
+
+  .confirmation-title {
+    font-size: 18px;
+  }
+
+  .confirmation-description {
+    font-size: 13px;
+  }
+
+  .affected-item-preview {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .item-id {
+    margin-left: 0;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .confirmation-content {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+
+  .confirmation-header {
+    border-color: #374151;
+  }
+
+  .confirmation-title {
+    color: #f9fafb;
+  }
+
+  .confirmation-description {
+    color: #9ca3af;
+  }
+
+  .confirmation-close-button {
+    color: #9ca3af;
+  }
+
+  .confirmation-close-button:hover {
+    background: #374151;
+    color: #d1d5db;
+  }
+
+  .confirmation-icon {
+    background: #374151;
+  }
+
+  .affected-items-title {
+    color: #f9fafb;
+  }
+
+  .affected-items-preview {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .affected-item-preview {
+    background: #4b5563;
+    border-color: #6b7280;
+  }
+
+  .item-name {
+    color: #f9fafb;
+  }
+
+  .item-id {
+    color: #9ca3af;
+  }
+
+  .affected-item-preview.more-items {
+    background: #6b7280;
+  }
+
+  .affected-item-preview.more-items:hover {
+    background: #7c2d12;
+  }
+
+  .reason-label {
+    color: #d1d5db;
+  }
+
+  .reason-textarea {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .reason-textarea:focus {
+    border-color: #3b82f6;
+  }
+
+  .reason-error {
+    color: #fca5a5;
+  }
+
+  .warning-section {
+    background: #7f1d1d;
+    border-color: #991b1b;
+  }
+
+  .warning-icon {
+    background: #991b1b;
+    color: #fca5a5;
+  }
+
+  .warning-title {
+    color: #fca5a5;
+  }
+
+  .warning-message {
+    color: #fecaca;
+  }
+
+  .confirmation-actions {
+    background: #111827;
+    border-color: #374151;
+  }
+
+  .cancel-button {
+    background: #374151;
+    border-color: #4b5563;
+    color: #d1d5db;
+  }
+
+  .cancel-button:hover {
+    background: #4b5563;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .confirmation-content {
+    border: 3px solid #000;
+  }
+
+  .affected-item-preview,
+  .warning-section {
+    border-width: 2px;
+  }
+
+  .cancel-button:focus,
+  .confirm-button:focus,
+  .confirmation-close-button:focus {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .confirmation-content,
+  .confirmation-overlay,
+  .affected-item-preview,
+  .warning-section,
+  .cancel-button,
+  .confirm-button,
+  .confirmation-close-button,
+  .reason-textarea {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Loading States */
+.confirm-button svg.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus Management */
+.confirmation-content:focus {
+  outline: none;
+}
+
+.confirmation-content[data-focus-trap] {
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+/* Print Styles */
+@media print {
+  .bulk-operation-confirmation {
+    position: static;
+    background: white;
+    color: black;
+  }
+
+  .confirmation-overlay {
+    display: none;
+  }
+
+  .confirmation-content {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+
+  .confirmation-actions {
+    display: none;
+  }
+}

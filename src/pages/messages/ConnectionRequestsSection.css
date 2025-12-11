@@ -1,0 +1,272 @@
+.connection-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.connection-section.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #666;
+  font-size: 14px;
+}
+
+.connection-section-header {
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 15px;
+}
+
+.connection-section-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.connection-section-header .subtitle {
+  margin: 8px 0 0 0;
+  color: #999;
+  font-size: 13px;
+}
+
+/* Error Message */
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  border-left: 4px solid #f44336;
+  font-size: 13px;
+}
+
+/* No Connections State */
+.no-connections {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 14px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+/* Subsections */
+.connection-subsection {
+  margin-bottom: 20px;
+}
+
+.connection-subsection:last-child {
+  margin-bottom: 0;
+}
+
+.subsection-header {
+  padding: 12px 0;
+  margin-bottom: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.subsection-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.subsection-header .icon {
+  font-size: 18px;
+}
+
+.subsection-header .toggle {
+  color: #999;
+  transition: transform 0.3s ease;
+}
+
+.subsection-header .toggle.open {
+  transform: rotate(180deg);
+}
+
+/* Connection List */
+.connection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Connection Card */
+.connection-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.connection-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.connection-card.pending {
+  border-color: #fff3cd;
+  background: #fffbf0;
+}
+
+.connection-card.approved {
+  border-color: #c8e6c9;
+  background: #f1f8f6;
+}
+
+.card-header {
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.org-info {
+  flex: 1;
+}
+
+.org-info h5 {
+  margin: 0;
+  color: #333;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.org-info .request-date,
+.org-info .approval-date {
+  margin: 4px 0 0 0;
+  color: #999;
+  font-size: 12px;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.status-badge.approved {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-badge span {
+  font-size: 13px;
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.info-text {
+  margin: 0;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-notes {
+  margin-top: 12px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 6px;
+  border-left: 3px solid #2196f3;
+}
+
+.admin-notes .label {
+  margin: 0 0 6px 0;
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-notes .notes-text {
+  margin: 0;
+  color: #555;
+  font-size: 13px;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+/* Button */
+.btn-message {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-message:hover {
+  background: #1976d2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+}
+
+.btn-message:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .connection-section {
+    padding: 15px;
+  }
+
+  .card-header {
+    flex-direction: column;
+  }
+
+  .status-badge {
+    align-self: flex-start;
+  }
+
+  .connection-section-header h3 {
+    font-size: 16px;
+  }
+
+  .subsection-header h4 {
+    font-size: 14px;
+  }
+
+  .info-text {
+    font-size: 12px;
+  }
+}

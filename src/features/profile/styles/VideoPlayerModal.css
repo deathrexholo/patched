@@ -1,0 +1,179 @@
+.video-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.video-modal-content {
+  background: #1a1a1a;
+  border-radius: 12px;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.video-modal-header {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+
+.video-modal-close {
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.video-modal-close:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.video-player-container {
+  position: relative;
+  width: 100%;
+  background: black;
+}
+
+.video-player {
+  width: 100%;
+  height: auto;
+  max-height: 70vh;
+  display: block;
+}
+
+.video-modal-info {
+  padding: 20px;
+  color: white;
+}
+
+.video-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: white;
+}
+
+.video-modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #b3b3b3;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.video-modal-sport {
+  background: #20B2AA;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.video-modal-category {
+  color: #20B2AA;
+  font-weight: 500;
+}
+
+.video-modal-separator {
+  color: #666;
+}
+
+.video-modal-views,
+.video-modal-date {
+  color: #b3b3b3;
+}
+
+.video-modal-description {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #e0e0e0;
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .video-modal-overlay {
+    padding: 10px;
+  }
+
+  .video-modal-content {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .video-modal-header {
+    top: 10px;
+    right: 10px;
+  }
+
+  .video-modal-close {
+    width: 36px;
+    height: 36px;
+  }
+
+  .video-player {
+    max-height: 60vh;
+  }
+
+  .video-modal-info {
+    padding: 16px;
+  }
+
+  .video-modal-title {
+    font-size: 18px;
+  }
+
+  .video-modal-meta {
+    font-size: 13px;
+  }
+
+  .video-modal-description {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-modal-overlay {
+    padding: 5px;
+  }
+
+  .video-modal-content {
+    border-radius: 8px;
+  }
+
+  .video-player {
+    max-height: 50vh;
+  }
+
+  .video-modal-info {
+    padding: 12px;
+  }
+
+  .video-modal-title {
+    font-size: 16px;
+  }
+}

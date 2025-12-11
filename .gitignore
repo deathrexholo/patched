@@ -1,0 +1,88 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+*.env
+*.env.*
+
+# API Keys and credentials
+**/config/secrets.json
+**/config/credentials.json
+**/config/keys.json
+**/.secrets/
+**/secrets/
+service-account*.json
+serviceAccountKey*.json
+admin-credentials*.json
+admin-config*.json
+
+# Firebase private keys
+firebase-adminsdk*.json
+*-firebase-adminsdk-*.json
+
+# Scripts service account keys (NEVER commit these!)
+scripts/serviceAccountKey.json
+scripts/**/serviceAccountKey*.json
+
+# SSL certificates and keys
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# Database credentials
+database.config.json
+db-credentials.json
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.claude
+.claude.md
+.kiro
+.vscode
+
+# Documentation files  
+*.md
+!CLAUDE.md
+!docs/*.md
+.firebase
+firebase-debug.log
+firebase.json
+firebase.rules
+firebase.functions.config.json
+firebase.storage.rules
+firebase.firestore.rules
+firebase.database.rules.json
+firebase.analytics.config.json
+firebase.appcheck.config.json
+firebase.remoteconfig.config.json
+firebase.messaging.config.json
+firebase.auth.config.json
+
+#folder
+/docs
+admin/node_modules/

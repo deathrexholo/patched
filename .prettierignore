@@ -1,0 +1,14 @@
+build
+coverage
+dist
+node_modules
+*.min.js
+*.min.css
+package-lock.json
+yarn.lock
+.env
+.env.local
+.env.production
+.env.development
+public/
+*.md

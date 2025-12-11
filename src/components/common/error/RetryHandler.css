@@ -1,0 +1,193 @@
+.retry-handler {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 2rem;
+  background: var(--background-color, #000);
+  color: var(--text-color, #fff);
+}
+
+.retry-content {
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.error-icon-container {
+  margin-bottom: 1rem;
+}
+
+.error-icon {
+  color: var(--error-color, #ff4444);
+}
+
+.error-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-color, #fff);
+}
+
+.error-message {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary, #ccc);
+}
+
+.network-status {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.network-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.network-indicator.online {
+  color: var(--success-color, #28a745);
+}
+
+.network-indicator.offline {
+  color: var(--error-color, #ff4444);
+}
+
+.connection-warning {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--warning-color, #ffc107);
+  margin-bottom: 0;
+}
+
+.retry-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.retry-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color, #007bff);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.retry-button:hover:not(:disabled) {
+  background: var(--primary-hover, #0056b3);
+  transform: translateY(-1px);
+}
+
+.retry-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.retry-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.retry-info {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #ccc);
+  margin: 0;
+  font-style: italic;
+}
+
+.error-details {
+  margin-top: 2rem;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.error-details summary {
+  cursor: pointer;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-color, #fff);
+}
+
+.error-stack {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-secondary, #ccc);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .retry-handler {
+    padding: 1rem;
+    min-height: 250px;
+  }
+
+  .error-title {
+    font-size: 1.25rem;
+  }
+
+  .error-message {
+    font-size: 0.9rem;
+  }
+
+  .retry-button {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+    min-width: 120px;
+  }
+
+  .network-status {
+    padding: 0.75rem;
+  }
+
+  .network-indicator {
+    font-size: 0.85rem;
+  }
+}
+
+/* Animation for retry button */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+  }
+}
+
+.retry-button:not(:disabled):hover {
+  animation: pulse 1.5s infinite;
+}

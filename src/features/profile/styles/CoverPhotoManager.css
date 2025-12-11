@@ -1,0 +1,314 @@
+.cover-photo-manager {
+  width: 100%;
+  margin-bottom: 0; /* Remove margin to prevent layout issues */
+}
+
+.cover-photo-container {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+  transition: all 0.3s ease;
+}
+
+.cover-photo-container.drag-over {
+  border: 2px dashed var(--primary-color);
+  background-color: var(--bg-tertiary);
+}
+
+.cover-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+/* Remove hover scale effect */
+
+.cover-photo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cover-photo-container:hover .cover-photo-overlay {
+  opacity: 1;
+}
+
+.cover-photo-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cover-photo-actions-centered {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-cover-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.upload-cover-btn:hover {
+  background: white;
+}
+
+.upload-cover-btn-centered {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.upload-cover-btn-centered:hover {
+  background: white;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.delete-cover-btn-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.delete-cover-btn-small:hover {
+  background: rgba(239, 68, 68, 1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.delete-cover-btn-small:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.delete-cover-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+.delete-cover-btn:hover {
+  background: rgba(239, 68, 68, 1);
+}
+
+.delete-cover-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.drag-drop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 123, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.drag-drop-content {
+  text-align: center;
+  color: white;
+}
+
+.drag-drop-content p {
+  margin: 8px 0 0 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cover-photo-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  gap: 12px;
+  z-index: 5;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.empty-cover-state {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(1px);
+}
+
+.empty-cover-content {
+  text-align: center;
+  color: white;
+  padding: 20px;
+}
+
+.empty-cover-content svg {
+  opacity: 0.8;
+  margin-bottom: 16px;
+}
+
+.empty-cover-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.empty-cover-content p {
+  margin: 0 0 20px 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.add-cover-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--accent-primary, #007bff);
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.add-cover-btn:hover {
+  background: var(--accent-primary-hover, #0056b3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.cover-photo-tips {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--bg-secondary, #f8f9fa);
+  border-radius: 8px;
+  border-left: 4px solid var(--accent-primary, #007bff);
+}
+
+.cover-photo-tips p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  line-height: 1.4;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .cover-photo-container {
+    height: 200px;
+    border-radius: 12px;
+    margin-bottom: -80px;
+  }
+  
+  .cover-photo-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .upload-cover-btn,
+  .delete-cover-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  
+  .empty-cover-content h3 {
+    font-size: 18px;
+  }
+  
+  .empty-cover-content p {
+    font-size: 13px;
+  }
+  
+  .cover-photo-tips {
+    margin-top: 8px;
+    padding: 10px 12px;
+  }
+  
+  .cover-photo-tips p {
+    font-size: 12px;
+  }
+}

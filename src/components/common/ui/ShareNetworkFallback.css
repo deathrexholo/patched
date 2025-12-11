@@ -1,0 +1,233 @@
+.share-network-fallback {
+  padding: 32px 24px;
+  text-align: center;
+  background: var(--background-primary, #ffffff);
+  border-radius: 12px;
+}
+
+.share-network-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.share-network-icon {
+  color: var(--warning-color, #f59e0b);
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.share-network-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary, #000);
+  margin: 0 0 12px 0;
+}
+
+.share-network-message {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+}
+
+.share-network-retry-info {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+  margin: 0 0 16px 0;
+}
+
+.share-network-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-indicator.offline {
+  background: var(--error-color, #ef4444);
+  animation: pulse 2s infinite;
+}
+
+.share-network-countdown {
+  font-size: 13px;
+  color: var(--primary-color, #1877f2);
+  margin: 0 0 16px 0;
+  font-weight: 500;
+}
+
+.share-network-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.share-network-retry-btn,
+.share-network-cancel-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+}
+
+.share-network-retry-btn {
+  background: var(--primary-color, #1877f2);
+  color: white;
+}
+
+.share-network-retry-btn:hover:not(:disabled) {
+  background: var(--primary-hover, #166fe5);
+}
+
+.share-network-retry-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.share-network-cancel-btn {
+  background: var(--background-secondary, #f5f5f5);
+  color: var(--text-primary, #000);
+}
+
+.share-network-cancel-btn:hover:not(:disabled) {
+  background: var(--background-tertiary, #e5e5e5);
+}
+
+.share-network-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.share-network-max-retries {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--error-background, #fee2e2);
+  color: var(--error-color, #ef4444);
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.share-network-tips {
+  text-align: left;
+  background: var(--background-secondary, #f5f5f5);
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.share-network-tips h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #000);
+  margin: 0 0 8px 0;
+}
+
+.share-network-tips ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  line-height: 1.6;
+}
+
+.share-network-tips li {
+  margin-bottom: 4px;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .share-network-fallback {
+    background: var(--background-primary, #1a1a1a);
+  }
+
+  .share-network-title {
+    color: var(--text-primary, #ffffff);
+  }
+
+  .share-network-message {
+    color: var(--text-secondary, #b3b3b3);
+  }
+
+  .share-network-cancel-btn {
+    background: var(--background-secondary, #2a2a2a);
+    color: var(--text-primary, #ffffff);
+  }
+
+  .share-network-cancel-btn:hover:not(:disabled) {
+    background: var(--background-tertiary, #3a3a3a);
+  }
+
+  .share-network-tips {
+    background: var(--background-secondary, #2a2a2a);
+  }
+
+  .share-network-max-retries {
+    background: rgba(239, 68, 68, 0.1);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .share-network-fallback {
+    padding: 24px 16px;
+  }
+
+  .share-network-title {
+    font-size: 16px;
+  }
+
+  .share-network-message {
+    font-size: 13px;
+  }
+
+  .share-network-actions {
+    flex-direction: column;
+  }
+
+  .share-network-retry-btn,
+  .share-network-cancel-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
