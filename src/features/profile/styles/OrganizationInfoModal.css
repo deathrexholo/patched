@@ -1,6 +1,47 @@
 .organization-info-modal {
   max-width: 500px;
   width: 90%;
+  background: white !important;
+  color: #1a1a1a !important;
+
+  /* Override dark theme CSS variables to light theme */
+  --text-primary: #1a1a1a !important;
+  --text-secondary: #4a5568 !important;
+  --bg-primary: white !important;
+  --bg-secondary: #f9fafb !important;
+  --bg-input: white !important;
+  --border-primary: #d1d5db !important;
+}
+
+.organization-info-modal *,
+.organization-info-modal *::before,
+.organization-info-modal *::after {
+  color: #1a1a1a;
+}
+
+.organization-info-modal option {
+  color: #1a1a1a !important;
+  background: white !important;
+}
+
+/* Fix autofill styles */
+.organization-info-modal input:-webkit-autofill,
+.organization-info-modal input:-webkit-autofill:hover,
+.organization-info-modal input:-webkit-autofill:focus,
+.organization-info-modal input:-webkit-autofill:active {
+  -webkit-text-fill-color: #1a1a1a !important;
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Ensure all text elements are dark */
+.organization-info-modal input[type="text"],
+.organization-info-modal input[type="email"],
+.organization-info-modal input[type="url"],
+.organization-info-modal input[type="tel"],
+.organization-info-modal input[type="number"] {
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
 }
 
 .organization-info-modal .modal-header {
@@ -24,7 +65,7 @@
 .organization-info-modal .modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a !important;
   margin: 0;
 }
 
@@ -53,12 +94,21 @@
 
 .organization-info-modal .modal-form {
   padding: 24px;
+  background: white !important;
+  color: #1a1a1a !important;
 }
 
 .organization-info-modal .form-section {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.organization-info-modal .form-section h3,
+.organization-info-modal h3,
+.organization-info-modal h2,
+.organization-info-modal h4 {
+  color: #1a1a1a !important;
 }
 
 .organization-info-modal .form-group {
@@ -73,18 +123,32 @@
   gap: 6px;
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: #1a1a1a !important;
 }
 
 .organization-info-modal .form-input,
-.organization-info-modal .form-select {
+.organization-info-modal .form-select,
+.organization-info-modal input,
+.organization-info-modal select,
+.organization-info-modal textarea {
   padding: 10px 12px;
   border: 1px solid #d0d0d0;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 14px !important;
   font-family: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background: white;
+  background: white !important;
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+}
+
+.organization-info-modal .form-input::placeholder,
+.organization-info-modal input::placeholder,
+.organization-info-modal select::placeholder,
+.organization-info-modal textarea::placeholder {
+  color: #888 !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #888 !important;
 }
 
 .organization-info-modal .form-input:focus,
@@ -142,7 +206,7 @@
 
 .organization-info-modal .modal-button.secondary {
   background: white;
-  color: #333;
+  color: #1a1a1a !important;
   border: 1px solid #d0d0d0;
 }
 
@@ -179,11 +243,12 @@
 }
 
 .modal-container {
-  background: white;
+  background: white !important;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 13px -3px rgba(0, 0, 0, 0.1);
   max-height: 90vh;
   overflow-y: auto;
+  color: #333 !important;
 }
 
 /* Mobile responsiveness */

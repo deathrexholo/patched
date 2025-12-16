@@ -73,12 +73,40 @@ const getCollectionForRole = (role: UserRole): string => {
 const Profile: React.FC = React.memo(() => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId?: string }>();
-  const { currentUser: firebaseUser, isGuest } = useAuth();
+  const { currentUser: firebaseUser, isGuest, updateUserProfile } = useAuth();
   const [currentRole, setCurrentRole] = useState<UserRole>('athlete');
+  const [viewerRole, setViewerRole] = useState<string>('athlete'); // Viewer's role
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Fetch viewer's role (current user)
+  useEffect(() => {
+    const fetchViewerRole = async () => {
+      // 1. Try localStorage first (fastest)
+      const storedRole = localStorage.getItem('userRole');
+      if (storedRole) {
+        setViewerRole(storedRole);
+        return;
+      }
+
+      // 2. Fetch from Firestore if not in localStorage and user is logged in
+      if (firebaseUser?.uid) {
+        try {
+          const profile = await userService.getUserProfile(firebaseUser.uid);
+          if (profile?.role) {
+            setViewerRole(profile.role);
+            localStorage.setItem('userRole', profile.role);
+          }
+        } catch (err) {
+          console.error('Error fetching viewer role:', err);
+        }
+      }
+    };
+
+    fetchViewerRole();
+  }, [firebaseUser]);
 
   // Performance monitoring - Disabled to prevent warnings
   // const { measureRender, logRenderTime } = usePerformanceMonitoring('Profile');
@@ -171,85 +199,40 @@ const Profile: React.FC = React.memo(() => {
 
 
 
-  // Function to load user posts from posts collection
-  const loadUserPosts = async (targetUserId: string) => {
-    try {
-      const { collection, query, where, orderBy, getDocs } = await import('firebase/firestore');
-      const { db } = await import('../../../lib/firebase');
-
-      // Query posts collection for posts by this user
-      const postsQuery = query(
-        collection(db, 'posts'),
-        where('userId', '==', targetUserId),
-        orderBy('timestamp', 'desc')
-      );
-
-      const postsSnapshot = await getDocs(postsQuery);
-      const userPosts: Post[] = [];
-
-      postsSnapshot.forEach((doc) => {
-        const postData = doc.data();
-
-        // Build mediaUrls array from the different media fields
-        const mediaUrls: string[] = [];
-        if (postData.imageUrl) mediaUrls.push(postData.imageUrl);
-        if (postData.videoUrl) mediaUrls.push(postData.videoUrl);
-        if (postData.mediaUrl) mediaUrls.push(postData.mediaUrl);
-
-        // Determine post type based on media
-        let postType: 'photo' | 'video' | 'text' | 'mixed' = 'text';
-        if (postData.mediaType === 'image' || postData.imageUrl) {
-          postType = 'photo';
-        } else if (postData.mediaType === 'video' || postData.videoUrl) {
-          postType = 'video';
-        } else if (mediaUrls.length > 1) {
-          postType = 'mixed';
-        }
-
-        userPosts.push({
-          id: doc.id,
-          type: postType,
-          title: postData.title || '',
-          content: postData.caption || postData.content || '',
-          mediaUrls: mediaUrls,
-          thumbnailUrl: postData.thumbnailUrl || postData.imageUrl || null,
-          createdDate: postData.timestamp?.toDate() || postData.createdAt?.toDate() || new Date(),
-          likes: Array.isArray(postData.likes) ? postData.likes.length : (postData.likes || 0),
-          comments: Array.isArray(postData.comments) ? postData.comments.length : (postData.comments || 0),
-          isPublic: postData.isPublic !== undefined ? postData.isPublic : true
-        });
-      });
-
-      setPosts(userPosts);
-    } catch (error) {
-      console.error('Error loading user posts:', error);
-      // Fallback to empty array if posts collection doesn't exist or has issues
-      setPosts([]);
-
-
-    }
-  };
-
   useEffect(() => {
-    // Load profile data based on whether it's current user or another user
+    let isMounted = true;
+
+    // Scroll to top immediately when profile changes
+    window.scrollTo(0, 0);
+
     const loadProfileData = async () => {
       try {
         setIsLoading(true);
+        // Reset states to prevent showing stale data
+        setPosts([]);
+        setTalentVideos([]);
+        setAchievements([]);
+        setCertificates([]);
+        setError(null);
 
-        const { doc, getDoc } = await import('firebase/firestore');
+        const { doc, getDoc, collection, query, where, orderBy, getDocs } = await import('firebase/firestore');
         const { db } = await import('../../../lib/firebase');
 
         const targetUserId = userId || firebaseUser?.uid;
 
         if (!targetUserId) {
-          setError('No user ID available');
-          setIsLoading(false);
+          if (isMounted) {
+            setError('No user ID available');
+            setIsLoading(false);
+          }
           return;
         }
 
+        // 1. Fetch User Profile
         try {
-          // Fetch user profile using userService (automatically checks all role-specific collections)
           const userData = await userService.getUserProfile(targetUserId);
+
+          if (!isMounted) return;
 
           if (userData) {
             // Set role from the fetched user data
@@ -257,43 +240,65 @@ const Profile: React.FC = React.memo(() => {
               setCurrentRole(userData.role as UserRole);
             }
 
-            // Set personal details from Firestore data
-            // Handle sport data: use sportDetails (array of objects) or fall back to sports field
+            // Set personal details
             const sportData = userData.sportDetails && userData.sportDetails.length > 0
-              ? userData.sportDetails[0].name // Use first sport's name
+              ? userData.sportDetails[0].name
               : userData.sports?.[0] || undefined;
 
-            // Handle position data: use positionName or fall back to position field
             const positionData = userData.positionName || userData.position;
 
             setPersonalDetails({
-              name: userData.displayName || firebaseUser?.displayName || 'User',
-              dateOfBirth: userData.dateOfBirth,
-              gender: userData.gender,
-              mobile: userData.mobile,
-              email: userData.email,
-              city: userData.city,
+              name: userData.displayName || (userData as any)?.organizationName || (userData as any)?.parentFullName || (userData as any)?.fullName || firebaseUser?.displayName || 'User',
+              dateOfBirth: userData.dateOfBirth || (userData as any)?.child?.dateOfBirth,
+              gender: userData.gender || (userData as any)?.child?.gender,
+              mobile: userData.mobile || (userData as any)?.primaryPhone || (userData as any)?.mobileNumber || (userData as any)?.phone,
+              email: userData.email || (userData as any)?.primaryEmail,
+              city: userData.city || (userData as any)?.address?.city || (userData as any)?.child?.city,
               district: undefined,
-              state: userData.state,
-              country: userData.country,
+              state: userData.state || (userData as any)?.address?.state || (userData as any)?.child?.state,
+              country: userData.country || (userData as any)?.address?.country || (userData as any)?.child?.country,
               playerType: undefined,
-              sport: sportData,
+              sport: sportData || (userData as any)?.sport,
               position: positionData,
               // Organization fields
-              organizationName: undefined,
-              organizationType: undefined,
+              organizationName: (userData as any)?.organizationName,
+              organizationType: (userData as any)?.organizationType,
               location: userData.location,
-              contactEmail: userData.email,
-              website: userData.website,
+              contactEmail: (userData as any)?.primaryEmail || userData.email,
+              website: (userData as any)?.website || userData.website,
+              contactPerson: (userData as any)?.contactPerson,
+              designation: (userData as any)?.designation,
+              primaryPhone: (userData as any)?.primaryPhone,
+              secondaryPhone: (userData as any)?.secondaryPhone,
+              registrationNumber: (userData as any)?.registrationNumber,
+              yearEstablished: (userData as any)?.yearEstablished,
+              address: (userData as any)?.address,
+              sports: (userData as any)?.sports,
+              numberOfPlayers: (userData as any)?.numberOfPlayers,
+              ageGroups: (userData as any)?.ageGroups,
+              facilities: (userData as any)?.facilities,
+              achievements: (userData as any)?.achievements,
               // Parent fields
-              relationship: undefined,
+              parentFullName: (userData as any)?.parentFullName,
+              relationship: (userData as any)?.relationshipToChild,
+              relationshipToChild: (userData as any)?.relationshipToChild,
+              mobileNumber: (userData as any)?.mobileNumber,
               connectedAthletes: [],
+              child: (userData as any)?.child,
+              schoolInfo: (userData as any)?.schoolInfo,
+              childSports: (userData as any)?.sports,
+              aspirations: (userData as any)?.aspirations,
+              contentConsent: (userData as any)?.contentConsent,
               // Coach fields
+              fullName: (userData as any)?.fullName,
+              phone: (userData as any)?.phone,
               specializations: userData.specializations || [],
-              yearsExperience: typeof (userData as any)?.yearsExperience === 'string' 
-                ? parseInt((userData as any).yearsExperience, 10) 
+              yearsExperience: typeof (userData as any)?.yearsExperience === 'string'
+                ? parseInt((userData as any).yearsExperience, 10)
                 : (userData as any)?.yearsExperience || 0,
-              coachingLevel: (userData as any)?.coachingLevel
+              coachingLevel: (userData as any)?.coachingLevel,
+              certifications: (userData as any)?.certifications,
+              bio: (userData as any)?.bio || userData.bio
             });
 
             // Set physical attributes
@@ -310,11 +315,7 @@ const Profile: React.FC = React.memo(() => {
               clubName: undefined
             });
 
-            // Load other profile data
-            setAchievements([]);
-            setCertificates([]);
-            // Load talent videos from separate talentVideos collection (not from user document)
-            const { collection, query, where, getDocs, Timestamp } = await import('firebase/firestore');
+            // Load talent videos
             const talentVideosRef = collection(db, 'talentVideos');
             const talentVideoQuery = query(talentVideosRef, where('userId', '==', targetUserId));
             const talentVideoSnapshot = await getDocs(talentVideoQuery);
@@ -328,26 +329,71 @@ const Profile: React.FC = React.memo(() => {
                 verificationDeadline: data.verificationDeadline?.toDate ? data.verificationDeadline.toDate() : undefined
               } as TalentVideo);
             });
-            setTalentVideos(talentVideosList);
-            setTrackBest({});
-            setProfilePicture(userData.photoURL || null);
-            setCoverPhoto(null);
-            setAthleteSports(userData.sportDetails || []);
+            
+            if (isMounted) {
+              setTalentVideos(talentVideosList);
+              setTrackBest({});
+              setProfilePicture(userData.photoURL || null);
+              setCoverPhoto(null);
+              setAthleteSports(userData.sportDetails || []);
+            }
 
-            // Load posts from separate posts collection
-            await loadUserPosts(targetUserId);
+            // 2. Load User Posts
+            const postsQuery = query(
+              collection(db, 'posts'),
+              where('userId', '==', targetUserId),
+              orderBy('timestamp', 'desc')
+            );
+
+            const postsSnapshot = await getDocs(postsQuery);
+            const userPosts: Post[] = [];
+
+            postsSnapshot.forEach((doc) => {
+              const postData = doc.data();
+              const mediaUrls: string[] = [];
+              if (postData.imageUrl) mediaUrls.push(postData.imageUrl);
+              if (postData.videoUrl) mediaUrls.push(postData.videoUrl);
+              if (postData.mediaUrl) mediaUrls.push(postData.mediaUrl);
+
+              let postType: 'photo' | 'video' | 'text' | 'mixed' = 'text';
+              if (postData.mediaType === 'image' || postData.imageUrl) {
+                postType = 'photo';
+              } else if (postData.mediaType === 'video' || postData.videoUrl) {
+                postType = 'video';
+              } else if (mediaUrls.length > 1) {
+                postType = 'mixed';
+              }
+
+              userPosts.push({
+                id: doc.id,
+                type: postType,
+                title: postData.title || '',
+                content: postData.caption || postData.content || '',
+                mediaUrls: mediaUrls,
+                thumbnailUrl: postData.thumbnailUrl || postData.imageUrl || null,
+                createdDate: postData.timestamp?.toDate() || postData.createdAt?.toDate() || new Date(),
+                likes: Array.isArray(postData.likes) ? postData.likes.length : (postData.likes || 0),
+                comments: Array.isArray(postData.comments) ? postData.comments.length : (postData.comments || 0),
+                isPublic: postData.isPublic !== undefined ? postData.isPublic : true
+              });
+            });
+
+            if (isMounted) {
+              setPosts(userPosts);
+            }
 
           } else if (isOwner) {
-            // If it's the current user but no document exists, create a basic profile
+            // New user initialization logic
             const defaultProfile = {
               name: firebaseUser?.displayName || 'User'
             };
-            setPersonalDetails(defaultProfile);
+            
+            if (isMounted) {
+              setPersonalDetails(defaultProfile);
+            }
 
-            // Create the user document in Firestore
             const { setDoc } = await import('firebase/firestore');
             
-            // Filter out undefined values to prevent Firestore errors
             const cleanProfileData = Object.fromEntries(
               Object.entries(defaultProfile).filter(([_, value]) => value !== undefined)
             );
@@ -360,41 +406,50 @@ const Profile: React.FC = React.memo(() => {
               ...cleanProfileData
             };
             
-            // Remove any remaining undefined values
             const cleanUserDocData = Object.fromEntries(
               Object.entries(userDocData).filter(([_, value]) => value !== undefined)
             );
-// Create in role-specific collection (default: athletes for backward compatibility)
-            const defaultRole: UserRole = 'athlete';
-            const collection = getCollectionForRole(defaultRole);
-            setCurrentRole(defaultRole);
-            await setDoc(doc(db, collection, targetUserId), { ...cleanUserDocData, role: defaultRole });
 
-            // Load posts for the new user (will be empty initially)
-            await loadUserPosts(targetUserId);
+            const defaultRole: UserRole = 'athlete';
+            const collectionName = getCollectionForRole(defaultRole);
+            
+            if (isMounted) {
+              setCurrentRole(defaultRole);
+            }
+            
+            await setDoc(doc(db, collectionName, targetUserId), { ...cleanUserDocData, role: defaultRole });
+            
+            if (isMounted) {
+              setPosts([]);
+            }
           } else {
-            setError('User not found');
-            setIsLoading(false);
-            return;
+            if (isMounted) {
+              setError('User not found');
+            }
           }
         } catch (fetchError) {
           console.error('Error fetching user profile:', fetchError);
-          setError('Failed to load user profile');
-          setIsLoading(false);
-          return;
+          if (isMounted) {
+            setError('Failed to load user profile');
+          }
         }
-
-        setIsLoading(false);
       } catch (err) {
         console.error('Error in loadProfileData:', err);
-        setError('Failed to load profile data');
-        setIsLoading(false);
+        if (isMounted) {
+          setError('Failed to load profile data');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
-    if (firebaseUser || userId) {
-      loadProfileData();
-    }
+    loadProfileData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [userId, isOwner, firebaseUser]);
 
   // Handle online/offline status
@@ -970,6 +1025,12 @@ announceToScreenReader(`Opening post: ${post.title || 'Untitled post'}`);
         const { doc, updateDoc } = await import('firebase/firestore');
         const { db } = await import('../../../lib/firebase');
 
+        // Fetch user's actual role from database to ensure we use the correct collection
+        const userData = await userService.getUserProfile(firebaseUser.uid);
+        const userActualRole = userData?.role as UserRole || currentRole;
+
+        console.log(`📝 Saving organization info for role: ${userActualRole}`);
+
         const updateData = {
           organizationName: updatedPersonalDetails.organizationName,
           organizationType: updatedPersonalDetails.organizationType,
@@ -984,10 +1045,15 @@ announceToScreenReader(`Opening post: ${post.title || 'Untitled post'}`);
           Object.entries(updateData).filter(([_, value]) => value !== undefined)
         );
 
-        const collection = getCollectionForRole(currentRole);
+        const collection = getCollectionForRole(userActualRole);
+        console.log(`📁 Using collection: ${collection} for user: ${firebaseUser.uid}`);
+
         const userRef = doc(db, collection, firebaseUser.uid);
         await updateDoc(userRef, cleanedUpdateData);
-// Dispatch custom event to notify other components about profile update
+
+        console.log('✅ Organization info saved successfully');
+
+        // Dispatch custom event to notify other components about profile update
         window.dispatchEvent(new CustomEvent('userProfileUpdated', {
           detail: { personalDetails: updatedPersonalDetails }
         }));
@@ -999,7 +1065,7 @@ announceToScreenReader(`Opening post: ${post.title || 'Untitled post'}`);
       announceToScreenReader('Failed to save organization information');
       alert('Failed to save organization information. Please try again.');
     }
-  }, [announceToScreenReader, firebaseUser]);
+  }, [announceToScreenReader, firebaseUser, currentRole]);
 
   // Handler for track best modal
   const handleSaveTrackBest = useCallback(async (updatedTrackBest: TrackBest) => {
@@ -1199,6 +1265,9 @@ announceToScreenReader(`Opening post: ${post.title || 'Untitled post'}`);
         updatedAt: new Date()
       });
 
+      // Update Auth Profile to sync currentUser across the app (e.g. Stories)
+      await updateUserProfile({ photoURL: downloadURL });
+
       announceToScreenReader('Profile picture updated successfully');
     } catch (error) {
       console.error('Error uploading profile picture:', error);
@@ -1371,57 +1440,27 @@ announceToScreenReader(`Opening post: ${post.title || 'Untitled post'}`);
       return;
     }
 
-    const checkConnectionStatus = async () => {
+    const fetchUserInfo = async () => {
       try {
-        // Get the viewed user's profile to fetch their role (checks all role-specific collections)
+        // Get the viewed user's profile to fetch their role and display name
         const userData = await userService.getUserProfile(userId);
 
         if (userData) {
           setTargetUserRole(userData.role || 'athlete');
           setTargetUserDisplayName(userData.displayName || 'User');
 
-          // Check for friendships (athlete-to-athlete connections)
-          const areFriends = await friendsService.areFriends(firebaseUser.uid, userId);
-          if (areFriends) {
-            setConnectionStatus('connected');
-            return;
-          }
-
-          // Check for pending friend requests using real-time hook data
-          const hasSentRequest = outgoingRequests.some(req => req.recipientId === userId);
-          const hasReceivedRequest = incomingRequests.some(req => req.requesterId === userId);
-
-          if (hasSentRequest || hasReceivedRequest) {
-            setConnectionStatus('pending');
-            return;
-          }
-
-          // Check for any pending or accepted organization connection requests between the two users
-          const connectionStatus = await organizationConnectionService.getConnectionStatusBetweenUsers(
-            firebaseUser.uid,
-            userId
-          );
-
-          if (connectionStatus === 'pending') {
-            setConnectionStatus('pending');
-            return;
-          }
-
-          if (connectionStatus === 'accepted') {
-            setConnectionStatus('connected');
-            return;
-          }
-
+          // Connection status checking is now handled by MessageButton component via useFriendRequest hook
+          // We still set a default connectionStatus for backward compatibility with other parts of the UI
           setConnectionStatus('none');
         }
       } catch (error) {
-        console.error('Error checking connection status:', error);
+        console.error('Error fetching user info:', error);
         setConnectionStatus('none');
       }
     };
 
-    checkConnectionStatus();
-  }, [userId, firebaseUser, isOwner, incomingRequests, outgoingRequests]);
+    fetchUserInfo();
+  }, [userId, firebaseUser, isOwner]);
 
   // Handler to open chat
   const handleOpenChat = useCallback(() => {
@@ -1576,6 +1615,7 @@ announceToScreenReader(`Opening post: ${post.title || 'Untitled post'}`);
                   targetUserId={userId || ''}
                   targetUserName={targetUserDisplayName}
                   targetUserRole={targetUserRole}
+                  currentUserRole={viewerRole}
                   connectionStatus={connectionStatus}
                   onConnectionRequest={handleConnectionRequestSent}
                   onOpenChat={handleOpenChat}
@@ -1595,60 +1635,62 @@ announceToScreenReader(`Opening post: ${post.title || 'Untitled post'}`);
           />
         )}
 
-        {/* Personal Details Section */}
-        <section className="personal-details" aria-labelledby="personal-details-heading">
-          <div className="section-header">
-            <h2 id="personal-details-heading" className="section-title">Personal Details</h2>
-            {isOwner && (
-              <button
-                className="section-edit-button"
-                onClick={handleEditPersonalDetails}
-                aria-label="Edit personal details"
-                type="button"
-              >
-                <Edit3 size={16} aria-hidden="true" />
-              </button>
-            )}
-          </div>
-          <div className="details-card" role="group" aria-labelledby="personal-details-heading">
-            <div className="field-row">
-              <span className="field-label" id="name-label">NAME</span>
-              <span className="field-value" aria-labelledby="name-label">{personalDetails.name}</span>
+        {/* Personal Details Section - Not shown for organizations */}
+        {sections.includes('personal') && (
+          <section className="personal-details" aria-labelledby="personal-details-heading">
+            <div className="section-header">
+              <h2 id="personal-details-heading" className="section-title">Personal Details</h2>
+              {isOwner && (
+                <button
+                  className="section-edit-button"
+                  onClick={handleEditPersonalDetails}
+                  aria-label="Edit personal details"
+                  type="button"
+                >
+                  <Edit3 size={16} aria-hidden="true" />
+                </button>
+              )}
             </div>
-            <div className="field-row">
-              <span className="field-label" id="dob-label">DATE OF BIRTH</span>
-              <span className="field-value" aria-labelledby="dob-label">{formatDateOfBirth(personalDetails.dateOfBirth)}</span>
+            <div className="details-card" role="group" aria-labelledby="personal-details-heading">
+              <div className="field-row">
+                <span className="field-label" id="name-label">NAME</span>
+                <span className="field-value" aria-labelledby="name-label">{personalDetails.name}</span>
+              </div>
+              <div className="field-row">
+                <span className="field-label" id="dob-label">DATE OF BIRTH</span>
+                <span className="field-value" aria-labelledby="dob-label">{formatDateOfBirth(personalDetails.dateOfBirth)}</span>
+              </div>
+              <div className="field-row">
+                <span className="field-label" id="gender-label">GENDER</span>
+                <span className="field-value" aria-labelledby="gender-label">{personalDetails.gender || 'Not specified'}</span>
+              </div>
+              <div className="field-row">
+                <span className="field-label" id="mobile-label">MOBILE</span>
+                <span className="field-value" aria-labelledby="mobile-label">{personalDetails.mobile || 'Not specified'}</span>
+              </div>
+              <div className="field-row">
+                <span className="field-label" id="email-label">EMAIL</span>
+                <span className="field-value" aria-labelledby="email-label">{personalDetails.email || 'Not specified'}</span>
+              </div>
+              <div className="field-row">
+                <span className="field-label" id="city-label">CITY</span>
+                <span className="field-value" aria-labelledby="city-label">{personalDetails.city || 'Not specified'}</span>
+              </div>
+              <div className="field-row">
+                <span className="field-label" id="state-label">STATE</span>
+                <span className="field-value" aria-labelledby="state-label">{personalDetails.state || 'Not specified'}</span>
+              </div>
+              <div className="field-row">
+                <span className="field-label" id="country-label">COUNTRY</span>
+                <span className="field-value" aria-labelledby="country-label">{personalDetails.country || 'Not specified'}</span>
+              </div>
+              <div className="field-row">
+                <span className="field-label" id="role-label">ACCOUNT TYPE</span>
+                <span className="field-value" aria-labelledby="role-label">{currentRoleConfig.displayName}</span>
+              </div>
             </div>
-            <div className="field-row">
-              <span className="field-label" id="gender-label">GENDER</span>
-              <span className="field-value" aria-labelledby="gender-label">{personalDetails.gender || 'Not specified'}</span>
-            </div>
-            <div className="field-row">
-              <span className="field-label" id="mobile-label">MOBILE</span>
-              <span className="field-value" aria-labelledby="mobile-label">{personalDetails.mobile || 'Not specified'}</span>
-            </div>
-            <div className="field-row">
-              <span className="field-label" id="email-label">EMAIL</span>
-              <span className="field-value" aria-labelledby="email-label">{personalDetails.email || 'Not specified'}</span>
-            </div>
-            <div className="field-row">
-              <span className="field-label" id="city-label">CITY</span>
-              <span className="field-value" aria-labelledby="city-label">{personalDetails.city || 'Not specified'}</span>
-            </div>
-            <div className="field-row">
-              <span className="field-label" id="state-label">STATE</span>
-              <span className="field-value" aria-labelledby="state-label">{personalDetails.state || 'Not specified'}</span>
-            </div>
-            <div className="field-row">
-              <span className="field-label" id="country-label">COUNTRY</span>
-              <span className="field-value" aria-labelledby="country-label">{personalDetails.country || 'Not specified'}</span>
-            </div>
-            <div className="field-row">
-              <span className="field-label" id="role-label">ACCOUNT TYPE</span>
-              <span className="field-value" aria-labelledby="role-label">{currentRoleConfig.displayName}</span>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Physical Attributes Section - Athletes only */}
         {sections.includes('physicalAttributes') && (

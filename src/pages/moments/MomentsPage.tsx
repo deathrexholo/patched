@@ -280,6 +280,38 @@ const MomentsPage: React.FC = () => {
     };
   }, [pauseAllVideos]);
 
+  // Pause videos immediately on route change
+  useEffect(() => {
+    const handleRouteChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{ pathname: string }>;
+      const newPath = customEvent.detail.pathname;
+
+      // If navigating away from /moments, pause all videos immediately
+      if (newPath !== '/moments') {
+        // Direct synchronous pause - bypass async pauseAllVideos for immediate effect
+        const videoElements = document.querySelectorAll('video');
+        videoElements.forEach(video => {
+          try {
+            if (!video.paused) {
+              video.pause();
+            }
+          } catch (error) {
+            console.warn('Failed to pause video on route change:', error);
+          }
+        });
+
+        // Also call hook's pauseAllVideos for proper cleanup
+        pauseAllVideos().catch(console.warn);
+      }
+    };
+
+    window.addEventListener('routeChange', handleRouteChange);
+
+    return () => {
+      window.removeEventListener('routeChange', handleRouteChange);
+    };
+  }, [pauseAllVideos]);
+
   return (
     <div className="moments-page">
       <NavigationBar

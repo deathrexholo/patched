@@ -3,7 +3,7 @@ import { MessageCircle, Circle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { navigateToProfile } from '../../../utils/navigation/profileNavigation';
-import ProfileAvatar from '../../../components/common/ui/ProfileAvatar';
+import UserAvatar from '../../../components/common/user/UserAvatar';
 import '../styles/FriendsList.css';
 
 interface Friend {
@@ -127,10 +127,12 @@ export default function FriendsList({ friends, onSelectFriend, loading }: Friend
               title="View profile"
               aria-label={`View ${friend.displayName || 'user'}'s profile`}
             >
-              <ProfileAvatar
-                src={shouldLoadAvatar ? friend.photoURL : undefined}
-                alt={friend.displayName || 'Anonymous User'}
-                size={48}
+              <UserAvatar
+                userId={friend.id}
+                displayName={friend.displayName || 'Anonymous User'}
+                photoURL={shouldLoadAvatar ? (friend.photoURL || undefined) : undefined}
+                size="medium"
+                clickable={false}
                 className="friend-avatar"
               />
               {friend.isOnline && (

@@ -41,7 +41,8 @@ type ProgressiveLoadingAction<T> =
   | { type: 'LOAD_MORE_SUCCESS'; payload: { newItems: T[]; hasMore: boolean } }
   | { type: 'LOAD_MORE_ERROR'; payload: { error: string } }
   | { type: 'RESET' }
-  | { type: 'REFRESH'; payload: { items: T[]; initialBatchSize: number } };
+  | { type: 'REFRESH'; payload: { items: T[]; initialBatchSize: number } }
+  | { type: 'UPDATE_ITEMS'; payload: { items: T[] } }; // New action
 
 function progressiveLoadingReducer<T>(
   state: ProgressiveLoadingState<T>,
@@ -58,6 +59,21 @@ function progressiveLoadingReducer<T>(
         hasMoreToLoad: items.length > initialBatchSize,
         isLoadingMore: false,
         error: null,
+      };
+    }
+    
+    // New case to handle updates without resetting scroll/batch
+    case 'UPDATE_ITEMS': {
+      const { items } = action.payload;
+      // Preserve the current number of visible items
+      const currentVisibleCount = state.visibleItems.length;
+      const updatedVisibleItems = items.slice(0, Math.max(currentVisibleCount, 1));
+      
+      return {
+        ...state,
+        visibleItems: updatedVisibleItems,
+        // Keep currentBatch and loading state as is
+        hasMoreToLoad: items.length > updatedVisibleItems.length,
       };
     }
     
@@ -168,16 +184,26 @@ export const useProgressiveLoading = <T,>(
     configRef.current = { initialBatchSize, batchSize };
   }, [allPosts, initialBatchSize, batchSize]);
 
-  // Initialize visible posts when allPosts changes
+  // Handle allPosts changes - INTELLIGENT UPDATE vs INITIALIZE
   useEffect(() => {
     if (allPosts.length > 0) {
-      startInitialLoad();
-      dispatch({ 
-        type: 'INITIALIZE', 
-        payload: { items: allPosts, initialBatchSize } 
-      });
-      // Mark as success after initialization
-      setTimeout(() => markLoadSuccess(), 100);
+      // If we already have visible items, this is likely an update (like a like/comment)
+      // So we update the items in place instead of resetting the view.
+      if (state.visibleItems.length > 0) {
+        dispatch({
+          type: 'UPDATE_ITEMS',
+          payload: { items: allPosts }
+        });
+      } else {
+        // Initial load or reset
+        startInitialLoad();
+        dispatch({ 
+          type: 'INITIALIZE', 
+          payload: { items: allPosts, initialBatchSize } 
+        });
+        // Mark as success after initialization
+        setTimeout(() => markLoadSuccess(), 100);
+      }
     } else {
       dispatch({ type: 'RESET' });
       resetLoadingState();

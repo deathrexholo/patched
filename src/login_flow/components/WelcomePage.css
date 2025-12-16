@@ -1,21 +1,16 @@
 .welcome-container {
   min-height: 100vh;
   min-height: -webkit-fill-available; /* iOS Safari fix */
-  height: 100vh;
-  height: -webkit-fill-available; /* iOS Safari fix */
-  width: 100vw;
-  width: 100%; /* Better than vw on mobile */
+  width: 100%;
   background: var(--bg-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
-  overflow: hidden;
   overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+  overflow-y: auto; /* Allow vertical scrolling */
   margin: 0;
   padding: 0;
-  padding-top: env(safe-area-inset-top); /* iOS notch support */
-  padding-bottom: env(safe-area-inset-bottom); /* iOS home indicator */
+  padding-top: max(env(safe-area-inset-top), 60px); /* iOS notch support + header space */
+  padding-bottom: max(env(safe-area-inset-bottom), 80px); /* iOS home indicator + browser bar */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .welcome-header {
@@ -202,16 +197,17 @@
   text-align: center;
   z-index: 2;
   position: relative;
-  max-width: 90vw;
-  max-width: min(90vw, calc(100% - 2rem)); /* Prevent overflow on mobile */
+  max-width: 1200px;
   width: 100%;
+  margin: 0 auto;
   padding: 2rem;
   padding-left: max(2rem, env(safe-area-inset-left)); /* iOS safe area */
   padding-right: max(2rem, env(safe-area-inset-right)); /* iOS safe area */
+  padding-top: 1rem;
+  padding-bottom: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   box-sizing: border-box; /* Include padding in width calculation */
 }
 
@@ -356,12 +352,13 @@
 
 @media (max-width: 768px) {
   .welcome-container {
-    padding: 1rem;
+    padding-top: max(env(safe-area-inset-top), 60px);
+    padding-bottom: max(env(safe-area-inset-bottom), 100px); /* More space for browser bar */
   }
-  
+
   .content {
-    padding: 1.5rem;
-    max-width: 95vw;
+    padding: 1.5rem 1rem;
+    max-width: 100%;
   }
   
   .main-title {
@@ -392,14 +389,14 @@
 
 @media (max-width: 480px) {
   .welcome-container {
-    padding-left: 0;
-    padding-right: 0;
+    padding-top: max(env(safe-area-inset-top), 60px);
+    padding-bottom: max(env(safe-area-inset-bottom), 120px); /* Even more space for iPhone browser bar */
   }
 
   .content {
-    padding: 1rem;
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
+    padding: 1rem 0.75rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
     max-width: 100%;
     width: 100%;
   }
@@ -469,7 +466,13 @@
 @supports (-webkit-touch-callout: none) {
   .welcome-container {
     min-height: -webkit-fill-available;
-    height: -webkit-fill-available;
+  }
+
+  /* Extra padding for iOS Safari address bar */
+  @media (max-width: 480px) {
+    .welcome-container {
+      padding-bottom: max(env(safe-area-inset-bottom), 140px);
+    }
   }
 }
 
@@ -514,6 +517,7 @@
   display: flex;
   gap: 2rem;
   margin-top: 4rem;
+  margin-bottom: 3rem; /* Space before bottom of page */
   max-width: 900px;
   width: 100%;
   justify-content: center;
@@ -605,6 +609,7 @@
     flex-direction: column;
     gap: 1.5rem;
     margin-top: 2.5rem;
+    margin-bottom: 2rem;
     max-width: 100%;
   }
   
@@ -635,6 +640,7 @@
 @media (max-width: 480px) {
   .vision-mission-section {
     margin-top: 2rem;
+    margin-bottom: 1.5rem;
     gap: 1rem;
   }
   
@@ -699,7 +705,7 @@
 /* Join for Free Section */
 .join-free-section {
   margin-top: 3rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   width: 100%;
   max-width: 800px;
 }

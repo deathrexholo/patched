@@ -92,7 +92,7 @@ function AppContent(): React.JSX.Element {
     };
     
     initializeApp();
-    
+
     // Register service worker (non-blocking)
     setTimeout(() => {
       registerSW({
@@ -101,6 +101,14 @@ function AppContent(): React.JSX.Element {
       });
     }, 2000);
   }, []);
+
+  // Pause videos on route change
+  useEffect(() => {
+    // Dispatch custom event to notify all video components of route change
+    window.dispatchEvent(new CustomEvent('routeChange', {
+      detail: { pathname: location.pathname }
+    }));
+  }, [location.pathname]);
 
   return (
     <div className="App">
@@ -146,6 +154,11 @@ function AppContent(): React.JSX.Element {
                 </PrivateRoute>
               } />
               <Route path="/messages" element={
+                <PrivateRoute>
+                  <Messages />
+                </PrivateRoute>
+              } />
+              <Route path="/messages/:userId" element={
                 <PrivateRoute>
                   <Messages />
                 </PrivateRoute>

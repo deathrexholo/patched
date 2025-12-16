@@ -8,6 +8,7 @@ import UserManagement from './components/UserManagement';
 import EventManagement from './components/EventManagement';
 import VideoVerification from './components/VideoVerification';
 import ConnectionRequests from './components/ConnectionRequests';
+import AnnouncementManagement from './components/AnnouncementManagement';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import './App.css';
 
@@ -50,6 +51,13 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <ConnectionRequests />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/announcements" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AnnouncementManagement />
                 </Layout>
               </ProtectedRoute>
             } />

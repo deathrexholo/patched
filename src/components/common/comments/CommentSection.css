@@ -171,26 +171,27 @@
 }
 
 .comment-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  border: 2px solid var(--border-color, #eee);
-  transition: all 0.2s ease;
+  /* UserAvatar handles all styling internally - no double borders */
 }
 
-.comment-avatar:hover {
-  transform: scale(1.1);
-  border-color: #2196f3;
+.comment-avatar .user-avatar,
+.comment-avatar .user-avatar__image {
+  /* Remove any extra borders from UserAvatar in comments */
+  border: none !important;
+  box-shadow: none !important;
 }
 
-[data-theme="dark"] .comment-avatar {
-  border-color: var(--border-color, #444);
+.comment-avatar .user-avatar__image {
+  /* Add subtle border for comments */
+  border: 1px solid var(--border-color, #e0e0e0) !important;
 }
 
-[data-theme="dark"] .comment-avatar:hover {
-  border-color: #4a9eff;
+[data-theme="dark"] .comment-avatar .user-avatar__image {
+  border-color: var(--border-color, #404040) !important;
 }
 
 .comment-meta {

@@ -1,24 +1,33 @@
 /* NavigationBar Component Styles */
 
 .nav-bar {
-  background: var(--glass-bg);
-  border-bottom: 1px solid var(--glass-border);
+  background: transparent !important; /* Forced transparency */
+  border-bottom: none !important; /* Forced no border */
   padding: 0 16px;
   position: sticky;
   top: 0;
   z-index: 1000; /* Below modals (2000+) but above content */
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-shadow);
+  box-shadow: none !important; /* Forced no shadow */
+  backdrop-filter: none !important; /* Forced no blur on outer container */
+  -webkit-backdrop-filter: none !important;
 }
 
 .nav-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  max-width: 800px; /* Reduced from 1200px to match content better */
   margin: 0 auto;
   height: 60px;
+  
+  /* Styles moved from nav-bar */
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border); /* Changed to full border for pill effect */
+  border-radius: 16px; /* Changed to full pill radius */
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  padding: 0 20px; /* Add internal padding */
 }
 
 .nav-back-button {
@@ -75,7 +84,7 @@
   border: 1px solid var(--warning-border, #ffeaa7);
 }
 
-/* Action Buttons - Matching Search Page Design */
+/* Action Buttons - Matching Footer Nav "Island" Design */
 .nav-actions {
   display: flex;
   align-items: center;
@@ -99,13 +108,16 @@
   height: 44px;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 50%;
+  border-radius: 22px; /* Match FooterNav radius */
   cursor: pointer;
-  color: var(--text-secondary, #666);
-  transition: all 0.3s ease;
+  color: var(--text-color-secondary);
+  
+  /* Match FooterNav transitions and effects */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  backdrop-filter: blur(10px);
-  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Force icon sizes to remain consistent */
@@ -114,8 +126,8 @@
 .settings-btn svg,
 .logout-btn svg,
 .nav-back-button svg {
-  width: 24px !important;
-  height: 24px !important;
+  width: 20px !important; /* Match FooterNav icon size */
+  height: 20px !important;
   flex-shrink: 0;
   transition: none !important;
 }
@@ -124,11 +136,11 @@
 .notification-btn:hover,
 .settings-btn:hover,
 .logout-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #333);
-  border-color: var(--accent-primary, #007bff);
+  background: rgba(255, 255, 255, 0.15); /* Match FooterNav hover background */
+  color: var(--text-primary);
+  border-color: var(--glass-border); /* Border color remains consistent on hover */
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 123, 255, 0.2);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); /* Match FooterNav hover shadow */
 }
 
 .search-btn:active,
@@ -141,10 +153,11 @@
 .search-btn.active,
 .notification-btn[aria-expanded="true"],
 .settings-btn[aria-expanded="true"] {
-  background: var(--accent-primary, #007bff);
+  background: var(--accent-primary);
   color: white;
-  border-color: var(--accent-primary, #007bff);
+  border-color: transparent;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--accent-primary-rgb), 0.4);
 }
 
 /* Notification Badge - Enhanced Design */

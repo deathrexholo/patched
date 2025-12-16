@@ -9,7 +9,7 @@ import LoadingSpinner from '../feedback/LoadingSpinner';
 import ErrorMessage from '../feedback/ErrorMessage';
 import userService from '../../../services/api/userService';
 import { User } from '../../../types/models/user';
-import ProfileAvatar from '../ui/ProfileAvatar';
+import UserAvatar from '../user/UserAvatar';
 import './CommentSection.css';
 
 interface CommentSectionProps {
@@ -195,19 +195,15 @@ const CommentSection = memo<CommentSectionProps>(({
                 <div key={comment.id} className="comment-item">
                   {/* Comment header */}
                   <div className="comment-header">
-                    <Link
-                      to={`/profile/${comment.userId}`}
-                      className="comment-avatar-link"
-                      title={`View ${comment.userDisplayName}'s profile`}
-                    >
-                      <div className="comment-avatar">
-                        <ProfileAvatar
-                          src={comment.userPhotoURL}
-                          alt={comment.userDisplayName}
-                          size={32}
-                        />
-                      </div>
-                    </Link>
+                    <div className="comment-avatar">
+                      <UserAvatar
+                        userId={comment.userId}
+                        displayName={comment.userDisplayName}
+                        photoURL={comment.userPhotoURL || undefined}
+                        size="small"
+                        clickable={true}
+                      />
+                    </div>
                     <div className="comment-meta">
                       <Link
                         to={`/profile/${comment.userId}`}
@@ -300,10 +296,12 @@ const CommentSection = memo<CommentSectionProps>(({
       {!hideCommentForm && currentUser && !isGuest() && (
         <form className="comment-input-form" onSubmit={handleSubmitComment}>
           <div className="user-avatar-small-container">
-            <ProfileAvatar
-              src={userProfile?.photoURL || currentUser.photoURL}
-              alt={userProfile?.displayName || currentUser.displayName || 'User'}
-              size={36}
+            <UserAvatar
+              userId={currentUser.uid}
+              displayName={userProfile?.displayName || currentUser.displayName || 'User'}
+              photoURL={userProfile?.photoURL || currentUser.photoURL || undefined}
+              size="small"
+              clickable={false}
               className="user-avatar-small"
             />
           </div>

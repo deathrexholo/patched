@@ -163,16 +163,16 @@ body {
 
 /* Navigation */
 .nav-bar {
-  background: var(--bg-navbar);
-  border-bottom: 1px solid var(--border-primary);
+  background: transparent;
+  border-bottom: none;
   padding: 0 20px;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  backdrop-filter: blur(15px);
-  box-shadow: var(--shadow-secondary);
+  backdrop-filter: none;
+  box-shadow: none;
 }
 
 .nav-content {

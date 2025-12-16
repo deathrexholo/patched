@@ -107,7 +107,13 @@ class UserService extends BaseService<User> {
 
   /**
    * Get user profile by ID with backward compatibility
-   * Checks role-specific collection first, then falls back to users collection
+   * Search order:
+   * 1. If role provided, check that specific role collection
+   * 2. If role unknown, check all role-specific collections (parent, coach, organization, athlete)
+   * 3. Finally, fallback to legacy users collection
+   *
+   * This prioritizes role-specific collections over legacy users collection to ensure
+   * users with profiles in multiple collections get their correct role-specific data.
    */
   async getUserProfile(userId: string, role?: UserRole): Promise<User | null> {
     try {
@@ -135,16 +141,8 @@ class UserService extends BaseService<User> {
         }
       }
 
-      // Strategy 2: Check legacy users collection
-      const userRef = doc(db, COLLECTIONS.USERS, userId);
-      const userDoc = await getDoc(userRef);
-
-      if (userDoc.exists()) {
-        const userData = { id: userDoc.id, ...userDoc.data() } as User;
-        return userData;
-      }
-
-      // Strategy 3: If role unknown, check all role-specific collections
+      // Strategy 2: If role unknown, check all role-specific collections FIRST
+      // (before legacy users collection to prioritize current architecture)
       if (!role) {
         const parentProfile = await parentsService.getParentProfile(userId);
         if (parentProfile) return parentProfile as unknown as User;
@@ -157,6 +155,15 @@ class UserService extends BaseService<User> {
 
         const athleteProfile = await athletesService.getAthleteProfile(userId);
         if (athleteProfile) return athleteProfile as unknown as User;
+      }
+
+      // Strategy 3: Check legacy users collection as fallback
+      const userRef = doc(db, COLLECTIONS.USERS, userId);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = { id: userDoc.id, ...userDoc.data() } as User;
+        return userData;
       }
 
       console.warn('⚠️ User profile not found:', userId);

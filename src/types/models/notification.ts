@@ -15,7 +15,13 @@ export type NotificationType =
   | 'system'
   | 'connection_request'
   | 'connection_accepted'
-  | 'connection_rejected';
+  | 'connection_rejected'
+  | 'story_like'
+  | 'story_view'
+  | 'story_comment'
+  | 'share_to_friend'
+  | 'share_to_group'
+  | 'post_shared';
 
 /**
  * Core Notification interface

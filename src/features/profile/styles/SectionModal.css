@@ -1,8 +1,8 @@
 /* Section Modal Styles */
 .section-modal {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-modal);
   max-width: 600px;
   width: 90vw;
   max-height: 90vh;
@@ -18,8 +18,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-bottom: 1px solid var(--border-secondary);
+  background: var(--bg-tertiary);
 }
 
 .section-modal .modal-header-left {
@@ -31,7 +31,7 @@
 .section-modal .modal-title {
   font-size: 18px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -41,13 +41,13 @@
   padding: 8px;
   border-radius: 6px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--text-muted);
   transition: all 0.2s ease;
 }
 
 .section-modal .modal-close-button:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
 }
 
 .section-modal .modal-body {
@@ -67,10 +67,10 @@
 .section-modal .form-section-title {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0 0 16px 0;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-secondary);
 }
 
 .section-modal .form-grid {
@@ -94,7 +94,7 @@
 .section-modal .form-label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .section-modal .form-label .required {
@@ -104,12 +104,12 @@
 
 .section-modal .form-input {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-secondary);
   border-radius: 6px;
   font-size: 14px;
   transition: all 0.2s ease;
-  background: white;
-  color: #111827;
+  background: var(--bg-input);
+  color: var(--text-primary);
   font-family: inherit;
 }
 
@@ -125,14 +125,14 @@
 }
 
 .section-modal .form-input::placeholder {
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 /* Ensure visibility for select elements */
 .section-modal select,
 .section-modal textarea {
-  color: #111827 !important;
-  background: white !important;
+  color: var(--text-primary) !important;
+  background: var(--bg-input) !important;
   font-family: inherit;
 }
 
@@ -154,8 +154,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-top: 1px solid var(--border-secondary);
+  background: var(--bg-tertiary);
 }
 
 .section-modal .modal-footer-left {
@@ -181,14 +181,14 @@
 }
 
 .section-modal .modal-button.secondary {
-  background: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-secondary);
 }
 
 .section-modal .modal-button.secondary:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: var(--bg-hover);
+  border-color: var(--text-muted);
 }
 
 .section-modal .modal-button.primary {
@@ -257,7 +257,7 @@
   align-items: flex-start;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-secondary);
 }
 
 .section-info {
@@ -267,13 +267,13 @@
 .section-subtitle {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0 0 4px 0;
 }
 
 .section-description {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -309,13 +309,13 @@
 .empty-title {
   font-size: 18px;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-secondary);
   margin: 0 0 8px 0;
 }
 
 .empty-description {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0 0 24px 0;
 }
 
@@ -345,16 +345,16 @@
 }
 
 .item-card {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border-secondary);
   border-radius: 8px;
   padding: 16px;
-  background: white;
+  background: var(--bg-card);
   transition: all 0.2s ease;
 }
 
 .item-card:hover {
-  border-color: #d1d5db;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-color: var(--border-primary);
+  box-shadow: var(--shadow-primary);
 }
 
 .item-header {
@@ -428,17 +428,17 @@
 
 .action-button {
   background: none;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-secondary);
   padding: 6px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .action-button:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: var(--bg-hover);
+  border-color: var(--text-muted);
 }
 
 .action-button.edit-button:hover {
@@ -458,7 +458,7 @@
 .item-title {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
@@ -471,12 +471,12 @@
 .item-category,
 .item-date {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
 }
 
 .item-description {
   font-size: 14px;
-  color: #374151;
+  color: var(--text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -487,13 +487,13 @@
 
 .organization-label {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin-right: 4px;
 }
 
 .organization-name {
   font-size: 14px;
-  color: #374151;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -511,7 +511,7 @@
 
 .date-label {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -519,7 +519,7 @@
 
 .date-value {
   font-size: 12px;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .expiration-item.expired .date-value {
@@ -561,7 +561,7 @@
 
 .track-best-modal .form-section-description {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--text-muted);
   margin: 0 0 16px 0;
   line-height: 1.5;
 }

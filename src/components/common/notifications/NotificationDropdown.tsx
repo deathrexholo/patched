@@ -1,25 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, X, Heart, MessageCircle, UserPlus, Eye, CheckCheck, Trash2 } from 'lucide-react';
+import { Bell, X, Heart, MessageCircle, UserPlus, Eye, CheckCheck, Trash2, Megaphone, Pin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { db } from '../../../lib/firebase';
-import { collection, query, where, onSnapshot, updateDoc, doc, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, updateDoc, doc, Timestamp } from 'firebase/firestore';
 import notificationManagementService from '../../../services/api/notificationManagementService';
+import { Announcement } from '../../../types/models/announcement';
+import { Notification } from '../../../types/models/notification';
+import { useRealtimeNotifications } from '../../../hooks/useRealtimeNotifications';
 import './NotificationDropdown.css';
-
-interface Notification {
-  id: string;
-  type: string;
-  message: string;
-  senderId?: string;
-  senderName?: string;
-  senderAvatar?: string;
-  postId?: string;
-  storyId?: string;
-  url?: string;
-  read: boolean;
-  createdAt: any;
-}
 
 interface NotificationDropdownProps {
   isOpen: boolean;
@@ -34,59 +23,71 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 }) => {
   const navigate = useNavigate();
   const { currentUser, isGuest } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Use the new hook for notifications
+  const { notifications, loading: notificationsLoading } = useRealtimeNotifications(isExpanded ? 50 : 10);
+  const [loadingAnnouncements, setLoadingAnnouncements] = useState(true);
 
-  // Fetch notifications
+  // Fetch announcements (kept local as it's specific to this UI for now)
   useEffect(() => {
     if (!currentUser || isGuest()) {
-      setLoading(false);
+      setLoadingAnnouncements(false);
       return;
     }
 
-    let unsubscribe: (() => void) | null = null;
+    let unsubscribeAnnouncements: (() => void) | null = null;
 
     try {
-      const notificationsRef = collection(db, 'notifications');
-      const q = query(
-        notificationsRef,
-        where('receiverId', '==', currentUser.uid),
-        limit(isExpanded ? 100 : 10)
+      // Fetch global announcements (active and non-expired only)
+      const announcementsRef = collection(db, 'announcements');
+      const announcementsQuery = query(
+        announcementsRef,
+        where('isActive', '==', true)
       );
 
-      unsubscribe = onSnapshot(q, (snapshot) => {
-        const notificationsList: Notification[] = [];
+      unsubscribeAnnouncements = onSnapshot(announcementsQuery, (snapshot) => {
+        const announcementsList: Announcement[] = [];
+        const now = Timestamp.now();
+
         snapshot.forEach((doc) => {
-          notificationsList.push({ id: doc.id, ...doc.data() } as Notification);
+          const data = doc.data();
+          // Filter out expired announcements on client side
+          if (data.expiresAt && data.expiresAt.toMillis() > now.toMillis()) {
+            announcementsList.push({ id: doc.id, ...data } as Announcement);
+          }
         });
-        
-        // Sort by timestamp (newest first) in memory instead of using orderBy
-        notificationsList.sort((a, b) => {
-          const timeA = a.createdAt?.toDate?.() || new Date(0);
-          const timeB = b.createdAt?.toDate?.() || new Date(0);
-          return timeB.getTime() - timeA.getTime();
+
+        // Sort by priority (high first) then by expiresAt (soonest first)
+        announcementsList.sort((a, b) => {
+          if (a.priority === 'high' && b.priority !== 'high') return -1;
+          if (a.priority !== 'high' && b.priority === 'high') return 1;
+
+          const aExpiry = (a.expiresAt as any).toMillis();
+          const bExpiry = (b.expiresAt as any).toMillis();
+          return aExpiry - bExpiry;
         });
-        
-        setNotifications(notificationsList);
-        setLoading(false);
+
+        setAnnouncements(announcementsList);
+        setLoadingAnnouncements(false);
       }, (error) => {
-        console.error('Error fetching notifications:', error);
-        setLoading(false);
+        console.error('Error fetching announcements:', error);
+        setLoadingAnnouncements(false);
       });
 
     } catch (error) {
-      console.error('Error setting up notifications listener:', error);
-      setLoading(false);
+      console.error('Error setting up announcement listener:', error);
+      setLoadingAnnouncements(false);
     }
 
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
+      if (unsubscribeAnnouncements) {
+        unsubscribeAnnouncements();
       }
     };
-  }, [currentUser, isGuest, isExpanded]);
+  }, [currentUser, isGuest]);
 
   // Handle click outside to close
   useEffect(() => {
@@ -131,27 +132,34 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       // Close dropdown
       onClose();
 
-      // Navigate based on notification type
+      // Navigate based on notification type or actionUrl
+      if (notification.actionUrl) {
+        const url = notification.actionUrl.startsWith('/') ? notification.actionUrl : `/${notification.actionUrl}`;
+        navigate(url);
+        return;
+      }
+
+      // Fallback navigation logic
       if (notification.type === 'like' || notification.type === 'comment') {
-        if (notification.postId) {
-          navigate(`/post/${notification.postId}`);
-        } else if (notification.url) {
-          const url = notification.url.startsWith('/') ? notification.url : `/${notification.url}`;
-          navigate(url);
+        if (notification.relatedId) {
+          navigate(`/post/${notification.relatedId}`);
         }
       } else if (notification.type === 'story_like' || notification.type === 'story_view' || notification.type === 'story_comment') {
-        if (notification.storyId) {
-          navigate(`/story/${notification.storyId}`);
-        } else if (notification.url) {
-          const url = notification.url.startsWith('/') ? notification.url : `/${notification.url}`;
-          navigate(url);
+        if (notification.relatedId) {
+          navigate(`/story/${notification.relatedId}`);
         }
       } else if (notification.type === 'follow') {
-        if (notification.senderId) {
-          navigate(`/profile/${notification.senderId}`);
+        if (notification.actorId) {
+          navigate(`/profile/${notification.actorId}`);
         }
       } else if (notification.type === 'friend_request') {
         navigate('/messages');
+      } else if (notification.type === 'message') {
+        if (notification.actorId) {
+          navigate(`/messages?user=${notification.actorId}`);
+        } else {
+          navigate('/messages');
+        }
       } else if (
         notification.type === 'connection_request' ||
         notification.type === 'connection_accepted' ||
@@ -167,10 +175,14 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   // Get notification icon
   const getNotificationIcon = (type: string) => {
     switch (type) {
+      case 'announcement':
+        return <Megaphone size={16} className="notification-icon announcement" />;
       case 'like':
         return <Heart size={16} className="notification-icon like" />;
       case 'comment':
         return <MessageCircle size={16} className="notification-icon comment" />;
+      case 'message':
+        return <MessageCircle size={16} className="notification-icon message" />;
       case 'follow':
       case 'friend_request':
       case 'connection_request':
@@ -210,14 +222,10 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     if (!currentUser) return;
 
     try {
-      setLoading(true);
       await notificationManagementService.markAllAsRead(currentUser.uid);
-      // Notifications will auto-update via the onSnapshot listener
     } catch (error) {
       console.error('Error marking all as read:', error);
       alert('Failed to mark all notifications as read');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -233,19 +241,19 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 
     if (window.confirm(`Delete ${readCount} read notification${readCount > 1 ? 's' : ''}?`)) {
       try {
-        setLoading(true);
         await notificationManagementService.deleteAllRead(currentUser.uid);
-        // Notifications will auto-update via the onSnapshot listener
       } catch (error) {
         console.error('Error deleting read notifications:', error);
         alert('Failed to delete read notifications');
-      } finally {
-        setLoading(false);
       }
     }
   };
 
-  if (!isOpen) return null;return (
+  const isLoading = notificationsLoading || loadingAnnouncements;
+
+  if (!isOpen) return null;
+
+  return (
     <div className={`notification-dropdown ${isExpanded ? 'expanded' : ''}`} ref={dropdownRef}>
       <div className="notification-header">
         <h3>Notifications</h3>
@@ -255,7 +263,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               <button
                 className="action-btn"
                 onClick={handleMarkAllAsRead}
-                disabled={loading || notifications.every(n => n.read)}
+                disabled={isLoading || notifications.every(n => n.read)}
                 title="Mark all as read"
               >
                 <CheckCheck size={16} />
@@ -263,7 +271,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               <button
                 className="action-btn"
                 onClick={handleDeleteAllRead}
-                disabled={loading || notifications.filter(n => n.read).length === 0}
+                disabled={isLoading || notifications.filter(n => n.read).length === 0}
                 title="Delete read notifications"
               >
                 <Trash2 size={16} />
@@ -277,46 +285,78 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       </div>
       
       <div className="notification-list">
-        {loading ? (
+        {isLoading && notifications.length === 0 ? (
           <div className="notification-loading">
             <div className="loading-spinner"></div>
             <p>Loading notifications...</p>
           </div>
-        ) : notifications.length === 0 ? (
+        ) : announcements.length === 0 && notifications.length === 0 ? (
           <div className="notification-empty">
             <Bell size={32} className="empty-icon" />
             <p>No notifications yet</p>
             <span>You'll see notifications here when someone interacts with your content</span>
           </div>
         ) : (
-          notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`notification-item ${!notification.read ? 'unread' : ''}`}
-              onClick={() => handleNotificationClick(notification)}
-            >
-              <div className="notification-icon-container">
-                {getNotificationIcon(notification.type)}
-              </div>
-              
-              <div className="notification-content">
-                <div className="notification-message">
-                  {notification.message}
+          <>
+            {/* Render announcements first (pinned at top) */}
+            {announcements.map((announcement) => (
+              <div
+                key={`announcement-${announcement.id}`}
+                className="notification-item announcement-item"
+              >
+                <div className="notification-icon-container">
+                  <Megaphone size={16} className="notification-icon announcement" />
                 </div>
-                <div className="notification-time">
-                  {formatTime(notification.createdAt)}
+
+                <div className="notification-content">
+                  <div className="announcement-header">
+                    <span className="announcement-title">{announcement.title}</span>
+                    <span className="announcement-badge">Announcement</span>
+                  </div>
+                  <div className="notification-message announcement-message">
+                    {announcement.message}
+                  </div>
+                  <div className="notification-time">
+                    Expires {formatTime(announcement.expiresAt)}
+                  </div>
+                </div>
+
+                <div className="announcement-pin-icon">
+                  <Pin size={14} />
                 </div>
               </div>
-              
-              {!notification.read && (
-                <div className="unread-indicator"></div>
-              )}
-            </div>
-          ))
+            ))}
+
+            {/* Render regular notifications */}
+            {notifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                onClick={() => handleNotificationClick(notification)}
+              >
+                <div className="notification-icon-container">
+                  {getNotificationIcon(notification.type)}
+                </div>
+
+                <div className="notification-content">
+                  <div className="notification-message">
+                    {notification.message}
+                  </div>
+                  <div className="notification-time">
+                    {formatTime(notification.timestamp)}
+                  </div>
+                </div>
+
+                {!notification.read && (
+                  <div className="unread-indicator"></div>
+                )}
+              </div>
+            ))}
+          </>
         )}
       </div>
       
-      {notifications.length > 0 && (
+      {(notifications.length > 0 || announcements.length > 0) && (
         <div className="notification-footer">
           <button
             className="view-all-btn"

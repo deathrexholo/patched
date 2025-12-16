@@ -5,7 +5,9 @@ import { StoriesService } from '../../services/api/storiesService';
 import { Plus, Play } from 'lucide-react';
 import StoryViewer from './StoryViewer';
 import StoryUpload from './StoryUpload';
-import SafeImage from '../../components/common/SafeImage';
+import UserAvatar from '../../components/common/user/UserAvatar';
+import userService from '../../services/api/userService';
+import { User } from '../../types/models/user';
 import { Story } from '../../types/models/story';
 import './Stories.css';
 
@@ -27,12 +29,36 @@ export default function StoriesContainer() {
   const [showUpload, setShowUpload] = useState<boolean>(false);
   const [selectedUserStories, setSelectedUserStories] = useState<UserStoriesGroup | null>(null);
   const [selectedStoryIndex, setSelectedStoryIndex] = useState<number>(0);
+  const [firestoreUser, setFirestoreUser] = useState<User | null>(null);
+  const [profileLoading, setProfileLoading] = useState<boolean>(true);
+
+  // Fetch Firestore user profile to get updated profile picture
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (currentUser?.uid) {
+        setProfileLoading(true);
+        try {
+          const userProfile = await userService.getUserProfile(currentUser.uid);
+          setFirestoreUser(userProfile);
+        } catch (error) {
+          console.error('Error fetching user profile for stories:', error);
+          setFirestoreUser(null);
+        } finally {
+          setProfileLoading(false);
+        }
+      } else {
+        setFirestoreUser(null);
+        setProfileLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [currentUser?.uid]);
 
   useEffect(() => {
     // Set up real-time listener for active stories
     const unsubscribe = StoriesService.onActiveStoriesUpdate((activeStories) => {
       setStories(activeStories);
-      
+
       // Group stories by user
       const grouped = groupStoriesByUser(activeStories);
       setGroupedStories(grouped);
@@ -95,11 +121,11 @@ export default function StoriesContainer() {
     return groupedArray;
   }, [currentUser]);
 
-  const handleStoryUploaded = useCallback((newStory: Story): void => {setShowUpload(false);
+  const handleStoryUploaded = useCallback((newStory: Story): void => {setShowUpload(false);
     // Stories will be updated via real-time listener
   }, []);
 
-  const handleUserStoriesClick = useCallback((userStories: UserStoriesGroup, startIndex: number = 0): void => {setSelectedUserStories(userStories);
+  const handleUserStoriesClick = useCallback((userStories: UserStoriesGroup, startIndex: number = 0): void => {setSelectedUserStories(userStories);
     setSelectedStoryIndex(startIndex);
   }, []);
 
@@ -170,10 +196,16 @@ export default function StoriesContainer() {
             onClick={() => setShowUpload(true)}
           >
             <div className="story-avatar add-story-avatar">
-              <SafeImage 
-                src={currentUser?.photoURL || ''} 
-                alt="Your avatar"
-                placeholder="avatar"
+              <UserAvatar
+                userId={currentUser?.uid || ''}
+                displayName={firestoreUser?.displayName || currentUser?.displayName || 'You'}
+                photoURL={
+                  profileLoading
+                    ? undefined
+                    : (firestoreUser?.photoURL || currentUser?.photoURL || undefined)
+                }
+                size="large"
+                clickable={false}
                 className="story-avatar-image"
               />
               <div className="add-story-icon">
@@ -192,14 +224,19 @@ export default function StoriesContainer() {
             onClick={() => handleUserStoriesClick(userGroup)}
           >
             <div className={`story-avatar ${userGroup.hasUnviewedStories ? 'unviewed' : 'viewed'}`}>
-              <SafeImage 
-                src={
-                  userGroup.userId === currentUser?.uid 
-                    ? (currentUser?.photoURL || '')
-                    : (userGroup.userPhotoURL || '')
-                } 
-                alt={userGroup.userDisplayName}
-                placeholder="avatar"
+              <UserAvatar
+                userId={userGroup.userId}
+                displayName={userGroup.userDisplayName}
+                photoURL={
+                  userGroup.userId === currentUser?.uid
+                    ? (profileLoading
+                        ? undefined
+                        : (firestoreUser?.photoURL || currentUser?.photoURL || undefined)
+                      )
+                    : (userGroup.userPhotoURL || undefined)
+                }
+                size="large"
+                clickable={false}
                 className="story-avatar-image"
               />
               {userGroup.stories.some(s => s.mediaType === 'video') && (

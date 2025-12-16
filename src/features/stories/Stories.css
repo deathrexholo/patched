@@ -225,6 +225,26 @@
   object-fit: cover;
 }
 
+/* Override UserAvatar sizing when inside story-avatar */
+.story-avatar .user-avatar,
+.story-avatar .user-avatar__image {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+.story-avatar .user-avatar {
+  display: block;
+}
+
+.story-avatar .user-avatar__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+
 .story-media-indicator {
   position: absolute;
   top: 5px;

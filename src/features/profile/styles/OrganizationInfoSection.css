@@ -26,6 +26,15 @@
   border-color: #20B2AA;
 }
 
+.info-item-full {
+  grid-column: 1 / -1;
+}
+
+.info-item-full .info-value {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .info-icon {
   display: flex;
   align-items: center;

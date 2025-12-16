@@ -1,16 +1,18 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useMediaUpload } from '../../../hooks/useMediaUpload';
 import { filterPostContent, getPostViolationMessage, logPostViolation } from '../../../utils/content/postContentFilter';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { Image, Upload, X, Trash2 } from 'lucide-react';
-import { User } from 'firebase/auth';
-import SafeImage from '../../../components/common/SafeImage';
+import { User as FirebaseAuthUser } from 'firebase/auth'; // Renamed to avoid conflict
+import UserAvatar from '../../../components/common/user/UserAvatar';
+import userService from '../../../services/api/userService';
+import { User as FirestoreUser } from '../../../types/models/user'; // Import Firestore User type
 import './PostComposer.css';
 
 interface PostComposerProps {
-  currentUser: User | null;
+  currentUser: FirebaseAuthUser | null;
   isGuest: boolean;
   onPostCreated?: () => void;
   disabled?: boolean;
@@ -29,17 +31,42 @@ interface PostViolation {
  * PostComposer Component
  * Handles post creation, media upload, and content validation
  */
-const PostComposer: React.FC<PostComposerProps> = ({ 
-  currentUser, 
-  isGuest, 
-  onPostCreated, 
-  disabled = false 
+const PostComposer: React.FC<PostComposerProps> = ({
+  currentUser,
+  isGuest,
+  onPostCreated,
+  disabled = false
 }) => {
   // Local state for post composition
   const [postText, setPostText] = useState<string>('');
   const [postViolation, setPostViolation] = useState<PostViolation | null>(null);
   const [showPostWarning, setShowPostWarning] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [firestoreUser, setFirestoreUser] = useState<FirestoreUser | null>(null); // State for Firestore user profile
+  const [profileLoading, setProfileLoading] = useState<boolean>(true);
+
+  // Fetch Firestore user profile
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (currentUser?.uid) {
+        setProfileLoading(true);
+        try {
+          const userProfile = await userService.getUserProfile(currentUser.uid);
+          setFirestoreUser(userProfile);
+        } catch (error) {
+          console.error('Error fetching Firestore user profile:', error);
+          setFirestoreUser(null);
+        } finally {
+          setProfileLoading(false);
+        }
+      } else {
+        setFirestoreUser(null);
+        setProfileLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [currentUser?.uid]);
+
 
   // Media upload hook
   const {
@@ -109,7 +136,7 @@ const PostComposer: React.FC<PostComposerProps> = ({
       return;
     }
 
-    if (!currentUser) {
+    if (!currentUser || !firestoreUser) { // Check for firestoreUser as well
       alert('You must be logged in to create posts');
       return;
     }
@@ -178,7 +205,11 @@ const PostComposer: React.FC<PostComposerProps> = ({
       const userPosition = getSafeValue('userPosition');
       const userPlayerType = getSafeValue('userPlayerType');
       const userOrganizationType = getSafeValue('userOrganizationType');
-      const userDisplayName = getSafeValue('userDisplayName') || currentUser.displayName || 'Anonymous User';
+      // Use firestoreUser's displayName and photoURL
+      const userDisplayName = firestoreUser?.displayName || currentUser.displayName || 'Anonymous User';
+      const userPhotoURL = firestoreUser?.photoURL || currentUser.photoURL || null;
+
+
       const userSpecializationsStr = getSafeValue('userSpecializations');
       const userSpecializations = userSpecializationsStr
         ? JSON.parse(userSpecializationsStr)
@@ -188,7 +219,7 @@ const PostComposer: React.FC<PostComposerProps> = ({
       const postData: any = {
         userId: currentUser.uid,
         userDisplayName: userDisplayName,
-        userPhotoURL: currentUser.photoURL || null,
+        userPhotoURL: userPhotoURL, // Use firestoreUser's photoURL
         userRole: userRole,
         caption: text,
         mediaUrl: mediaUrl,
@@ -230,11 +261,12 @@ const PostComposer: React.FC<PostComposerProps> = ({
       setIsSubmitting(false);
     }
   }, [
-    isGuest, 
-    postText, 
-    selectedMedia, 
-    currentUser, 
-    uploadMedia, 
+    isGuest,
+    postText,
+    selectedMedia,
+    currentUser,
+    firestoreUser, // Add firestoreUser to dependencies
+    uploadMedia,
     onPostCreated
   ]);
 
@@ -254,6 +286,16 @@ const PostComposer: React.FC<PostComposerProps> = ({
     return null;
   }
 
+  // Display loading spinner or placeholder while profile is loading
+  if (profileLoading) {
+    return (
+      <div className="post-composer loading">
+        Loading profile...
+      </div>
+    );
+  }
+
+
   const isFormDisabled = disabled || isSubmitting || uploading;
   const canSubmit = (postText.trim() || selectedMedia) && !showPostWarning && !isFormDisabled;
 
@@ -261,10 +303,12 @@ const PostComposer: React.FC<PostComposerProps> = ({
     <div className="post-composer">
       <div className="composer-header">
         <div className="composer-avatar">
-          <SafeImage
-            src={currentUser?.photoURL || ''}
-            alt="Your avatar"
-            placeholder="avatar"
+          <UserAvatar
+            userId={currentUser?.uid || ''}
+            displayName={firestoreUser?.displayName || currentUser?.displayName || 'User'}
+            photoURL={firestoreUser?.photoURL || currentUser?.photoURL || undefined}
+            size="medium"
+            clickable={true}
             className="composer-avatar-image"
           />
         </div>
@@ -297,8 +341,8 @@ const PostComposer: React.FC<PostComposerProps> = ({
       {/* Media Preview */}
       {mediaPreview && (
         <div className="media-preview">
-          <button 
-            className="remove-media-btn" 
+          <button
+            className="remove-media-btn"
             onClick={handleRemoveMedia}
             disabled={isFormDisabled}
           >

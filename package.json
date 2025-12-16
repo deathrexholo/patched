@@ -27,7 +27,7 @@
   "scripts": {
     "start": "craco start",
     "dev": "craco start",
-    "build": "craco build && node scripts/optimize-build.js",
+    "build": "node --max_old_space_size=4096 ./node_modules/@craco/craco/dist/bin/craco.js build && node scripts/optimize-build.js",
     "build:all": "node build-all.js",
     "build:analyze": "set ANALYZE=true && craco build",
     "build:serve": "npm run build && npx serve -s build",

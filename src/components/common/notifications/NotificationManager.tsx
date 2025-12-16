@@ -47,7 +47,8 @@ const NotificationManager: React.FC = () => {
       for (const docSnapshot of snapshot.docs) {
         const data = docSnapshot.data();
         
-        const hasObjects = Object.values(data).some(value => 
+        const hasObjects = Object.entries(data).some(([key, value]) => 
+          key !== 'metadata' && key !== 'data' && key !== 'pushData' && // Allow these fields
           typeof value === 'object' && value !== null && 
           !(value as any).toDate &&
           !Array.isArray(value) &&

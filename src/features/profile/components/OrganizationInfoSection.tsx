@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit3, MapPin, Mail, Globe, Building } from 'lucide-react';
+import { Edit3, MapPin, Mail, Globe, Building, Phone, User, Award, Calendar, FileText, Users, Trophy } from 'lucide-react';
 import { PersonalDetails } from '../types/ProfileTypes';
 import '../styles/OrganizationInfoSection.css';
 
@@ -18,7 +18,11 @@ const OrganizationInfoSection: React.FC<OrganizationInfoSectionProps> = ({
                              personalDetails.organizationType ||
                              personalDetails.location ||
                              personalDetails.contactEmail ||
-                             personalDetails.website;
+                             personalDetails.website ||
+                             personalDetails.contactPerson ||
+                             personalDetails.primaryPhone ||
+                             personalDetails.registrationNumber ||
+                             personalDetails.yearEstablished;
 
   return (
     <section className="profile-section organization-info-section" aria-labelledby="organization-info-heading">
@@ -56,6 +60,7 @@ const OrganizationInfoSection: React.FC<OrganizationInfoSectionProps> = ({
           </div>
         ) : (
           <div className="organization-info-grid">
+            {/* Basic Information */}
             {personalDetails.organizationName && (
               <div className="info-item">
                 <div className="info-icon">
@@ -80,14 +85,75 @@ const OrganizationInfoSection: React.FC<OrganizationInfoSectionProps> = ({
               </div>
             )}
 
-            {personalDetails.location && (
+            {personalDetails.registrationNumber && (
               <div className="info-item">
                 <div className="info-icon">
-                  <MapPin size={20} aria-hidden="true" />
+                  <FileText size={20} aria-hidden="true" />
                 </div>
                 <div className="info-content">
-                  <span className="info-label">Location</span>
-                  <span className="info-value">{personalDetails.location}</span>
+                  <span className="info-label">Registration Number</span>
+                  <span className="info-value">{personalDetails.registrationNumber}</span>
+                </div>
+              </div>
+            )}
+
+            {personalDetails.yearEstablished && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <Calendar size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Year Established</span>
+                  <span className="info-value">{personalDetails.yearEstablished}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Contact Information */}
+            {personalDetails.contactPerson && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <User size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Contact Person</span>
+                  <span className="info-value">{personalDetails.contactPerson}</span>
+                </div>
+              </div>
+            )}
+
+            {personalDetails.designation && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <Award size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Designation</span>
+                  <span className="info-value">{personalDetails.designation}</span>
+                </div>
+              </div>
+            )}
+
+            {personalDetails.primaryPhone && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <Phone size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Primary Phone</span>
+                  <span className="info-value">{personalDetails.primaryPhone}</span>
+                </div>
+              </div>
+            )}
+
+            {personalDetails.secondaryPhone && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <Phone size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Alternate Phone</span>
+                  <span className="info-value">{personalDetails.secondaryPhone}</span>
                 </div>
               </div>
             )}
@@ -98,7 +164,7 @@ const OrganizationInfoSection: React.FC<OrganizationInfoSectionProps> = ({
                   <Mail size={20} aria-hidden="true" />
                 </div>
                 <div className="info-content">
-                  <span className="info-label">Contact Email</span>
+                  <span className="info-label">Email</span>
                   <span className="info-value">{personalDetails.contactEmail}</span>
                 </div>
               </div>
@@ -121,6 +187,101 @@ const OrganizationInfoSection: React.FC<OrganizationInfoSectionProps> = ({
                       {personalDetails.website}
                     </a>
                   </span>
+                </div>
+              </div>
+            )}
+
+            {/* Address */}
+            {personalDetails.address && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <MapPin size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Address</span>
+                  <span className="info-value">
+                    {personalDetails.address.line1}
+                    {personalDetails.address.line2 && `, ${personalDetails.address.line2}`}
+                    {`, ${personalDetails.address.city}`}
+                    {`, ${personalDetails.address.state}`}
+                    {`, ${personalDetails.address.pincode}`}
+                    {`, ${personalDetails.address.country}`}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {personalDetails.location && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <MapPin size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Location</span>
+                  <span className="info-value">{personalDetails.location}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Sports & Players */}
+            {personalDetails.sports && personalDetails.sports.length > 0 && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <Trophy size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Sports Offered</span>
+                  <span className="info-value">{personalDetails.sports.join(', ')}</span>
+                </div>
+              </div>
+            )}
+
+            {personalDetails.numberOfPlayers && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <Users size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Number of Players</span>
+                  <span className="info-value">{personalDetails.numberOfPlayers}</span>
+                </div>
+              </div>
+            )}
+
+            {personalDetails.ageGroups && personalDetails.ageGroups.length > 0 && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <Users size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Age Groups</span>
+                  <span className="info-value">{personalDetails.ageGroups.join(', ')}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Facilities */}
+            {personalDetails.facilities && personalDetails.facilities.length > 0 && (
+              <div className="info-item">
+                <div className="info-icon">
+                  <Building size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Facilities</span>
+                  <span className="info-value">{personalDetails.facilities.join(', ')}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Achievements */}
+            {personalDetails.achievements && (
+              <div className="info-item info-item-full">
+                <div className="info-icon">
+                  <Award size={20} aria-hidden="true" />
+                </div>
+                <div className="info-content">
+                  <span className="info-label">Achievements</span>
+                  <span className="info-value">{personalDetails.achievements}</span>
                 </div>
               </div>
             )}

@@ -4,7 +4,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import CommentService, { ContentType } from '../../../services/api/commentService';
 import userService from '../../../services/api/userService';
 import { User } from '../../../types/models/user';
-import ProfileAvatar from '../ui/ProfileAvatar';
+import UserAvatar from '../user/UserAvatar';
 
 interface CommentInputFormProps {
   contentId: string;
@@ -93,10 +93,12 @@ const CommentInputForm: React.FC<CommentInputFormProps> = ({
       )}
       <form className="comment-input-form" onSubmit={handleSubmitComment}>
         <div className="user-avatar-small-container">
-          <ProfileAvatar
-            src={userProfile?.photoURL || currentUser.photoURL}
-            alt={userProfile?.displayName || currentUser.displayName || 'User'}
-            size={36}
+          <UserAvatar
+            userId={currentUser.uid}
+            displayName={userProfile?.displayName || currentUser.displayName || 'User'}
+            photoURL={userProfile?.photoURL || currentUser.photoURL || undefined}
+            size="small"
+            clickable={false}
             className="user-avatar-small"
           />
         </div>

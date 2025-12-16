@@ -8,6 +8,7 @@ import FooterNav from '../../components/layout/FooterNav';
 import SettingsMenu from '../../components/common/settings/SettingsMenu';
 import NotificationDropdown from '../../components/common/notifications/NotificationDropdown';
 import SafeImage from '../../components/common/SafeImage';
+import SearchResultItem from './SearchResultItem';
 import notificationService from '../../services/notificationService';
 import friendsService from '../../services/api/friendsService';
 import './Search.css';
@@ -28,22 +29,6 @@ interface UserData {
   achievements?: Array<{ title: string }>;
 }
 
-interface FriendRequest {
-  id: string;
-  requesterId: string;
-  recipientId: string;
-  requesterName: string;
-  recipientName: string;
-  status: string;
-  timestamp: any;
-}
-
-interface Friendship {
-  id: string;
-  user1: string;
-  user2: string;
-  createdAt: any;
-}
 
 interface SearchFilters {
   location: string;
@@ -66,8 +51,6 @@ export default function Search() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchResults, setSearchResults] = useState<UserData[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
-  const [friendships, setFriendships] = useState<Friendship[]>([]);
   const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [filters, setFilters] = useState<SearchFilters>({
@@ -88,71 +71,10 @@ export default function Search() {
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false);
   const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [loadingRequestId, setLoadingRequestId] = useState<string | null>(null);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
   const notificationButtonRef = useRef<HTMLButtonElement>(null);
 
-  const fetchSentRequests = useCallback(() => {
-    if (!currentUser) return;
-
-    const q = query(
-      collection(db, 'friendRequests'),
-      where('user1', '==', currentUser.uid)
-    );
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const requests: FriendRequest[] = [];
-      snapshot.forEach((doc) => {
-        requests.push({ id: doc.id, ...doc.data() } as FriendRequest);
-      });
-      setSentRequests(requests);
-    });
-
-    return unsubscribe;
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (currentUser && !isGuest()) {
-      fetchSentRequests();
-      const unsubscribeFriendships = fetchFriendships();
-
-      // Return cleanup function
-      return () => {
-        if (unsubscribeFriendships) unsubscribeFriendships();
-      };
-    }
-  }, [currentUser, isGuest, fetchSentRequests]);
-
-  // Listen for friendship changes from other components
-  useEffect(() => {
-    const handleFriendshipChange = (event: Event) => {
-// Force aggressive refresh of ALL friendship data
-      if (currentUser && !isGuest()) {
-// Clear current state immediately
-        setFriendships([]);
-        setSentRequests([]);
-        
-        // Refresh from database with delay
-        setTimeout(() => {
-fetchFriendships();
-          fetchSentRequests();
-        }, 1000);
-        
-        // Also refresh search results if there are any
-        if (searchResults.length > 0) {
-setTimeout(() => {
-            handleSearch();
-          }, 1500);
-        }
-      }
-    };
-
-    window.addEventListener('friendshipChanged', handleFriendshipChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('friendshipChanged', handleFriendshipChange as EventListener);
-    };
-  }, [currentUser, searchResults.length]);
+  // Friend request and friendship tracking is now handled by SearchResultItem components
 
   // Live search effect with debouncing
   useEffect(() => {
@@ -227,55 +149,6 @@ setTimeout(() => {
     };
   }, [currentUser, isGuest]);
 
-  const fetchFriendships = () => {
-    if (!currentUser) return;
-const q1 = query(
-      collection(db, 'friendships'),
-      where('user1', '==', currentUser.uid)
-    );
-    const q2 = query(
-      collection(db, 'friendships'),
-      where('user2', '==', currentUser.uid)
-    );
-    
-    const updateFriendshipsList = async () => {
-      try {
-        const friendshipsList: Friendship[] = [];
-        
-        // Get friendships where current user is user1
-        const snapshot1 = await getDocs(q1);
-        snapshot1.forEach((doc) => {
-          friendshipsList.push({ id: doc.id, ...doc.data() } as Friendship);
-        });
-        
-        // Get friendships where current user is user2
-        const snapshot2 = await getDocs(q2);
-        snapshot2.forEach((doc) => {
-          friendshipsList.push({ id: doc.id, ...doc.data() } as Friendship);
-        });
-setFriendships(friendshipsList);
-      } catch (error) {
-        console.error('❌ Error fetching friendships for search:', error);
-      }
-    };
-    
-    // Set up real-time listeners
-    const unsubscribe1 = onSnapshot(q1, () => {
-updateFriendshipsList();
-    });
-    const unsubscribe2 = onSnapshot(q2, () => {
-updateFriendshipsList();
-    });
-    
-    // Initial load
-    updateFriendshipsList();
-    
-    // Return cleanup function
-    return () => {
-      unsubscribe1();
-      unsubscribe2();
-    };
-  };
 
 
   // Helper interface for match scores
@@ -559,76 +432,7 @@ const allUsersSnapshot = await getDocs(collection(db, 'users'));
   };
 
 
-  const handleSendFriendRequest = async (userId: string, userName: string, userPhoto?: string): Promise<void> => {
-    if (isGuest()) {
-      if (window.confirm('Please sign up or log in to send friend requests.\n\nWould you like to go to the login page?')) {
-        navigate('/login');
-      }
-      return;
-    }
-
-    if (!currentUser) return;
-
-    try {
-      // Set loading state to prevent rapid clicks
-      setLoadingRequestId(userId);
-
-      // Check if a request already exists in EITHER direction (bidirectional check)
-      const sentRequest = await friendsService.checkFriendRequestExists(currentUser.uid, userId);
-      const receivedRequest = await friendsService.checkFriendRequestExists(userId, currentUser.uid);
-
-      // If I already sent a request
-      if (sentRequest) {
-        if (sentRequest.status === 'pending') {
-          // Cancel the pending request
-          await deleteDoc(doc(db, 'friendRequests', sentRequest.id));
-          alert('Friend request cancelled');
-} else if (sentRequest.status === 'accepted') {
-          // Already friends
-          alert('You are already friends with this user');
-        } else {
-          alert('Friend request status: ' + sentRequest.status);
-        }
-        return;
-      }
-
-      // If they sent me a request (should accept, not send new)
-      if (receivedRequest && receivedRequest.status === 'pending') {
-        alert('This user already sent you a request. Check your Requests tab in Messages.');
-        return;
-      }
-
-      // No existing request in either direction - send new friend request
-      await addDoc(collection(db, 'friendRequests'), {
-        requesterId: currentUser.uid,
-        recipientId: userId,
-        requesterName: currentUser.displayName || 'Anonymous User',
-        recipientName: userName,
-        status: 'pending',
-        timestamp: serverTimestamp(),
-        createdAt: serverTimestamp()
-      });
-      alert('Friend request sent!');
-    } catch (error: any) {
-      console.error('❌ Error with friend request:', error);
-      alert('Failed to update friend request: ' + error.message);
-    } finally {
-      // Clear loading state
-      setLoadingRequestId(null);
-    }
-  };
-
-  const getRequestStatus = (userId: string): string | null => {
-    const request = sentRequests.find(req => req.recipientId === userId);
-    if (!request) return null;
-    return request.status;
-  };
-
-  const isAlreadyFriend = (userId: string): boolean => {
-    return friendships.some(friendship => 
-      friendship.user1 === userId || friendship.user2 === userId
-    );
-  };
+  // Friend request logic is now handled by SearchResultItem component using useFriendRequest hook
 
   const handleFilterChange = (filterName: keyof SearchFilters, value: string): void => {
     setFilters(prev => ({
@@ -988,68 +792,9 @@ const allUsersSnapshot = await getDocs(collection(db, 'users'));
             </div>
           )}
           
-          {searchResults.map((user) => {
-            const requestStatus = getRequestStatus(user.id);
-            const isFriend = isAlreadyFriend(user.id);
-            
-            return (
-              <div key={user.id} className="user-result">
-                <div className="user-avatar" onClick={() => navigate(`/profile/${user.id}`)}>
-                  <SafeImage 
-                    src={user.photoURL || ''} 
-                    alt={user.displayName}
-                    placeholder="avatar"
-                    className="user-avatar-image"
-                  />
-                </div>
-                <div className="user-info" onClick={() => navigate(`/profile/${user.id}`)}>
-                  <strong>{user.displayName || 'Anonymous User'}</strong>
-                  <div className="user-details">
-                    {user.role && <span className="user-role">{user.role}</span>}
-                    {user.location && <span className="user-location"><MapPin size={12} />{user.location}</span>}
-                    {user.sport && <span className="user-sport"><Target size={12} />{user.sport}</span>}
-                    {user.sex && <span className="user-sex">{user.sex}</span>}
-                    {user.age && <span className="user-age"><Calendar size={12} />{user.age} years</span>}
-                  </div>
-                </div>
-                <div className="user-actions">
-                  <div className="social-actions">
-                    {(() => {
-                      if (isFriend) {
-                        return (
-                          <button className="friend-btn" disabled>
-                            <Check size={16} />
-                            Friends
-                          </button>
-                        );
-                      } else if (requestStatus === 'pending') {
-                        return (
-                          <button 
-                            className="cancel-btn"
-                            onClick={() => handleSendFriendRequest(user.id, user.displayName || 'Anonymous User', user.photoURL)}
-                          >
-                            <X size={16} />
-                            Cancel Request
-                          </button>
-                        );
-                      } else {
-                        // Default case: not friends and no pending request
-                        return (
-                          <button 
-                            className="add-friend-btn"
-                            onClick={() => handleSendFriendRequest(user.id, user.displayName || 'Anonymous User', user.photoURL)}
-                          >
-                            <UserPlus size={16} />
-                            Add Friend
-                          </button>
-                        );
-                      }
-                    })()}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {searchResults.map((user) => (
+            <SearchResultItem key={user.id} user={user} />
+          ))}
         </div>
       </div>
       

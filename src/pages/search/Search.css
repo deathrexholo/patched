@@ -804,9 +804,23 @@ otification and Settings buttons */
   .nav-controls {
     gap: 8px;
   }
-  
+
   .notification-btn,
   .settings-btn {
     padding: 6px;
+  }
+}
+
+/* Spinning animation for loading indicators */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }

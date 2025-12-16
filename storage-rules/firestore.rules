@@ -743,11 +743,11 @@ service cloud.firestore {
         && data.senderId is string
         && data.senderId == request.auth.uid
         && data.senderName is string
-        && data.senderRole in ['organization', 'coach']
+        && data.senderRole in ['organization', 'coach', 'athlete']
         && data.recipientId is string
         && data.recipientName is string
-        && data.recipientRole in ['athlete', 'organization']
-        && data.connectionType in ['org_to_athlete', 'coach_to_org']
+        && data.recipientRole in ['athlete', 'organization', 'coach']
+        && data.connectionType in ['org_to_athlete', 'athlete_to_org', 'org_to_coach', 'coach_to_org']
         && data.status == 'pending'
         && data.createdViaConnection == true;
     }
@@ -774,7 +774,7 @@ service cloud.firestore {
       let data = request.resource.data;
       return data.keys().hasAll(['connectionId', 'connectionType', 'action', 'actionDate', 'performedByUserId', 'performedByName', 'senderId', 'senderName', 'recipientId', 'recipientName'])
         && data.connectionId is string
-        && data.connectionType in ['org_to_athlete', 'coach_to_org']
+        && data.connectionType in ['org_to_athlete', 'athlete_to_org', 'org_to_coach', 'coach_to_org']
         && data.action in ['request_sent', 'request_accepted', 'request_rejected', 'request_cancelled', 'message_sent', 'call_initiated']
         && data.actionDate != null
         && data.performedByUserId is string
@@ -1152,6 +1152,42 @@ service cloud.firestore {
 
       // No updates or deletes (append-only)
       allow update, delete: if false;
+    }
+
+    // ============================================================================
+    // ANNOUNCEMENTS COLLECTION (Global admin-created announcements)
+    // ============================================================================
+    match /announcements/{announcementId} {
+      // Anyone authenticated can read announcements (filtering happens on client)
+      // This allows the query to work properly without permission errors
+      allow read: if request.auth != null || isAdminUser();
+
+      // Only admins can create announcements
+      allow create: if request.auth != null &&
+        isAdminUser() &&
+        validateAnnouncementData();
+
+      // Only admins can update announcements
+      allow update: if request.auth != null && isAdminUser();
+
+      // Only admins can delete announcements
+      allow delete: if request.auth != null && isAdminUser();
+    }
+
+    // Validate announcement data structure
+    function validateAnnouncementData() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['title', 'message', 'createdAt', 'expiresAt', 'createdBy', 'createdByName', 'isActive'])
+        && isValidStringLength(data.title, 100)
+        && isValidStringLength(data.message, 500)
+        && data.createdBy is string
+        && data.createdBy == request.auth.uid
+        && data.createdByName is string
+        && data.isActive is bool
+        && data.expiresAt > request.time // Must be future date
+        && (!data.keys().hasAny(['actionUrl']) || data.actionUrl is string || data.actionUrl == null)
+        && (!data.keys().hasAny(['priority']) || data.priority in ['low', 'normal', 'high'])
+        && (!data.keys().hasAny(['dismissible']) || data.dismissible is bool);
     }
 
     // ============================================================================

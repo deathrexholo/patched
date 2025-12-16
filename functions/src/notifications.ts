@@ -106,6 +106,7 @@ export const sendLikeNotification = functions.firestore
         .collection('notifications')
         .add({
           userId: postOwnerId,
+          receiverId: postOwnerId,
           type: 'like',
           postId: postId,
           fromUserId: likerUserId,
@@ -210,6 +211,7 @@ export const sendFollowNotification = functions.firestore
         .collection('notifications')
         .add({
           userId: followedId,
+          receiverId: followedId,
           type: 'follow',
           fromUserId: followerId,
           fromUserName: followerData?.name || 'Unknown User',
@@ -309,6 +311,24 @@ export const sendMessageNotification = functions.firestore
       });
       
       await Promise.all(promises);
+
+      // Store notification in Firestore for in-app display
+      await admin.firestore()
+        .collection('notifications')
+        .add({
+          userId: receiverId,
+          receiverId: receiverId,
+          type: 'message',
+          fromUserId: senderId,
+          fromUserName: senderData?.name || 'Unknown User',
+          fromUserPhoto: senderData?.photoURL || null,
+          message: messagePreview,
+          read: false,
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          metadata: {
+            messageId: context.params.messageId
+          }
+        });
       
     } catch (error) {
       console.error('Error sending message notification:', error);

@@ -28,15 +28,66 @@ export interface PersonalDetails {
   location?: string;
   contactEmail?: string;
   website?: string;
+  contactPerson?: string;
+  designation?: string;
+  primaryPhone?: string;
+  secondaryPhone?: string;
+  registrationNumber?: string;
+  yearEstablished?: string;
+  address?: {
+    line1: string;
+    line2?: string;
+    city: string;
+    state: string;
+    pincode: string;
+    country: string;
+  };
+  sports?: string[];
+  numberOfPlayers?: string;
+  ageGroups?: string[];
+  facilities?: string[];
+  achievements?: string;
 
   // Parent-specific
+  parentFullName?: string;
   relationship?: string;
+  relationshipToChild?: string;
+  mobileNumber?: string;
   connectedAthletes?: string[];
+  child?: {
+    fullName: string;
+    dateOfBirth: string;
+    age: number;
+    gender: string;
+    state: string;
+    city: string;
+    country: string;
+  };
+  schoolInfo?: {
+    schoolName: string;
+    board: string;
+    schoolClass: string;
+    schoolCity: string;
+    schoolCoachName: string;
+    teamParticipation: boolean;
+  };
+  childSports?: {
+    primary: string;
+    secondary?: string;
+    skillLevel: string;
+    playingCategory: string;
+  };
+  aspirations?: string;
+  contentConsent?: boolean;
 
   // Coach-specific
+  fullName?: string;
+  phone?: string;
   specializations?: string[];
   yearsExperience?: number;
   coachingLevel?: string;
+  certifications?: string;
+  bio?: string;
 }
 
 export interface PhysicalAttributes {
@@ -163,8 +214,8 @@ export const roleConfigurations: Record<UserRole, RoleConfig> = {
   },
   organization: {
     role: 'organization',
-    sections: ['personal', 'organizationInfo', 'certificates', 'posts'],
-    editableFields: ['name', 'dateOfBirth', 'gender', 'mobile', 'email', 'city', 'state', 'country'],
+    sections: ['organizationInfo', 'certificates', 'posts'],
+    editableFields: [],
     displayName: 'Organization'
   },
   parent: {

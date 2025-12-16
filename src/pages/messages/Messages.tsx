@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRealtimeFriendRequests } from '../../hooks/useRealtimeFriendRequests';
 import { db } from '../../lib/firebase';
-import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, getDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, getDoc, getDocs, deleteDoc, orderBy, limit, writeBatch } from 'firebase/firestore';
 import { MessageSquare, UserPlus, Check, X, Send, Users, Edit3, Trash2, Save, XCircle, AlertTriangle } from 'lucide-react';
 import NavigationBar from '../../components/layout/NavigationBar';
 import FooterNav from '../../components/layout/FooterNav';
@@ -65,6 +65,7 @@ type TabType = 'friends' | 'requests';
 
 export default function Messages() {
   const navigate = useNavigate();
+  const { userId } = useParams<{ userId: string }>();
   const { currentUser, isGuest } = useAuth();
 
   const handleTitleClick = () => {
@@ -101,23 +102,36 @@ export default function Messages() {
   const [showScrollToBottom, setShowScrollToBottom] = useState<boolean>(false);
 
   useEffect(() => {
-if (currentUser && !isGuest()) {
+    if (userId) {
+      if (friends.length > 0) {
+        const friendToChat = friends.find(f => f.id === userId);
+        if (friendToChat && friendToChat.id !== selectedChat?.id) {
+          setSelectedChat(friendToChat);
+        }
+      }
+    } else {
+      if (selectedChat) {
+        setSelectedChat(null);
+      }
+    }
+  }, [userId, friends, selectedChat]);
+
+  useEffect(() => {
+    if (currentUser && !isGuest()) {
       try {
         // Friend requests now handled by useRealtimeFriendRequests hook
         const unsubscribeFriends = fetchFriends();
-        const unsubscribeMessages = fetchMessages();
         fetchFollowedUsers();
         // Notifications moved to NavigationBar
         
         // Set loading to false after a brief delay to allow data to load
         setTimeout(() => {
-setLoading(false);
+          setLoading(false);
         }, 1000);
         
         // Return cleanup function
         return () => {
           if (unsubscribeFriends) unsubscribeFriends();
-          if (unsubscribeMessages) unsubscribeMessages();
           // Notifications cleanup moved to NavigationBar
         };
       } catch (error) {
@@ -125,9 +139,97 @@ setLoading(false);
         setLoading(false);
       }
     } else {
-setLoading(false);
+      setLoading(false);
     }
   }, [currentUser, isGuest]);
+
+  // Specific listener for the active chat only
+  useEffect(() => {
+    if (!currentUser || !selectedChat) {
+      setMessages([]);
+      return;
+    }
+
+    // Two queries to get both sides of the conversation
+    // Limited to last 50 messages for performance
+    const q1 = query(
+      collection(db, 'messages'),
+      where('senderId', '==', currentUser.uid),
+      where('receiverId', '==', selectedChat.id),
+      orderBy('timestamp', 'desc'),
+      limit(50)
+    );
+
+    const q2 = query(
+      collection(db, 'messages'),
+      where('senderId', '==', selectedChat.id),
+      where('receiverId', '==', currentUser.uid),
+      orderBy('timestamp', 'desc'),
+      limit(50)
+    );
+
+    let messages1: Message[] = [];
+    let messages2: Message[] = [];
+
+    const mergeAndSetMessages = () => {
+      // Combine and deduplicate
+      const allMessages = [...messages1, ...messages2];
+      const uniqueMessages = allMessages.filter((msg, index, self) => 
+        index === self.findIndex((m) => m.id === msg.id)
+      );
+
+      // Sort by timestamp (oldest first for chat display)
+      uniqueMessages.sort((a, b) => {
+        const timeA = a.timestamp?.toDate?.() || new Date(0);
+        const timeB = b.timestamp?.toDate?.() || new Date(0);
+        return timeA.getTime() - timeB.getTime();
+      });
+
+      setMessages(uniqueMessages);
+    };
+
+    // Helper to mark messages as read
+    const markMessagesAsRead = async (newMessages: Message[]) => {
+      const unreadMessages = newMessages.filter(
+        msg => !msg.read && msg.receiverId === currentUser.uid
+      );
+
+      if (unreadMessages.length > 0) {
+        try {
+          const batch = writeBatch(db);
+          unreadMessages.forEach(msg => {
+            const msgRef = doc(db, 'messages', msg.id);
+            batch.update(msgRef, { read: true });
+          });
+          await batch.commit();
+          console.log(`Marked ${unreadMessages.length} messages as read`);
+        } catch (error) {
+          console.error("Error marking messages as read:", error);
+        }
+      }
+    };
+
+    const unsubscribe1 = onSnapshot(q1, (snapshot) => {
+      messages1 = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Message));
+      mergeAndSetMessages();
+    }, (error) => {
+      console.error("Error fetching sent messages:", error);
+    });
+
+    const unsubscribe2 = onSnapshot(q2, (snapshot) => {
+      messages2 = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Message));
+      // Mark received messages as read immediately when viewed
+      markMessagesAsRead(messages2);
+      mergeAndSetMessages();
+    }, (error) => {
+      console.error("Error fetching received messages:", error);
+    });
+
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
+  }, [selectedChat, currentUser]);
 
   // Listen for friendship changes from other components
   useEffect(() => {
@@ -158,7 +260,9 @@ setLoading(false);
 
   const fetchFriends = () => {
     if (!currentUser) return;
-const q1 = query(
+    
+    // Standard Friendships (Legacy)
+    const q1 = query(
       collection(db, 'friendships'),
       where('user1', '==', currentUser.uid)
     );
@@ -166,11 +270,23 @@ const q1 = query(
       collection(db, 'friendships'),
       where('user2', '==', currentUser.uid)
     );
+
+    // Organization Connections (Accepted)
+    const q3 = query(
+      collection(db, 'organizationConnections'),
+      where('senderId', '==', currentUser.uid),
+      where('status', '==', 'accepted')
+    );
+    const q4 = query(
+      collection(db, 'organizationConnections'),
+      where('recipientId', '==', currentUser.uid),
+      where('status', '==', 'accepted')
+    );
     
     // Debounce updates to prevent duplicate calls
     let updateTimeout: NodeJS.Timeout | null = null;
     
-    // Function to combine results from both queries with deduplication
+    // Function to combine results from all queries with deduplication
     async function updateFriendsList() {
       // Clear any pending updates
       if (updateTimeout) {
@@ -183,203 +299,92 @@ const q1 = query(
           const friendsList: Friend[] = [];
           const addedFriendIds = new Set<string>(); // Track added friends to prevent duplicates
           
-          // Get friendships where current user is user1
+          // Helper to process friend/partner ID
+          const processPartner = async (partnerId: string, connectionId: string) => {
+            if (addedFriendIds.has(partnerId)) return;
+            
+            try {
+              const friendProfile = await userService.getUserProfile(partnerId);
+              if (friendProfile) {
+                // Normalize name field
+                const displayName = friendProfile.displayName || 
+                                  (friendProfile as any).organizationName || 
+                                  (friendProfile as any).fullName || 
+                                  (friendProfile as any).name || 
+                                  'Unknown User';
+
+                const friendData: Friend = {
+                  id: partnerId,
+                  ...friendProfile,
+                  displayName: displayName,
+                  friendshipId: connectionId
+                } as Friend;
+                friendsList.push(friendData);
+                addedFriendIds.add(partnerId);
+              }
+            } catch (error) {
+              console.error('❌ Error fetching profile for:', partnerId, error);
+            }
+          };
+
+          // 1. Process Standard Friendships (I am user1)
           const snapshot1 = await getDocs(q1);
-          
           for (const docSnap of snapshot1.docs) {
-            const friendship = docSnap.data();
-            const friendId = friendship.user2; // I am user1, friend is user2
-            
-            // Skip if already added
-            if (addedFriendIds.has(friendId)) {
-continue;
-            }
-            
-            try {
-              const friendProfile = await userService.getUserProfile(friendId);
-              if (friendProfile) {
-                const friendData: Friend = {
-                  id: friendId,
-                  ...friendProfile,
-                  friendshipId: docSnap.id
-                } as Friend;
-                friendsList.push(friendData);
-                addedFriendIds.add(friendId);
-              } else {
-                console.warn('⚠️ Friend document not found for ID:', friendId);
-              }
-            } catch (error) {
-              console.error('❌ Error fetching friend profile:', error);
-            }
+            await processPartner(docSnap.data().user2, docSnap.id);
           }
           
-          // Get friendships where current user is user2
+          // 2. Process Standard Friendships (I am user2)
           const snapshot2 = await getDocs(q2);
-          
           for (const docSnap of snapshot2.docs) {
-            const friendship = docSnap.data();
-            const friendId = friendship.user1; // I am user2, friend is user1
-            
-            // Skip if already added
-            if (addedFriendIds.has(friendId)) {
-continue;
-            }
-            
-            try {
-              const friendProfile = await userService.getUserProfile(friendId);
-              if (friendProfile) {
-                const friendData: Friend = {
-                  id: friendId,
-                  ...friendProfile,
-                  friendshipId: docSnap.id
-                } as Friend;
-                friendsList.push(friendData);
-                addedFriendIds.add(friendId);
-              } else {
-                console.warn('⚠️ Friend document not found for ID:', friendId);
-              }
-            } catch (error) {
-              console.error('❌ Error fetching friend profile:', error);
-            }
+            await processPartner(docSnap.data().user1, docSnap.id);
           }
-console.log('📱 Messages: Added friend IDs:', Array.from(addedFriendIds));
-          setFriends(friendsList);
+
+          // 3. Process Org Connections (I am sender)
+          const snapshot3 = await getDocs(q3);
+          for (const docSnap of snapshot3.docs) {
+            await processPartner(docSnap.data().recipientId, docSnap.id);
+          }
+
+          // 4. Process Org Connections (I am recipient)
+          const snapshot4 = await getDocs(q4);
+          for (const docSnap of snapshot4.docs) {
+            await processPartner(docSnap.data().senderId, docSnap.id);
+          }
+
+          console.log('📱 Messages: Total connections found:', friendsList.length);
+          
+          setFriends(prevFriends => {
+            // Deep comparison to prevent unnecessary re-renders (which cause image reload loops)
+            if (JSON.stringify(prevFriends) === JSON.stringify(friendsList)) {
+              return prevFriends;
+            }
+            return friendsList;
+          });
         } catch (error) {
           console.error('❌ Error in updateFriendsList:', error);
         }
       }, 100);
     }
     
-    const unsubscribe1 = onSnapshot(
-      q1,
-      () => {
-updateFriendsList();
-      },
-      (error) => {
-        console.error('❌ Error in friends listener 1:', error);
-        if (updateTimeout) {
-          clearTimeout(updateTimeout);
-        }
-      }
-    );
-
-    const unsubscribe2 = onSnapshot(
-      q2,
-      () => {
-updateFriendsList();
-      },
-      (error) => {
-        console.error('❌ Error in friends listener 2:', error);
-        if (updateTimeout) {
-          clearTimeout(updateTimeout);
-        }
-      }
-    );
+    const unsubscribe1 = onSnapshot(q1, () => updateFriendsList(), (e) => console.error('Error q1', e));
+    const unsubscribe2 = onSnapshot(q2, () => updateFriendsList(), (e) => console.error('Error q2', e));
+    const unsubscribe3 = onSnapshot(q3, () => updateFriendsList(), (e) => console.error('Error q3', e));
+    const unsubscribe4 = onSnapshot(q4, () => updateFriendsList(), (e) => console.error('Error q4', e));
 
     // Update friends list initially
     updateFriendsList();
 
     // Return cleanup function
     return () => {
-      if (updateTimeout) {
-        clearTimeout(updateTimeout);
-      }
+      if (updateTimeout) clearTimeout(updateTimeout);
       unsubscribe1();
       unsubscribe2();
+      unsubscribe3();
+      unsubscribe4();
     };
   };
 
-  const fetchMessages = () => {
-    if (!currentUser) return;
-// Query for messages where current user is receiver
-    const q1 = query(
-      collection(db, 'messages'),
-      where('receiverId', '==', currentUser.uid)
-    );
-
-    // Query for messages where current user is sender
-    const q2 = query(
-      collection(db, 'messages'),
-      where('senderId', '==', currentUser.uid)
-    );
-
-    // Debounce timeout for preventing rapid updates
-    let updateTimeout: NodeJS.Timeout | null = null;
-    let listener1Fired = false;
-    let listener2Fired = false;
-
-    const updateMessages = async () => {
-      try {
-        const messagesList: Message[] = [];
-
-        // Get messages where user is receiver
-        const snapshot1 = await getDocs(q1);
-snapshot1.forEach((doc) => {
-          messagesList.push({ id: doc.id, ...doc.data() } as Message);
-        });
-
-        // Get messages where user is sender
-        const snapshot2 = await getDocs(q2);
-snapshot2.forEach((doc) => {
-          messagesList.push({ id: doc.id, ...doc.data() } as Message);
-        });
-
-        // Remove duplicates (shouldn't happen but just in case)
-        const uniqueMessages = messagesList.filter((msg, index, arr) =>
-          arr.findIndex(m => m.id === msg.id) === index
-        );
-
-        // Sort by timestamp, oldest first
-        uniqueMessages.sort((a, b) => {
-          const timeA = a.timestamp?.toDate?.() || new Date(0);
-          const timeB = b.timestamp?.toDate?.() || new Date(0);
-          return timeA.getTime() - timeB.getTime();
-        });
-setMessages(uniqueMessages);
-      } catch (error) {
-        console.error('❌ Error fetching messages:', error);
-      }
-    };
-
-    // Debounced update function to prevent rapid Firestore listener conflicts
-    const debouncedUpdate = () => {
-      if (updateTimeout) {
-        clearTimeout(updateTimeout);
-      }
-      updateTimeout = setTimeout(() => {
-        updateMessages();
-        listener1Fired = false;
-        listener2Fired = false;
-      }, 300);
-    };
-
-    // Initial load
-    updateMessages();
-
-    // Listen for changes in both collections with debouncing
-    const unsubscribe1 = onSnapshot(q1, (snapshot) => {
-listener1Fired = true;
-      debouncedUpdate();
-    }, (error) => {
-      console.error('❌ Error in messages listener 1:', error);
-    });
-
-    const unsubscribe2 = onSnapshot(q2, (snapshot) => {
-listener2Fired = true;
-      debouncedUpdate();
-    }, (error) => {
-      console.error('❌ Error in messages listener 2:', error);
-    });
-
-    return () => {
-      if (updateTimeout) {
-        clearTimeout(updateTimeout);
-      }
-      unsubscribe1();
-      unsubscribe2();
-    };
-  };
-
+  
   // Notifications functionality moved to NavigationBar
 
   // Notification functions moved to NavigationBar
@@ -1005,7 +1010,7 @@ await addDoc(collection(db, 'messages'), {
             {!selectedChat && (
               <FriendsList
                 friends={friends}
-                onSelectFriend={setSelectedChat}
+                onSelectFriend={(friend) => navigate(`/messages/${friend.id}`)}
                 loading={loading}
               />
             )}
@@ -1014,7 +1019,9 @@ await addDoc(collection(db, 'messages'), {
               <div className="chat-interface">
                 <ChatHeader
                   friend={selectedChat}
-                  onBack={() => setSelectedChat(null)}
+                  onBack={() => {
+                    navigate('/messages');
+                  }}
                 />
 
                     <div className="chat-messages-container">

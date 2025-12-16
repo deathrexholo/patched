@@ -13,7 +13,7 @@ import { useNetworkStatus } from '../../../hooks/useNetworkStatus';
 import VideoOptimizationUtils from '../../../utils/videoOptimization';
 import LoadingSpinner from '../loading/LoadingSpinner';
 import RetryHandler from '../error/RetryHandler';
-import ProfileAvatar from '../ui/ProfileAvatar';
+import UserAvatar from '../user/UserAvatar';
 import './VideoPlayer.css';
 
 interface VideoPlayerProps {
@@ -867,10 +867,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       {/* Video Metadata */}
       <div className="video-metadata" id={`video-metadata-${moment.id}`} role="region" aria-label="Video information">
         <div className="creator-info">
-          <ProfileAvatar
-            src={moment.userPhotoURL}
-            alt={`${moment.userDisplayName}'s profile picture`}
-            size={40}
+          <UserAvatar
+            userId={moment.userId}
+            displayName={moment.userDisplayName}
+            photoURL={moment.userPhotoURL || undefined}
+            size="medium"
+            clickable={true}
             className="creator-avatar"
           />
           <span className="creator-name" role="text" aria-label={`Created by ${moment.userDisplayName}`}>

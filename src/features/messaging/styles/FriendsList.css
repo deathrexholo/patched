@@ -59,7 +59,7 @@
 }
 
 .friend-card-enhanced:hover {
-  background: var(--bg-hover);
+  /* Hover effects removed to prevent screen shake */
 }
 
 .friend-card-enhanced:focus {
@@ -93,7 +93,7 @@
 }
 
 .friend-card-enhanced:hover .friend-avatar-enhanced {
-  border-color: var(--accent-primary);
+  /* Hover effects removed to prevent screen shake */
 }
 
 .online-status-indicator {
@@ -262,17 +262,16 @@
 /* Touch Interactions */
 @media (hover: none) {
   .friend-card-enhanced:hover {
-    transform: none;
+    /* Hover effects removed to prevent screen shake */
   }
-  
+
   .friend-card-enhanced:active {
     background: var(--bg-hover);
     transform: scale(0.98);
   }
-  
+
   .friend-card-enhanced:hover .friend-avatar-enhanced {
-    transform: none;
-    border-color: var(--border-secondary);
+    /* Hover effects removed to prevent screen shake */
   }
   
   .friend-card-enhanced:active .friend-avatar-enhanced {
@@ -375,7 +374,6 @@
     border: 2px solid var(--border-primary);
   }
   
-  .friend-card-enhanced:hover,
   .friend-card-enhanced:focus {
     border-color: var(--accent-primary);
   }
@@ -407,13 +405,11 @@
     padding: 20px 24px;
     gap: 18px;
     min-height: 80px;
-    /* Enhanced tablet hover effects */
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Transitions removed to prevent screen shake */
   }
   
   .friend-card-enhanced:hover {
-    box-shadow: 0 6px 20px rgba(0, 255, 136, 0.15);
-    background: linear-gradient(135deg, var(--bg-card), rgba(0, 255, 136, 0.03));
+    /* Hover effects removed to prevent screen shake */
   }
   
   .friend-avatar-container {
@@ -427,7 +423,7 @@
   }
 
   .friend-card-enhanced:hover .friend-avatar-enhanced {
-    border-color: var(--accent-primary);
+    /* Hover effects removed to prevent screen shake */
   }
   
   .friend-name {
@@ -443,8 +439,7 @@
   }
   
   .friend-card-enhanced:hover .friend-action-indicator {
-    opacity: 0.9;
-    transform: scale(1.15);
+    /* Hover effects removed to prevent screen shake */
   }
   
   .friends-empty-state {
@@ -493,15 +488,12 @@
     min-height: 88px;
     border-radius: 16px;
     margin: 0 8px 8px 8px;
-    /* Enhanced desktop hover effects */
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Transitions removed to prevent screen shake */
     cursor: pointer;
   }
   
   .friend-card-enhanced:hover {
-    box-shadow: 0 12px 32px rgba(0, 255, 136, 0.2);
-    background: linear-gradient(135deg, var(--bg-card), rgba(0, 255, 136, 0.05));
-    border-radius: 20px;
+    /* Hover effects removed to prevent screen shake */
   }
   
   .friend-avatar-container {
@@ -512,18 +504,17 @@
   .friend-avatar-enhanced {
     width: 56px;
     height: 56px;
-    transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Transitions removed to prevent screen shake */
   }
 
   .friend-card-enhanced:hover .friend-avatar-enhanced {
-    border-color: var(--accent-primary);
-    box-shadow: 0 4px 16px rgba(0, 255, 136, 0.3);
+    /* Hover effects removed to prevent screen shake */
   }
   
   .friend-name {
     font-size: 1.25rem;
     font-weight: 600;
-    transition: color 0.3s ease;
+    /* Transitions removed to prevent screen shake */
   }
 
   .friend-status {
@@ -532,21 +523,19 @@
   
   .friend-action-indicator {
     opacity: 0.3;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Transitions removed to prevent screen shake */
   }
-  
+
   .friend-card-enhanced:hover .friend-action-indicator {
-    opacity: 1;
-    color: var(--accent-primary);
+    /* Hover effects removed to prevent screen shake */
   }
-  
+
   .chat-icon {
-    transition: all 0.3s ease;
+    /* Transitions removed to prevent screen shake */
   }
   
   .friend-card-enhanced:hover .chat-icon {
-    color: var(--accent-primary);
-    filter: drop-shadow(0 2px 4px rgba(0, 255, 136, 0.3));
+    /* Hover effects removed to prevent screen shake */
   }
   
   .friends-empty-state {
@@ -633,9 +622,9 @@
   .chat-icon {
     transition: none;
   }
-  
+
   .friend-card-enhanced:hover {
-    transform: none;
+    /* Hover effects removed to prevent screen shake */
   }
   
   .friend-card-enhanced:active {

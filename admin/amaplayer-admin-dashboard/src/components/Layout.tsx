@@ -10,7 +10,8 @@ import {
   Menu,
   X,
   Shield,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Megaphone
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -56,6 +57,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       name: 'Connection Requests',
       href: '/connections',
       icon: LinkIcon,
+    },
+    {
+      name: 'Announcements',
+      href: '/announcements',
+      icon: Megaphone,
     },
   ];
 

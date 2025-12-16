@@ -1,7 +1,7 @@
 import { useState, useEffect, FormEvent, ChangeEvent, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { Home, Eye, EyeOff } from 'lucide-react';
 import ThemeToggle from '../../components/common/ui/ThemeToggle';
 import LanguageSelector from '../../components/common/forms/LanguageSelector';
 import './Auth.css';
@@ -13,6 +13,8 @@ export default function Signup() {
   const [displayName, setDisplayName] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const { signup, googleLogin, appleLogin, currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -365,23 +367,39 @@ export default function Signup() {
               required
             />
           </div>
-          <div className="form-group">
+          <div className="form-group password-field">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               required
             />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
-          <div className="form-group">
+          <div className="form-group password-field">
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm Password"
               value={confirmPassword}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
               required
             />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
           <button disabled={loading} type="submit" className="auth-btn">
             Sign Up

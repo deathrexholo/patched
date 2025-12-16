@@ -2,7 +2,7 @@
 import React, { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2, Edit2, Check, X, Heart } from 'lucide-react';
-import ProfileAvatar from '../ui/ProfileAvatar';
+import UserAvatar from '../user/UserAvatar';
 import ErrorBoundary from './ErrorBoundary';
 import {
   ultraSafeCommentData,
@@ -89,19 +89,15 @@ const SafeComment = memo(function SafeComment({
   return (
     <ErrorBoundary name={`SafeComment-${context}-${index}`}>
       <div className="comment" data-comment-id={commentId}>
-        <Link
-          to={`/profile/${userId}`}
-          className="comment-avatar-link"
-          title={`View ${displayName}'s profile`}
-        >
-          <div className="comment-avatar">
-            <ProfileAvatar
-              src={userPhoto}
-              alt={`${displayName} avatar`}
-              size={32}
-            />
-          </div>
-        </Link>
+        <div className="comment-avatar">
+          <UserAvatar
+            userId={userId}
+            displayName={displayName}
+            photoURL={userPhoto || undefined}
+            size="small"
+            clickable={true}
+          />
+        </div>
 
         <div className="comment-content">
           <div className="comment-header">
