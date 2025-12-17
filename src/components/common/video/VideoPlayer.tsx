@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Pause, Volume2, VolumeX, Heart, MessageCircle, Share } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Heart, MessageCircle, Share, Maximize } from 'lucide-react';
 import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { MomentVideo, VideoPlayerState } from '../../../types/models/moment';
@@ -39,6 +39,9 @@ interface VideoPlayerProps {
   // Performance optimization props
   enablePerformanceOptimizations?: boolean;
   preloadDistance?: number;
+  // UI props
+  controls?: boolean;
+  showFullscreenButton?: boolean;
 }
 
 /**
@@ -66,7 +69,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onSwipeLeft,
   onSwipeRight,
   enablePerformanceOptimizations = true,
-  preloadDistance = 2
+  preloadDistance = 2,
+  controls = false,
+  showFullscreenButton = true
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -192,7 +197,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     maxTapDistance: 15,
     doubleTapDelay: 300,
     longPressDelay: 500,
-    preventScroll: true // Prevent scroll during video interaction
+    preventScroll: false // Allow native scrolling for better iOS experience
   });
 
   // Attach touch gestures to container
@@ -489,6 +494,42 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setAnnouncement(`Video ${newMuted ? 'muted' : 'unmuted'}`);
   }, [playerState.isMuted]);
 
+  // Handle fullscreen toggle
+  const toggleFullscreen = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    console.log('Toggle fullscreen clicked');
+
+    // Check if we are already in fullscreen
+    const isFullscreen = document.fullscreenElement || (video as any).webkitDisplayingFullscreen;
+
+    if (!isFullscreen) {
+      console.log('Attempting to enter fullscreen');
+      if (video.requestFullscreen) {
+        video.requestFullscreen().catch(err => {
+          console.error('Error attempting to enable fullscreen:', err);
+        });
+      } else if ((video as any).webkitEnterFullscreen) {
+        // iOS Safari specific
+        console.log('Using webkitEnterFullscreen');
+        (video as any).webkitEnterFullscreen();
+      } else if ((video as any).msRequestFullscreen) {
+        // IE11
+        (video as any).msRequestFullscreen();
+      } else {
+        console.warn('Fullscreen API not supported');
+      }
+    } else {
+      console.log('Attempting to exit fullscreen');
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((video as any).webkitExitFullscreen) {
+        (video as any).webkitExitFullscreen();
+      }
+    }
+  }, []);
+
   // Handle like button click
   const handleLike = useCallback(async () => {
     if (!currentUserId || isLiking) return;
@@ -782,6 +823,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
           poster={moment.thumbnailUrl}
           muted={playerState.isMuted}
           playsInline
+          controls={controls}
           preload={enablePerformanceOptimizations ? "none" : "metadata"}
           onLoadedMetadata={handleLoadedMetadata}
           onTimeUpdate={handleTimeUpdate}
@@ -853,6 +895,22 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         >
           {playerState.isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
         </button>
+
+        {/* Fullscreen Button - Top Right */}
+        {showFullscreenButton && (
+          <button
+            className="fullscreen-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFullscreen();
+            }}
+            aria-label="Toggle fullscreen"
+            title="Fullscreen (F)"
+            tabIndex={0}
+          >
+            <Maximize size={20} />
+          </button>
+        )}
 
         {/* Talent Video Badge */}
         {moment.isTalentVideo && (

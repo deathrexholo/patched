@@ -7,6 +7,18 @@ import { UserRole } from './user';
 export type MediaType = 'image' | 'video';
 
 /**
+ * Video crop data for 1:1 square posts
+ * Coordinates are normalized (0-1) for display flexibility
+ */
+export interface VideoCropData {
+  x: number;        // Normalized 0-1 (left position)
+  y: number;        // Normalized 0-1 (top position)
+  width: number;    // Normalized 0-1
+  height: number;   // Normalized 0-1
+  aspectRatio: 1;   // Always 1:1 for posts
+}
+
+/**
  * Post visibility options
  */
 export type PostVisibility = 'public' | 'friends' | 'private';
@@ -29,6 +41,14 @@ export interface Post {
   mediaUrl?: string | null;
   mediaType?: MediaType;
   mediaMetadata?: MediaMetadata;
+  mediaSettings?: {
+    // Legacy format (for old posts)
+    objectFit?: 'cover' | 'contain';
+    objectPosition?: string;
+    // New format (for videos with crop data)
+    cropData?: VideoCropData;
+    aspectRatio?: number;
+  };
   // Video-specific fields for moments feed compatibility
   videoUrl?: string | null;
   type?: 'image' | 'video' | 'text';

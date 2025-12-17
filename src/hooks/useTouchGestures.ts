@@ -46,6 +46,9 @@ export const useTouchGestures = (options: TouchGestureOptions = {}) => {
   const lastTapRef = useRef<TouchPoint | null>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPressRef = useRef(false);
+  
+  // Detect iOS device
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
 
   const clearLongPressTimer = useCallback(() => {
     if (longPressTimerRef.current) {
@@ -76,11 +79,11 @@ export const useTouchGestures = (options: TouchGestureOptions = {}) => {
       }, longPressDelay);
     }
 
-    // Prevent scroll if requested
-    if (preventScroll) {
+    // Prevent scroll if requested and NOT on iOS
+    if (preventScroll && !isIOS) {
       event.preventDefault();
     }
-  }, [onLongPress, longPressDelay, preventScroll]);
+  }, [onLongPress, longPressDelay, preventScroll, isIOS]);
 
   const handleTouchMove = useCallback((event: TouchEvent) => {
     const touch = event.touches[0];
@@ -102,11 +105,11 @@ export const useTouchGestures = (options: TouchGestureOptions = {}) => {
       clearLongPressTimer();
     }
 
-    // Prevent scroll if requested and we're handling the gesture
-    if (preventScroll && (deltaX > 10 || deltaY > 10)) {
+    // Prevent scroll if requested and we're handling the gesture (and NOT on iOS)
+    if (preventScroll && !isIOS && (deltaX > 10 || deltaY > 10)) {
       event.preventDefault();
     }
-  }, [maxTapDistance, clearLongPressTimer, preventScroll]);
+  }, [maxTapDistance, clearLongPressTimer, preventScroll, isIOS]);
 
   const handleTouchEnd = useCallback((event: TouchEvent) => {
     const touch = event.changedTouches[0];
@@ -133,26 +136,35 @@ export const useTouchGestures = (options: TouchGestureOptions = {}) => {
     const duration = touchPoint.timestamp - touchStartRef.current.timestamp;
 
     // Check for swipe gestures
-    if (distance >= minSwipeDistance && duration < 500) {
+    // Only detect swipes if they're fast and decisive
+    if (distance >= minSwipeDistance && duration < 300) {
       const absX = Math.abs(deltaX);
       const absY = Math.abs(deltaY);
 
-      if (absX > absY) {
+      // Require horizontal swipes to be MORE horizontal than vertical (1.5x threshold)
+      if (absX > absY * 1.5) {
         // Horizontal swipe
         if (deltaX > 0) {
           onSwipeRight?.();
         } else {
           onSwipeLeft?.();
         }
-      } else {
-        // Vertical swipe
-        if (deltaY > 0) {
-          onSwipeDown?.();
-        } else {
-          onSwipeUp?.();
-        }
+        return;
       }
-      return;
+      
+      // For vertical swipes, we only trigger if we're NOT relying on native scroll
+      // OR if the movement is clearly intentional and vertical
+      if (!preventScroll && absY > absX * 1.5) {
+         // Let native scroll handle it usually, but if we have handlers and want to support
+         // some custom logic (like "next video" via JS), we can do it here.
+         // However, for the Moment feed, we primarily want native scroll.
+         // So we optionally call the handlers if they exist, but generally relying on scroll-snap is better.
+         if (deltaY > 0) {
+            onSwipeDown?.();
+         } else {
+            onSwipeUp?.();
+         }
+      }
     }
 
     // Check for tap gestures

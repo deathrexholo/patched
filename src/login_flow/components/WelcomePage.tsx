@@ -118,7 +118,7 @@ const WelcomePage: React.FC = () => {
             </div>
             <h3 className="card-title">{t('vision') || 'Our Vision'}</h3>
             <p className="card-description">
-              {t('visionText') || 'To create a global platform that connects athletes, coaches, and sports enthusiasts, empowering them to showcase their talent and achieve their dreams.'}
+              {t('visionText') || 'To unlock India’s untapped sporting talent by creating a platform that connects players with national and global sports ecosystems. Strengthening India’s sporting future by turning potential into performance.'}
             </p>
           </div>
 
@@ -131,7 +131,7 @@ const WelcomePage: React.FC = () => {
             </div>
             <h3 className="card-title">{t('mission') || 'Our Mission'}</h3>
             <p className="card-description">
-              {t('missionText') || 'To provide innovative tools and opportunities for athletes to connect, grow, and succeed in their sporting journey while building a vibrant community.'}
+              {t('missionText') || 'To help India produce champions by connecting talent with the right opportunities.'}
             </p>
           </div>
         </div>

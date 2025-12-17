@@ -176,6 +176,39 @@
   transition: all 0.1s ease;
 }
 
+/* Fullscreen Button */
+.fullscreen-btn {
+  position: absolute;
+  top: 16px;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  padding: 0.75rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  will-change: transform;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.fullscreen-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.15);
+}
+
+.fullscreen-btn:active {
+  transform: scale(0.9);
+  transition: all 0.1s ease;
+}
+
 /* Mute Button */
 .mute-btn {
   position: absolute;
@@ -441,6 +474,21 @@
     transform: scale(0.9);
     background: rgba(0, 0, 0, 0.8);
   }
+
+  .fullscreen-btn {
+    padding: 0.6rem;
+    top: 12px;
+    right: 0.5rem;
+    min-width: 44px;
+    min-height: 44px;
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+    touch-action: manipulation;
+  }
+
+  .fullscreen-btn:active {
+    transform: scale(0.9);
+    background: rgba(0, 0, 0, 0.8);
+  }
   
   .retry-btn {
     min-width: 44px;
@@ -542,7 +590,8 @@
   }
   
   .play-pause-btn,
-  .mute-btn {
+  .mute-btn,
+  .fullscreen-btn {
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.5);
   }
@@ -654,6 +703,7 @@
 .engagement-btn:focus,
 .play-pause-btn:focus,
 .mute-btn:focus,
+.fullscreen-btn:focus,
 .retry-btn:focus {
   outline: 3px solid #007bff;
   outline-offset: 2px;
@@ -671,6 +721,7 @@
   .engagement-btn:focus,
   .play-pause-btn:focus,
   .mute-btn:focus,
+  .fullscreen-btn:focus,
   .retry-btn:focus {
     outline: 4px solid #ffffff;
     outline-offset: 2px;
@@ -683,6 +734,7 @@
   .engagement-btn,
   .play-pause-btn,
   .mute-btn,
+  .fullscreen-btn,
   .retry-btn {
     min-width: 48px;
     min-height: 48px;
@@ -694,6 +746,7 @@
   .engagement-btn:active,
   .play-pause-btn:active,
   .mute-btn:active,
+  .fullscreen-btn:active,
   .retry-btn:active {
     transform: scale(0.9);
   }
@@ -764,7 +817,8 @@
   .video-player-container,
   .engagement-btn,
   .play-pause-btn,
-  .mute-btn {
+  .mute-btn,
+  .fullscreen-btn {
     transition: none;
   }
   

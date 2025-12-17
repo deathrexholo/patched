@@ -372,44 +372,56 @@ const Post: React.FC<PostProps> = ({
       </div>
 
       {/* Media Display */}
-      {((post.mediaUrl && post.mediaUrl.trim() !== '') ||
-        ((post as any).imageUrl && (post as any).imageUrl.trim() !== '') ||
-        ((post as any).videoUrl && (post as any).videoUrl.trim() !== '')) && (
-          <div className="post-media">
-            {(post.mediaType === 'video' || (post as any).videoUrl) ? (
-              <div
-                onClick={(e) => {
-                  // Prevent navigation when clicking anywhere on video
-                  e.stopPropagation();
-                }}
-              >
-                <VideoPlayer
-                  src={post.mediaUrl || (post as any).videoUrl}
-                  poster={(post as any).mediaMetadata?.thumbnail}
-                  controls={true}
-                  className="post-video"
-                  videoId={`post-${post.id}`}
-                  autoPauseOnScroll={true}
+      {(() => {
+        // Detect legacy vs new post format for backwards compatibility
+        const hasLegacyMediaSettings = post.mediaSettings &&
+          ('objectFit' in post.mediaSettings || 'objectPosition' in post.mediaSettings);
+        const hasCropData = post.mediaSettings?.cropData;
+
+        return ((post.mediaUrl && post.mediaUrl.trim() !== '') ||
+          ((post as any).imageUrl && (post as any).imageUrl.trim() !== '') ||
+          ((post as any).videoUrl && (post as any).videoUrl.trim() !== '')) && (
+            <div className="post-media">
+              {(post.mediaType === 'video' || (post as any).videoUrl) ? (
+                <div
+                  onClick={(e) => {
+                    // Prevent navigation when clicking anywhere on video
+                    e.stopPropagation();
+                  }}
+                >
+                  <VideoPlayer
+                    src={post.mediaUrl || (post as any).videoUrl}
+                    poster={(post as any).mediaMetadata?.thumbnail}
+                    controls={true}
+                    className="post-video"
+                    videoId={`post-${post.id}`}
+                    autoPauseOnScroll={true}
+                    mediaSettings={post.mediaSettings}
+                  />
+                </div>
+              ) : (
+                <LazyLoadImage
+                  src={post.mediaUrl || (post as any).imageUrl}
+                  alt={post.caption}
+                  className="post-image"
+                  width={600}
+                  height={400}
+                  quality={85}
+                  webp={true}
+                  responsive={true}
+                  threshold={0.1}
+                  rootMargin="100px"
+                  onClick={() => handleNavigateToPost(post.id)}
+                  style={hasLegacyMediaSettings ? {
+                    cursor: 'pointer',
+                    objectFit: post.mediaSettings?.objectFit,
+                    objectPosition: post.mediaSettings?.objectPosition
+                  } : { cursor: 'pointer' }}
                 />
-              </div>
-            ) : (
-              <LazyLoadImage
-                src={post.mediaUrl || (post as any).imageUrl}
-                alt={post.caption}
-                className="post-image"
-                width={600}
-                height={400}
-                quality={85}
-                webp={true}
-                responsive={true}
-                threshold={0.1}
-                rootMargin="100px"
-                onClick={() => handleNavigateToPost(post.id)}
-                style={{ cursor: 'pointer' }}
-              />
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          );
+      })()}
 
       {/* Text-only content */}
       {!((post.mediaUrl && post.mediaUrl.trim() !== '') ||

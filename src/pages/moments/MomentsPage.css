@@ -109,6 +109,28 @@
   will-change: scroll-position;
   /* Passive event listeners will be used in JS */
   touch-action: pan-y;
+  
+  /* iOS-specific scroll improvements */
+  overscroll-behavior-y: contain; /* Prevent bounce at edges */
+
+  /* Force hardware acceleration on iOS */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+
+  /* Improve scroll performance on iOS */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* iOS Safari specific fix */
+@supports (-webkit-touch-callout: none) {
+  .video-feed-container {
+    /* Disable momentum scrolling temporarily to fix snap */
+    -webkit-overflow-scrolling: auto;
+
+    /* Re-enable with better snap behavior */
+    scroll-snap-type: y proximity; /* Change from 'mandatory' to 'proximity' */
+  }
 }
 
 .video-feed-container::-webkit-scrollbar {
@@ -157,6 +179,17 @@
   background-color: #000;
   flex-shrink: 0;
   border-radius: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ensure VideoPlayer component internal containers fill the wrapper */
+.video-player-wrapper .video-player-container,
+.video-player-wrapper .video-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
 }
 
 /* Landscape mode - phone-like container with border */
@@ -181,6 +214,8 @@
   height: 100%;
   object-fit: contain;
   display: block;
+  /* Ensure centering within the flex container if aspect ratio differs */
+  margin: auto; 
 }
 
 .video-description {

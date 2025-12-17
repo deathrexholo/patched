@@ -9,6 +9,7 @@ import { User as FirebaseAuthUser } from 'firebase/auth'; // Renamed to avoid co
 import UserAvatar from '../../../components/common/user/UserAvatar';
 import userService from '../../../services/api/userService';
 import { User as FirestoreUser } from '../../../types/models/user'; // Import Firestore User type
+import PostMediaCropper, { VideoCropData, CropResult } from '../../../components/common/media/PostMediaCropper';
 import './PostComposer.css';
 
 interface PostComposerProps {
@@ -44,6 +45,13 @@ const PostComposer: React.FC<PostComposerProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [firestoreUser, setFirestoreUser] = useState<FirestoreUser | null>(null); // State for Firestore user profile
   const [profileLoading, setProfileLoading] = useState<boolean>(true);
+  
+  // Cropper state
+  const [showCropper, setShowCropper] = useState(false);
+  const [fileToBeCropped, setFileToBeCropped] = useState<File | null>(null);
+  const [croppedImageBlob, setCroppedImageBlob] = useState<Blob | null>(null);
+  const [videoCropData, setVideoCropData] = useState<VideoCropData | null>(null);
+
 
   // Fetch Firestore user profile
   useEffect(() => {
@@ -111,21 +119,73 @@ const PostComposer: React.FC<PostComposerProps> = ({
   }, []);
 
   /**
-   * Handle media file selection
+   * Handle media file selection - Show cropper instead of direct preview
    */
   const handleMediaSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    selectMedia(file);
-  }, [selectMedia]);
+    // Validate file before showing cropper
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+
+    if (!isImage && !isVideo) {
+      alert('Please select an image or video file');
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit
+      alert('File size must be less than 50MB');
+      return;
+    }
+
+    // Show cropper modal
+    setFileToBeCropped(file);
+    setShowCropper(true);
+
+    // Reset input value to allow selecting the same file again
+    e.target.value = '';
+  }, []);
 
   /**
    * Remove selected media
    */
   const handleRemoveMedia = useCallback(() => {
     removeMedia();
+    setCroppedImageBlob(null);
+    setVideoCropData(null);
   }, [removeMedia]);
+
+  /**
+   * Handle crop completion from PostMediaCropper
+   */
+  const handleCropComplete = useCallback((result: CropResult) => {
+    setShowCropper(false);
+    setFileToBeCropped(null);
+
+    if (result.type === 'image') {
+      // Store cropped blob for upload
+      setCroppedImageBlob(result.blob!);
+
+      // Create File from blob for useMediaUpload hook
+      const croppedFile = new File([result.blob!], fileToBeCropped!.name, { type: 'image/jpeg' });
+      selectMedia(croppedFile);
+    } else {
+      // Store video crop metadata
+      setVideoCropData(result.cropData!);
+
+      // Select original video file
+      selectMedia(fileToBeCropped!);
+    }
+  }, [fileToBeCropped, selectMedia]);
+
+  /**
+   * Handle crop cancellation
+   */
+  const handleCropCancel = useCallback(() => {
+    setShowCropper(false);
+    setFileToBeCropped(null);
+  }, []);
 
   /**
    * Create and submit post
@@ -243,6 +303,14 @@ const PostComposer: React.FC<PostComposerProps> = ({
       if (userOrganizationType) postData.userOrganizationType = userOrganizationType;
       if (userSpecializations) postData.userSpecializations = userSpecializations;
 
+      // Save video crop data (images are already cropped to 1:1)
+      if (mediaType === 'video' && videoCropData) {
+        postData.mediaSettings = {
+          cropData: videoCropData,
+          aspectRatio: 1
+        };
+      }
+
       await addDoc(collection(db, 'posts'), postData);
 
       // Reset form
@@ -265,8 +333,9 @@ const PostComposer: React.FC<PostComposerProps> = ({
     postText,
     selectedMedia,
     currentUser,
-    firestoreUser, // Add firestoreUser to dependencies
+    firestoreUser,
     uploadMedia,
+    videoCropData,
     onPostCreated
   ]);
 
@@ -279,6 +348,10 @@ const PostComposer: React.FC<PostComposerProps> = ({
     setShowPostWarning(false);
     resetMedia();
     clearError();
+    setCroppedImageBlob(null);
+    setVideoCropData(null);
+    setShowCropper(false);
+    setFileToBeCropped(null);
   }, [resetMedia, clearError]);
 
   // Don't render for guest users
@@ -349,9 +422,16 @@ const PostComposer: React.FC<PostComposerProps> = ({
             <X size={20} />
           </button>
           {mediaPreview.type === 'image' ? (
-            <img src={mediaPreview.url} alt="Preview" />
+            <img
+              src={mediaPreview.url}
+              alt="Preview"
+            />
           ) : (
-            <video src={mediaPreview.url} controls muted />
+            <video
+              src={mediaPreview.url}
+              controls
+              muted
+            />
           )}
           <div className="media-info">
             <span>{mediaPreview.name}</span>
@@ -389,7 +469,7 @@ const PostComposer: React.FC<PostComposerProps> = ({
             type="file"
             id="media-upload"
             accept="image/*,video/*"
-            onChange={handleFileSelect}
+            onChange={handleMediaSelect}
             style={{ display: 'none' }}
             disabled={isFormDisabled}
           />
@@ -414,6 +494,15 @@ const PostComposer: React.FC<PostComposerProps> = ({
           )}
         </button>
       </div>
+
+      {/* Media Cropper Modal */}
+      {showCropper && fileToBeCropped && (
+        <PostMediaCropper
+          file={fileToBeCropped}
+          onCrop={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 };

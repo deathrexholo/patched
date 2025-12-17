@@ -303,7 +303,7 @@ const AboutPage: React.FC = () => {
                 <div className="card-icon mission-icon">🎯</div>
                 <h3 className="card-title">{t('ourMission')}</h3>
                 <p className="card-description">
-                  {t('missionDescription', "To create the world's most comprehensive platform that connects athletes, coaches, and organizations, fostering talent development and creating opportunities for athletic excellence across all sports disciplines.")}
+                  {t('missionDescription', "To help India produce champions by connecting talent with the right opportunities.")}
                 </p>
               </div>
 
@@ -311,7 +311,7 @@ const AboutPage: React.FC = () => {
                 <div className="card-icon vision-icon">🌟</div>
                 <h3 className="card-title">{t('ourVision')}</h3>
                 <p className="card-description">
-                  {t('visionDescription', 'To revolutionize the sports industry by building a global ecosystem where every athlete has access to world-class coaching, every coach can discover exceptional talent, and every organization can build championship-winning teams.')}
+                  {t('visionDescription', 'To unlock India’s untapped sporting talent by creating a platform that connects players with national and global sports ecosystems.Strengthening India’s sporting future by turning potential into performance.')}
                 </p>
               </div>
             </div>

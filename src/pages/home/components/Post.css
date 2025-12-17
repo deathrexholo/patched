@@ -123,13 +123,13 @@
 .post-image,
 .post-video {
   width: 100%;
-  aspect-ratio: 4/3;
+  aspect-ratio: 1 / 1;  /* Changed from 4/3 to 1:1 square for Instagram-style posts */
   object-fit: cover;
   display: block;
 }
 
 .post-video {
-  aspect-ratio: 16/9;
+  aspect-ratio: 1 / 1;  /* Changed from 16/9 to 1:1 square */
   max-height: 500px;
   object-fit: contain;
 }

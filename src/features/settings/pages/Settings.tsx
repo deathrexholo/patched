@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Settings as SettingsIcon, User, Shield, Eye, Bell, Sun, Globe, Mail, Lock, Check } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useLanguage } from '../../../hooks/useLanguage';
 import PasswordChangeSection from '../components/PasswordChangeSection';
 import ThemeToggle from '../../../components/common/ui/ThemeToggle';
 import LanguageSelector from '../../../components/common/forms/LanguageSelector';
@@ -12,15 +13,16 @@ interface SettingsPageProps {
 
 const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
   const { currentUser, isGuest } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [isLoading] = useState<boolean>(false);
 
   const tabs = [
-    { id: 'account', label: 'Account', icon: User },
-    { id: 'preferences', label: 'Preferences', icon: SettingsIcon },
-    { id: 'security', label: 'Security', icon: Shield },
-    { id: 'privacy', label: 'Privacy', icon: Eye },
-    { id: 'notifications', label: 'Notifications', icon: Bell }
+    { id: 'account', label: t('accountSettings'), icon: User },
+    { id: 'preferences', label: t('preferences'), icon: SettingsIcon },
+    { id: 'security', label: t('security'), icon: Shield },
+    { id: 'privacy', label: t('privacy'), icon: Eye },
+    { id: 'notifications', label: t('notifications'), icon: Bell }
   ];
 
   const handleTabChange = (tabId: string) => {
@@ -32,8 +34,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
       case 'account':
         return (
           <div className="settings-tab-content">
-            <h3>Account Settings</h3>
-            <p>Manage your account information and profile settings.</p>
+            <h3>{t('accountSettings')}</h3>
+            <p>{t('manageAccount')}</p>
             
             <div className="settings-section">
               <div className="setting-item">
@@ -41,11 +43,11 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
                   <User size={20} />
                 </div>
                 <div className="setting-content">
-                  <h4>Display Name</h4>
-                  <p>Your public display name</p>
+                  <h4>{t('displayName')}</h4>
+                  <p>{t('publicDisplayName')}</p>
                   <input 
                     type="text" 
-                    placeholder="Enter display name" 
+                    placeholder={t('enterDisplayName')} 
                     value={currentUser?.displayName || ''} 
                     className="setting-input" 
                   />
@@ -57,8 +59,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
                   <Mail size={20} />
                 </div>
                 <div className="setting-content">
-                  <h4>Email Address</h4>
-                  <p>Your account email address</p>
+                  <h4>{t('emailAddress')}</h4>
+                  <p>{t('accountEmail')}</p>
                   <input 
                     type="email" 
                     value={currentUser?.email || ''} 
@@ -71,7 +73,7 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
               <div className="setting-actions">
                 <button className="save-btn">
                   <Check size={16} />
-                  Save Changes
+                  {t('saveChanges')}
                 </button>
               </div>
             </div>
@@ -80,8 +82,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
       case 'preferences':
         return (
           <div className="settings-tab-content">
-            <h3>App Preferences</h3>
-            <p>Customize your app experience with theme and language settings.</p>
+            <h3>{t('appPreferences')}</h3>
+            <p>{t('customizeExperience')}</p>
             
             <div className="settings-section">
               <div className="setting-item">
@@ -89,8 +91,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
                   <Sun size={20} />
                 </div>
                 <div className="setting-content">
-                  <h4>Theme</h4>
-                  <p>Choose your preferred theme</p>
+                  <h4>{t('theme')}</h4>
+                  <p>{t('chooseTheme')}</p>
                   <div className="setting-control">
                     <ThemeToggle inline={false} showLabel={true} />
                   </div>
@@ -102,8 +104,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
                   <Globe size={20} />
                 </div>
                 <div className="setting-content">
-                  <h4>Language</h4>
-                  <p>Select your preferred language</p>
+                  <h4>{t('language')}</h4>
+                  <p>{t('selectLanguage')}</p>
                   <div className="setting-control">
                     <LanguageSelector inline={false} showLabel={true} />
                   </div>
@@ -115,8 +117,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
       case 'security':
         return (
           <div className="settings-tab-content">
-            <h3>Security Settings</h3>
-            <p>Manage your password and security preferences.</p>
+            <h3>{t('securitySettings')}</h3>
+            <p>{t('manageSecurity')}</p>
 
             {!isGuest() && currentUser ? (
               <PasswordChangeSection />
@@ -127,8 +129,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
                     <Lock size={20} />
                   </div>
                   <div className="setting-content">
-                    <h4>Password Management</h4>
-                    <p>Sign in to manage your password and security settings.</p>
+                    <h4>{t('passwordManagement')}</h4>
+                    <p>{t('signInToManage')}</p>
                   </div>
                 </div>
               </div>
@@ -138,8 +140,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
       case 'privacy':
         return (
           <div className="settings-tab-content">
-            <h3>Privacy Settings</h3>
-            <p>Control your privacy and visibility settings.</p>
+            <h3>{t('privacySettings')}</h3>
+            <p>{t('controlPrivacy')}</p>
             
             <div className="settings-section">
               <div className="setting-item">
@@ -147,24 +149,24 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
                   <Eye size={20} />
                 </div>
                 <div className="setting-content">
-                  <h4>Profile Visibility</h4>
-                  <p>Choose who can see your profile information</p>
+                  <h4>{t('profileVisibility')}</h4>
+                  <p>{t('chooseWhoCanSee')}</p>
                   <select className="setting-select">
-                    <option value="public">Public</option>
-                    <option value="friends">Friends Only</option>
-                    <option value="private">Private</option>
+                    <option value="public">{t('public')}</option>
+                    <option value="friends">{t('friendsOnly')}</option>
+                    <option value="private">{t('private')}</option>
                   </select>
                 </div>
               </div>
               
               <div className="setting-item">
                 <div className="setting-content">
-                  <h4>Activity Status</h4>
-                  <p>Show when you're active on the platform</p>
+                  <h4>{t('activityStatus')}</h4>
+                  <p>{t('showActive')}</p>
                   <label className="setting-toggle">
                     <input type="checkbox" defaultChecked />
                     <span className="toggle-slider"></span>
-                    <span className="toggle-label">Show activity status</span>
+                    <span className="toggle-label">{t('showActive')}</span>
                   </label>
                 </div>
               </div>
@@ -174,8 +176,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
       case 'notifications':
         return (
           <div className="settings-tab-content">
-            <h3>Notification Preferences</h3>
-            <p>Manage your notification settings.</p>
+            <h3>{t('notificationPreferences')}</h3>
+            <p>{t('manageNotifications')}</p>
             
             <div className="settings-section">
               <div className="setting-item">
@@ -183,36 +185,36 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
                   <Bell size={20} />
                 </div>
                 <div className="setting-content">
-                  <h4>Email Notifications</h4>
-                  <p>Receive notifications via email</p>
+                  <h4>{t('emailNotifications')}</h4>
+                  <p>{t('receiveEmailNotifications')}</p>
                   <label className="setting-toggle">
                     <input type="checkbox" defaultChecked />
                     <span className="toggle-slider"></span>
-                    <span className="toggle-label">Enable email notifications</span>
+                    <span className="toggle-label">{t('enableEmailNotifications')}</span>
                   </label>
                 </div>
               </div>
               
               <div className="setting-item">
                 <div className="setting-content">
-                  <h4>Push Notifications</h4>
-                  <p>Receive push notifications in your browser</p>
+                  <h4>{t('pushNotifications')}</h4>
+                  <p>{t('receivePushNotifications')}</p>
                   <label className="setting-toggle">
                     <input type="checkbox" defaultChecked />
                     <span className="toggle-slider"></span>
-                    <span className="toggle-label">Enable push notifications</span>
+                    <span className="toggle-label">{t('enablePushNotifications')}</span>
                   </label>
                 </div>
               </div>
               
               <div className="setting-item">
                 <div className="setting-content">
-                  <h4>Achievement Notifications</h4>
-                  <p>Get notified about new achievements</p>
+                  <h4>{t('achievementNotifications')}</h4>
+                  <p>{t('notifyAchievements')}</p>
                   <label className="setting-toggle">
                     <input type="checkbox" defaultChecked />
                     <span className="toggle-slider"></span>
-                    <span className="toggle-label">Enable achievement notifications</span>
+                    <span className="toggle-label">{t('enableAchievementNotifications')}</span>
                   </label>
                 </div>
               </div>
@@ -222,8 +224,8 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
       default:
         return (
           <div className="settings-tab-content">
-            <h3>Settings</h3>
-            <p>Select a tab to view settings.</p>
+            <h3>{t('settings')}</h3>
+            <p>{t('selectTab')}</p>
           </div>
         );
     }
@@ -234,7 +236,7 @@ const Settings: React.FC<SettingsPageProps> = ({ initialTab = 'account' }) => {
       <div className="settings-header">
         <div className="settings-title">
           <SettingsIcon size={24} />
-          <h1>Settings</h1>
+          <h1>{t('settings')}</h1>
         </div>
       </div>
 

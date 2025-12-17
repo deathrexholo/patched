@@ -418,6 +418,7 @@ const MomentsPage: React.FC = () => {
                             autoPlayEnabled={true}
                             enablePerformanceOptimizations={true}
                             preloadDistance={performanceSettings.preloadDistance}
+                            showFullscreenButton={false}
                           />
                         </div>
                       </VideoErrorBoundary>

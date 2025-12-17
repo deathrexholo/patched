@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, memo, ChangeEvent, MouseEvent as Re
 import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw, X } from 'lucide-react';
 import './VideoPlayer.css';
 import { useVideoManager } from '../../../hooks/useVideoManager';
+import { VideoCropData } from '../../../types/models/post';
 
 interface VideoPlayerProps {
   src: string;
@@ -17,6 +18,12 @@ interface VideoPlayerProps {
   autoPauseOnScroll?: boolean;
   videoId?: string | null;
   useGlobalVideoManager?: boolean;
+  mediaSettings?: {
+    objectFit?: 'cover' | 'contain';
+    objectPosition?: string;
+    cropData?: VideoCropData;
+    aspectRatio?: number;
+  };
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = memo(function VideoPlayer({
@@ -32,7 +39,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = memo(function VideoPlayer({
   onEnded = null,
   autoPauseOnScroll = true,
   videoId = null,
-  useGlobalVideoManager = true
+  useGlobalVideoManager = true,
+  mediaSettings
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -71,7 +79,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = memo(function VideoPlayer({
 
         if (!visible && isPlaying && videoRef.current) {
           videoRef.current.pause();
-          setShowAutoPauseIndicator(true);setTimeout(() => {
+setTimeout(() => {
             setShowAutoPauseIndicator(false);
           }, 2000);
         }
@@ -155,24 +163,51 @@ const VideoPlayer: React.FC<VideoPlayerProps> = memo(function VideoPlayer({
     }
   };
 
-  const toggleFullscreen = async () => {
-    if (!document.fullscreenElement) {
-      try {
-        await containerRef.current?.requestFullscreen();
-        setIsFullscreen(true);
-      } catch (error) {
-        console.error('Error entering fullscreen:', error);
+  const toggleFullscreen = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    console.log('VideoPlayer: Toggle fullscreen clicked');
+
+    // Check if we are already in fullscreen (standard or iOS)
+    const isFullscreen = document.fullscreenElement || (video as any).webkitDisplayingFullscreen;
+
+    if (!isFullscreen) {
+      console.log('VideoPlayer: Attempting to enter fullscreen');
+      
+      // Try standard Fullscreen API on container first (for desktop/Android)
+      // Note: iOS Safari does NOT support requestFullscreen on div, only on video
+      if (containerRef.current && containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen().then(() => {
+          setIsFullscreen(true);
+        }).catch((err) => {
+          console.warn('VideoPlayer: Container fullscreen failed, trying video fallback:', err);
+          // Fallback for iOS Safari or other browsers if container fails
+          if ((video as any).webkitEnterFullscreen) {
+            console.log('VideoPlayer: Using webkitEnterFullscreen');
+            (video as any).webkitEnterFullscreen();
+          }
+        });
+      } else if ((video as any).webkitEnterFullscreen) {
+        // iOS Safari direct support
+        console.log('VideoPlayer: Using direct webkitEnterFullscreen');
+        (video as any).webkitEnterFullscreen();
+      } else if ((video as any).msRequestFullscreen) {
+        (video as any).msRequestFullscreen();
+      } else {
+        console.warn('VideoPlayer: Fullscreen API not supported');
       }
     } else {
-      try {
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-      } catch (error) {
-        console.error('Error exiting fullscreen:', error);
-      }
-    }
-  };
-
+                console.log('VideoPlayer: Attempting to exit fullscreen');
+                if (document.exitFullscreen) {
+                  document.exitFullscreen().then(() => {
+                    setIsFullscreen(false);
+                  }).catch(console.error);
+                } else if ((video as any).webkitExitFullscreen) {
+                  (video as any).webkitExitFullscreen();
+                }
+              }
+            };
   const restart = () => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
@@ -269,6 +304,25 @@ const VideoPlayer: React.FC<VideoPlayerProps> = memo(function VideoPlayer({
         onEnded={handleEnded}
         onError={handleError}
         className="video-element"
+        style={
+          mediaSettings?.cropData ? {
+            // New format: Apply clip-path based on crop coordinates
+            objectFit: 'cover',
+            clipPath: `inset(
+              ${mediaSettings.cropData.y * 100}%
+              ${(1 - mediaSettings.cropData.x - mediaSettings.cropData.width) * 100}%
+              ${(1 - mediaSettings.cropData.y - mediaSettings.cropData.height) * 100}%
+              ${mediaSettings.cropData.x * 100}%
+            )`
+          } : mediaSettings?.objectFit || mediaSettings?.objectPosition ? {
+            // Legacy format: Use objectFit and objectPosition
+            objectFit: mediaSettings.objectFit,
+            objectPosition: mediaSettings.objectPosition
+          } : {
+            // Default: No crop
+            objectFit: 'cover'
+          }
+        }
       />
 
       {/* Close button for fullscreen mode */}
