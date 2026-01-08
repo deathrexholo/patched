@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@hooks/useLanguage';
+import { ArrowLeft } from 'lucide-react';
 import ThemeToggle from '../../components/common/ui/ThemeToggle';
 import LanguageSelector from '../../components/common/forms/LanguageSelector';
 import './WelcomePage.css';
@@ -41,10 +42,26 @@ const WelcomePage: React.FC = () => {
   return (
     <div className="welcome-container">
       <div className={`welcome-header ${isHeaderVisible ? 'visible' : 'hidden'}`}>
+        <button
+          className="back-to-website-btn"
+          onClick={() => window.location.href = '/landing/index.html'}
+          title="Back to Website"
+        >
+          <ArrowLeft size={20} />
+          <span>Back to Website</span>
+        </button>
         <div className="welcome-controls">
           <LanguageSelector />
           <ThemeToggle />
         </div>
+      </div>
+
+      {/* Video Background */}
+      <div className="video-background">
+        <video autoPlay loop muted playsInline className="background-video">
+          <source src="/assets/football_pitch.mp4" type="video/mp4" />
+        </video>
+        <div className="video-overlay"></div>
       </div>
 
       <div className="background-graphic">
@@ -55,48 +72,21 @@ const WelcomePage: React.FC = () => {
         </div>
       </div>
 
-      <div className="content">
+      <div className="content content-centered">
         <div className="tagline">{t('tagline')}</div>
         <h1 className="main-title">AmaPlayer</h1>
         <p className="subtitle">{t('subtitle')}</p>
 
-        <div className="button-group">
-          <button className="login-btn" onClick={handleLetsPlayClick}>
+        <div className="button-group button-group-large">
+          <button className="login-btn login-btn-large" onClick={handleLetsPlayClick}>
             {t('letsPlay')}
           </button>
-          <button className="secondary-btn" onClick={() => navigate('/login')}>
+          <button className="secondary-btn secondary-btn-large" onClick={() => navigate('/login')}>
             {t('login')}
           </button>
         </div>
 
-        {/* Vision and Mission Section */}
-        <div className="vision-mission-section">
-          <div className="vision-mission-card">
-            <div className="card-icon vision-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-            </div>
-            <h3 className="card-title">{t('vision') || 'Our Vision'}</h3>
-            <p className="card-description">
-              {t('visionText') || 'To unlock India’s untapped sporting talent by creating a platform that connects players with national and global sports ecosystems. Strengthening India’s sporting future by turning potential into performance.'}
-            </p>
-          </div>
 
-          <div className="vision-mission-card">
-            <div className="card-icon mission-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-            </div>
-            <h3 className="card-title">{t('mission') || 'Our Mission'}</h3>
-            <p className="card-description">
-              {t('missionText') || 'To help India produce champions by connecting talent with the right opportunities.'}
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );
